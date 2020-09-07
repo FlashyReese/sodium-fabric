@@ -7,10 +7,11 @@ import me.jellysquid.mods.sodium.client.util.collections.FixedLongHashTable;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.biome.source.BiomeArray;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -95,22 +96,19 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     }
 
     @Override
-    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask, boolean complete) {
+    public WorldChunk loadChunkFromPacket(World world, int x, int z, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask, boolean complete) {
         long key = createChunkKey(x, z);
 
         WorldChunk chunk = this.chunks.get(key);
+        Biome[] biomes = new Biome[0];//Fixme:
 
         // If the chunk does not yet exist, create it now
         if (!complete && chunk != null) {
-            chunk.loadFromPacket(biomes, buf, tag, verticalStripBitmask);
+            chunk.loadFromPacket(buf, tag, verticalStripBitmask, complete);
         } else {
-            // [VanillaCopy] If the packet didn't contain any biome data and the chunk doesn't exist yet, abort
-            if (biomes == null) {
-                return null;
-            }
 
             chunk = new WorldChunk(this.world, new ChunkPos(x, z), biomes);
-            chunk.loadFromPacket(biomes, buf, tag, verticalStripBitmask);
+            chunk.loadFromPacket(buf, tag, verticalStripBitmask, complete);
 
             long stamp = this.lock.writeLock();
 
@@ -165,11 +163,12 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
 
     @Override
     public String getDebugString() {
-        return "SodiumChunkCache: " + this.getLoadedChunkCount();
+        return "SodiumChunkCache: " + this.method_20182();
     }
 
     @Override
-    public int getLoadedChunkCount() {
+    //public int getLoadedChunkCount() {
+    public int method_20182(){
         return this.chunks.size();
     }
 
@@ -191,7 +190,8 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         }
 
         // Sodium doesn't actually use vanilla's global color cache, but we keep it around for compatibility purposes
-        this.world.resetChunkColor(x, z);
+        //this.world.resetChunkColor(x, z);
+        //Fixme:
 
         // Notify the chunk listener
         if (this.listener != null) {

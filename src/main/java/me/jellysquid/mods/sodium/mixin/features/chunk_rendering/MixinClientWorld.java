@@ -7,17 +7,14 @@ import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.level.LevelInfo;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.Supplier;
 
 @Mixin(ClientWorld.class)
 public abstract class MixinClientWorld implements ClientWorldExtended {
@@ -27,19 +24,18 @@ public abstract class MixinClientWorld implements ClientWorldExtended {
      * Captures the biome generation seed so that our own caches can make use of it.
      */
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(ClientPlayNetworkHandler netHandler, ClientWorld.Properties properties, RegistryKey<World> worldKey,
-                      RegistryKey<DimensionType> dimensionKey, DimensionType dimensionType, int loadDistance,
-                      Supplier<Profiler> profiler, WorldRenderer renderer, boolean debugWorld, long seed,
+    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, LevelInfo levelInfo, DimensionType dimensionType, int chunkLoadDistance, Profiler profiler, WorldRenderer worldRenderer,
                       CallbackInfo ci) {
-        this.biomeSeed = seed;
+        this.biomeSeed = levelInfo.getSeed();
     }
 
     /**
      * Replace the client world chunk manager with our own implementation that is both faster and contains additional
      * features needed to pull off event-based rendering.
      */
+    //Fixme: asap
     @Dynamic
-    @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientChunkManager"))
+    @Redirect(method = "method_2940", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientChunkManager"))
     private static ClientChunkManager redirectCreateChunkManager(ClientWorld world, int renderDistance) {
         return new SodiumChunkManager(world, renderDistance);
     }

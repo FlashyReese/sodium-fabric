@@ -81,17 +81,17 @@ public class SmoothLightPipeline implements LightPipeline {
             this.applyComplex(neighborInfo, quad, pos, face, out, flags);
         }
 
-        this.applySidedBrightness(out, face, shade);
+        //this.applySidedBrightness(out, face, shade);
     }
 
-    private void applySidedBrightness(QuadLightData out, Direction face, boolean shade) {
-        float brightness = this.lightCache.getWorld().getBrightness(face, shade);
+    /*private void applySidedBrightness(QuadLightData out, Direction face, boolean shade) {
+        float brightness = 1.0f;//this.lightCache.getWorld().getBrightness(face, shade);//Fixme:
         float[] br = out.br;
 
         for (int i = 0; i < br.length; i++) {
             br[i] *= brightness;
         }
-    }
+    }*/
 
     private void applyComplex(AoNeighborInfo neighborInfo, ModelQuadView quad, BlockPos pos, Direction dir, QuadLightData out, int flags) {
         // If the model quad is aligned to the block face, use the corner blocks above this face

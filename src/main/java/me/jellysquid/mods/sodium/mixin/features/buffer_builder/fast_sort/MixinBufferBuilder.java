@@ -15,7 +15,8 @@ import java.util.BitSet;
 
 @Mixin(BufferBuilder.class)
 public class MixinBufferBuilder {
-    @Shadow
+    //Fixme:
+    /*@Shadow
     private ByteBuffer buffer;
 
     @Shadow
@@ -27,10 +28,10 @@ public class MixinBufferBuilder {
     @Shadow
     private int buildStart;
 
-    /**
+    *//**
      * @reason Reduce allocations, use stack allocations, avoid unnecessary math and pointer bumping, inline comparators
      * @author JellySquid
-     */
+     *//*
     @Overwrite
     public void sortQuads(float cameraX, float cameraY, float cameraZ) {
         this.buffer.clear();
@@ -175,6 +176,6 @@ public class MixinBufferBuilder {
 
             a[j] = t;
         }
-    }
+    }*/
 
 }

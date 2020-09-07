@@ -12,11 +12,11 @@ public class TranslucentRenderPass extends BlockRenderPass {
 
     @Override
     public void beginRender() {
-        RenderLayer.getTranslucent().startDrawing();
+        //RenderLayer.getTranslucent().startDrawing();
     }
 
     @Override
     public void endRender() {
-        RenderLayer.getTranslucent().endDrawing();
+        //RenderLayer.getTranslucent().endDrawing();
     }
 }

@@ -1,15 +1,12 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.WorldRenderPhase;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -19,17 +16,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Map;
 import java.util.SortedSet;
 
 @Mixin(WorldRenderer.class)
 public abstract class MixinWorldRenderer {
+    //fixme:
     @Shadow
     @Final
-    private BufferBuilderStorage bufferBuilders;
-
-    @Shadow
-    @Final
-    private Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions;
+    private Map<Integer, BlockBreakingInfo> partiallyBrokenBlocks;
 
     private SodiumWorldRenderer renderer;
 
@@ -40,7 +35,7 @@ public abstract class MixinWorldRenderer {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(MinecraftClient client, BufferBuilderStorage bufferBuilders, CallbackInfo ci) {
+    private void init(MinecraftClient client, CallbackInfo ci) {
         this.renderer = SodiumWorldRenderer.create();
     }
 
@@ -77,12 +72,13 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void renderLayer(RenderLayer renderLayer, MatrixStack matrixStack, double x, double y, double z) {
-        if (renderLayer == RenderLayer.getSolid()) {
-            this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, matrixStack, x, y, z);
-        } else if (renderLayer == RenderLayer.getTranslucent()) {
-            this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, matrixStack, x, y, z);
+    public int renderLayer(RenderLayer renderLayer, Camera camera) {//Fixme:
+        if (renderLayer == RenderLayer.SOLID) {
+            this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, camera.getPos().getX(), camera.getPos().getY(), camera.getPos().getZ());
+        } else if (renderLayer == RenderLayer.TRANSLUCENT) {
+            this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, camera.getPos().getX(), camera.getPos().getY(), camera.getPos().getZ());
         }
+        return 0;
     }
 
     /**
@@ -90,8 +86,8 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void setupTerrain(Camera camera, Frustum frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
-        this.renderer.updateChunks(camera, frustum, hasForcedFrustum, frame, spectator);
+    public void setUpTerrain(Camera camera, VisibleRegion visibleRegion, int frame, boolean spectator) {
+        //this.renderer.updateChunks(camera, frustum, hasForcedFrustum, frame, spectator);//Fixme:
     }
 
     /**
@@ -135,9 +131,10 @@ public abstract class MixinWorldRenderer {
         this.renderer.reload();
     }
 
-    @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;noCullingBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
-    private void onRenderTileEntities(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
-        this.renderer.renderTileEntities(matrices, this.bufferBuilders, this.blockBreakingProgressions, camera, tickDelta);
+    //Fixme:
+    @Inject(method = "renderEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;noCullingBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
+    private void onRenderTileEntities(Camera camera, VisibleRegion visibleRegion, float tickDelta, CallbackInfo ci) {
+        //this.renderer.renderTileEntities(this.partiallyBrokenBlocks, camera, tickDelta);
     }
 
     /**

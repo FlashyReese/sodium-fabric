@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.passes.impl;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockLayer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 
 public class SolidRenderPass extends BlockRenderPass {
@@ -13,15 +12,16 @@ public class SolidRenderPass extends BlockRenderPass {
 
     @Override
     public void beginRender() {
-        RenderLayer.getSolid().startDrawing();
+        //Fixme:
+        //RenderLayer.SOLID.startDrawing();
 
-        RenderSystem.enableAlphaTest();
+        GlStateManager.enableAlphaTest();
     }
 
     @Override
     public void endRender() {
-        RenderSystem.disableAlphaTest();
+        GlStateManager.disableAlphaTest();
 
-        RenderLayer.getSolid().endDrawing();
+        //RenderLayer.getSolid().endDrawing();
     }
 }

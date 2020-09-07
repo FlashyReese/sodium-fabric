@@ -7,9 +7,10 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(ChunkBuilder.class)
 public class MixinChunkBuilder {
-    @ModifyVariable(method = "<init>", index = 9, at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayListWithExpectedSize(I)Ljava/util/ArrayList;", remap = false))
+    //Fixme: code seems correct but still crashes?
+    /*@ModifyVariable(method = "<init>", index = 7, at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayListWithExpectedSize(I)Ljava/util/ArrayList;", remap = false))
     private int modifyThreadPoolSize(int prev) {
         // Do not allow any resources to be allocated
         return 0;
-    }
+    }*/
 }

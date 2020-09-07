@@ -8,7 +8,7 @@ import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl33.GL33ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
-import net.minecraft.client.options.GraphicsMode;
+import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.resource.language.I18n;
 
 import java.io.File;
@@ -97,6 +97,22 @@ public class SodiumGameOptions {
         }
     }
 
+    public enum DefaultGraphicsQuality implements TextProvider {
+        FAST("Fast"),
+        FANCY("Fancy");
+
+        private final String name;
+
+        DefaultGraphicsQuality(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getLocalizedName() {
+            return this.name;
+        }
+    }
+
     public enum GraphicsQuality implements TextProvider {
         DEFAULT("generator.default"),
         FANCY("options.clouds.fancy"),
@@ -113,8 +129,12 @@ public class SodiumGameOptions {
             return I18n.translate(this.name);
         }
 
-        public boolean isFancy(GraphicsMode graphicsMode) {
-            return (this == FANCY) || (this == DEFAULT && (graphicsMode == GraphicsMode.FANCY || graphicsMode == GraphicsMode.FABULOUS));
+        public boolean isFancy() {
+            return this == FANCY;
+        }
+
+        public boolean isFancy(boolean def) {
+            return this == DEFAULT ? def : this.isFancy();
         }
     }
 

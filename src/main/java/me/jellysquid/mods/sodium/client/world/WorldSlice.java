@@ -1,33 +1,25 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCacheManager;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
 import me.jellysquid.mods.sodium.common.util.pool.ReusableObject;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.ChunkLightingView;
-import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraft.world.level.ColorResolver;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
@@ -40,12 +32,12 @@ import java.util.Map;
  * You should use object pooling with this type to avoid huge allocations as instances of this class contain many large
  * arrays.
  */
-public class WorldSlice extends ReusableObject implements BlockRenderView, BiomeAccess.Storage {
+public class WorldSlice extends ReusableObject implements BlockRenderView{
     // The number of outward blocks from the origin chunk to slice
     public static final int NEIGHBOR_BLOCK_RADIUS = 1;
 
     // The number of outward chunks from the origin chunk to slice
-    public static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.roundUpToMultiple(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    public static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
 
     // The length of the chunk section array on each axis
     public static final int SECTION_LENGTH = 1 + (NEIGHBOR_CHUNK_RADIUS * 2);
@@ -70,18 +62,7 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     private final ChunkNibbleArray[] blockLightArrays;
     private final ChunkNibbleArray[] skyLightArrays;
     private final BiomeCache[] biomeCaches;
-    private final BiomeArray[] biomeArrays;
-
-    // The biome blend caches for each color resolver type
-    // This map is always re-initialized, but the caches themselves are taken from an object pool
-    private final Map<ColorResolver, BiomeColorCache> colorResolvers = new Reference2ObjectOpenHashMap<>();
-
-    // The previously accessed and cached color resolver, used in conjunction with the cached color cache field
-    private ColorResolver prevColorResolver;
-
-    // The cached lookup result for the previously accessed color resolver to avoid excess hash table accesses
-    // for vertex color blending
-    private BiomeColorCache prevColorCache;
+    private final Biome[][] biomeArrays;
 
     // The world this slice has copied data from, not thread-safe
     private World world;
@@ -131,7 +112,7 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         this.blockLightArrays = new ChunkNibbleArray[SECTION_COUNT];
         this.skyLightArrays = new ChunkNibbleArray[SECTION_COUNT];
         this.biomeCaches = new BiomeCache[CHUNK_COUNT];
-        this.biomeArrays = new BiomeArray[CHUNK_COUNT];
+        this.biomeArrays = new Biome[CHUNK_COUNT][];
     }
 
     public void init(ChunkBuilder<?> builder, World world, ChunkSectionPos chunkPos, WorldChunk[] chunks) {
@@ -164,8 +145,8 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         this.chunkOffsetZ = chunkPos.getZ() - NEIGHBOR_CHUNK_RADIUS;
 
         // Hoist the lighting providers so that they can be directly accessed
-        ChunkLightingView blockLightProvider = this.world.getLightingProvider().get(LightType.BLOCK);
-        ChunkLightingView skyLightProvider = this.world.getLightingProvider().get(LightType.SKY);
+        ChunkLightingView blockLightProvider = this.world.getChunkManager().getLightingProvider().get(LightType.BLOCK);
+        ChunkLightingView skyLightProvider = this.world.getChunkManager().getLightingProvider().get(LightType.SKY);
 
         // Iterate over all sliced chunks
         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
@@ -246,42 +227,12 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     }
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
-        return this.world.getBrightness(direction, shaded);
-    }
-
-    @Override
-    public LightingProvider getLightingProvider() {
-        return this.world.getLightingProvider();
-    }
-
-    @Override
     public BlockEntity getBlockEntity(BlockPos pos) {
         return this.getBlockEntity(pos, WorldChunk.CreationType.IMMEDIATE);
     }
 
     public BlockEntity getBlockEntity(BlockPos pos, WorldChunk.CreationType type) {
         return this.chunks[this.getChunkIndexForBlock(pos)].getBlockEntity(pos, type);
-    }
-
-    @Override
-    public int getColor(BlockPos pos, ColorResolver resolver) {
-        BiomeColorCache cache;
-
-        if (this.prevColorResolver == resolver) {
-            cache = this.prevColorCache;
-        } else {
-            cache = this.colorResolvers.get(resolver);
-
-            if (cache == null) {
-                this.colorResolvers.put(resolver, cache = new BiomeColorCache(resolver, this));
-            }
-
-            this.prevColorResolver = resolver;
-            this.prevColorCache = cache;
-        }
-
-        return cache.getBlendedColor(pos);
     }
 
     @Override
@@ -294,11 +245,6 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
             default:
                 return 0;
         }
-    }
-
-    @Override
-    public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
-        return 0;
     }
 
     @Override
@@ -322,21 +268,22 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
 
     // TODO: Is this safe? The biome data arrays should be immutable once loaded into the client
     @Override
-    public Biome getBiomeForNoiseGen(int x, int y, int z) {
-        BiomeArray array = this.biomeArrays[this.getBiomeIndexForBlock(x, z)];
+    public Biome getBiome(BlockPos blockPos) {
+        //return null; //Fixme:
+        Biome[] array = this.biomeArrays[this.getBiomeIndexForBlock(blockPos.getX(), blockPos.getZ())];
 
-        if (array != null ) {
-            return array.getBiomeForNoiseGen(x, y, z);
+        if (array != null) {
+            return array[blockPos.getX() << SECTION_COUNT | blockPos.getZ() << SECTION_COUNT | blockPos.getY()];
         }
 
-        return this.world.getGeneratorStoredBiome(x, y, z);
+        return this.world.getBiome(blockPos);
     }
 
     /**
      * Gets or computes the biome at the given global coordinates.
      */
     public Biome getCachedBiome(int x, int z) {
-        return this.biomeCaches[this.getChunkIndexForBlock(x, z)].getBiome(this, x, z);
+        return this.biomeCaches[this.getChunkIndexForBlock(x, z)].getBiome(x, z);
     }
 
     /**
@@ -418,10 +365,6 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         this.biomeCacheManager = null;
         this.chunks = null;
         this.world = null;
-
-        this.colorResolvers.clear();
-        this.prevColorCache = null;
-        this.prevColorResolver = null;
     }
 
     public int getBlockOffsetX() {

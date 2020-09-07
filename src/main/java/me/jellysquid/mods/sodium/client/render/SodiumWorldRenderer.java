@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -28,12 +28,12 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -196,29 +196,29 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
 
-    public void drawChunkLayers(WorldRenderPhase phase, MatrixStack matrixStack, double x, double y, double z) {
+    public void drawChunkLayers(WorldRenderPhase phase, double x, double y, double z) {
         for (BlockRenderPass pass : this.chunkRenderBackend.getRenderPassManager().getPassesForPhase(phase)) {
-            this.drawChunkLayer(pass, matrixStack, x, y, z);
+            this.drawChunkLayer(pass, x, y, z);
         }
     }
 
     /**
      * Performs a render pass for the given {@link RenderLayer} and draws all visible chunks for it.
      */
-    public void drawChunkLayer(BlockRenderPass pass, MatrixStack matrixStack, double x, double y, double z) {
+    public void drawChunkLayer(BlockRenderPass pass, double x, double y, double z) {
         pass.beginRender();
 
         // We don't have a great way to check if underwater fog is being used, so assume that terrain will only ever
         // use linear fog. This will not disable fog in the Nether.
         if (!SodiumClientMod.options().quality.enableFog && GlFogHelper.isFogLinear()) {
-            RenderSystem.disableFog();
+            GlStateManager.disableFog();
         }
 
-        this.chunkRenderManager.renderChunks(matrixStack, pass, x, y, z);
+        this.chunkRenderManager.renderChunks(pass, x, y, z);
 
         pass.endRender();
 
-        RenderSystem.clearCurrentColor();
+        GlStateManager.clearCurrentColor();
     }
 
     public void reload() {
@@ -281,9 +281,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         }
     }
 
-    public void renderTileEntities(MatrixStack matrices, BufferBuilderStorage bufferBuilders, Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
+    //Fixme:
+    /*public void renderTileEntities(Map<Integer, BlockBreakingInfo> blockBreakingProgressions,
                                    Camera camera, float tickDelta) {
-        VertexConsumerProvider.Immediate immediate = bufferBuilders.getEntityVertexConsumers();
 
         Vec3d cameraPos = camera.getPos();
         double x = cameraPos.getX();
@@ -293,38 +293,24 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         for (BlockEntity blockEntity : this.chunkRenderManager.getVisibleBlockEntities()) {
             BlockPos pos = blockEntity.getPos();
 
-            matrices.push();
-            matrices.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
-
-            VertexConsumerProvider consumer = immediate;
             SortedSet<BlockBreakingInfo> breakingInfos = blockBreakingProgressions.get(pos.asLong());
 
             if (breakingInfos != null && !breakingInfos.isEmpty()) {
                 int stage = breakingInfos.last().getStage();
 
                 if (stage >= 0) {
-                    MatrixStack.Entry entry = matrices.peek();
-                    VertexConsumer transformer = new TransformingVertexConsumer(bufferBuilders.getEffectVertexConsumers().getBuffer(ModelLoader.BLOCK_DESTRUCTION_RENDER_LAYERS.get(stage)), entry.getModel(), entry.getNormal());
-                    consumer = (layer) -> layer.hasCrumbling() ? VertexConsumers.dual(transformer, immediate.getBuffer(layer)) : immediate.getBuffer(layer);
                 }
             }
 
-            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, consumer);
-
-            matrices.pop();
+            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta);
         }
 
         for (BlockEntity blockEntity : this.globalBlockEntities) {
             BlockPos pos = blockEntity.getPos();
 
-            matrices.push();
-            matrices.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
-
             BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, immediate);
-
-            matrices.pop();
         }
-    }
+    }*/
 
     @Override
     public void onChunkAdded(int x, int z) {
@@ -355,17 +341,17 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         // Entities outside the valid world height will never map to a rendered chunk
         // Always render these entities or they'll be culled incorrectly!
-        if (box.maxY < 0.5D || box.minY > 255.5D) {
+        if (box.y2 < 0.5D || box.y1 > 255.5D) {
             return true;
         }
 
-        int minX = MathHelper.floor(box.minX - 0.5D) >> 4;
-        int minY = MathHelper.floor(box.minY - 0.5D) >> 4;
-        int minZ = MathHelper.floor(box.minZ - 0.5D) >> 4;
+        int minX = MathHelper.floor(box.x1 - 0.5D) >> 4;
+        int minY = MathHelper.floor(box.y1 - 0.5D) >> 4;
+        int minZ = MathHelper.floor(box.z1 - 0.5D) >> 4;
 
-        int maxX = MathHelper.floor(box.maxX + 0.5D) >> 4;
-        int maxY = MathHelper.floor(box.maxY + 0.5D) >> 4;
-        int maxZ = MathHelper.floor(box.maxZ + 0.5D) >> 4;
+        int maxX = MathHelper.floor(box.x2 + 0.5D) >> 4;
+        int maxY = MathHelper.floor(box.y2 + 0.5D) >> 4;
+        int maxZ = MathHelper.floor(box.z2 + 0.5D) >> 4;
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {

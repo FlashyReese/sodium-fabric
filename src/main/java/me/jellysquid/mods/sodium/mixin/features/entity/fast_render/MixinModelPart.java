@@ -1,34 +1,21 @@
 package me.jellysquid.mods.sodium.mixin.features.entity.fast_render;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import me.jellysquid.mods.sodium.client.model.ModelCuboidAccessor;
-import me.jellysquid.mods.sodium.client.model.consumer.QuadVertexConsumer;
-import me.jellysquid.mods.sodium.client.util.Norm3b;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import me.jellysquid.mods.sodium.client.util.math.Matrix3fExtended;
-import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
-import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ModelPart.class)
 public class MixinModelPart {
-    private static final float NORM = 1.0F / 16.0F;
+    //Fixme: optimize
+    /*private static final float NORM = 1.0F / 16.0F;
 
     @Shadow
     @Final
     private ObjectList<ModelPart.Cuboid> cuboids;
 
-    /**
+    *//**
      * @author JellySquid
      * @reason Use optimized vertex writer, avoid allocations, use quick matrix transformations
-     */
+     *//*
     @Overwrite
     private void renderCuboids(MatrixStack.Entry matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         Matrix3fExtended normalExt = MatrixUtil.getExtendedMatrix(matrices.getNormal());
@@ -61,5 +48,5 @@ public class MixinModelPart {
                 }
             }
         }
-    }
+    }*/
 }

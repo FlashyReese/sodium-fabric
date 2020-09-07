@@ -19,9 +19,9 @@ import java.util.List;
 @Mixin(DebugHud.class)
 public abstract class MixinDebugHud {
     @Shadow
-    private static long toMiB(long bytes) {
+    private static long method_1838(long bytes) {
         throw new UnsupportedOperationException();
-    }
+    }//toMiB
 
     @Inject(method = "getRightText", at = @At("RETURN"))
     private void appendRightText(CallbackInfoReturnable<List<String>> cir) {
@@ -57,7 +57,7 @@ public abstract class MixinDebugHud {
 
             int ratio = (int) Math.floor(((double) used / (double) allocated) * 100.0D);
 
-            strings.add("VRAM: " + toMiB(used) + "/" + toMiB(allocated) + "MB (" + ratio + "%)");
+            strings.add("VRAM: " + method_1838(used) + "/" + method_1838(allocated) + "MB (" + ratio + "%)");
         }
 
         strings.addAll(backend.getDebugStrings());
@@ -66,6 +66,6 @@ public abstract class MixinDebugHud {
     }
 
     private static String getNativeMemoryString() {
-        return "Off-Heap: +" + toMiB(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed()) + "MB";
+        return "Off-Heap: +" + method_1838(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed()) + "MB";
     }
 }

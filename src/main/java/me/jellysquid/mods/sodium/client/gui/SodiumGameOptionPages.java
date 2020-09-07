@@ -17,7 +17,7 @@ import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.options.AttackIndicator;
-import net.minecraft.client.options.GraphicsMode;
+import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.Option;
 import net.minecraft.client.options.ParticlesOption;
 import net.minecraft.client.resource.language.I18n;
@@ -54,11 +54,12 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> {
                             opts.quality.enableClouds = value;
 
-                            if (MinecraftClient.isFabulousGraphicsOrBetter()) {
-                                Framebuffer framebuffer = MinecraftClient.getInstance().worldRenderer.getCloudsFramebuffer();
+                            if (MinecraftClient.isFancyGraphicsEnabled()) {
+                                //Fixme:
+                                /*Framebuffer framebuffer = MinecraftClient.getInstance().worldRenderer.getCloudsFramebuffer();
                                 if (framebuffer != null) {
                                     framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
-                                }
+                                }*/
                             }
                         }, (opts) -> opts.quality.enableClouds)
                         .build())
@@ -90,7 +91,7 @@ public class SodiumGameOptionPages {
                             opts.fullscreen = value;
 
                             MinecraftClient client = MinecraftClient.getInstance();
-                            Window window = client.getWindow();
+                            Window window = client.window;
 
                             if (window != null && window.isFullscreen() != opts.fullscreen) {
                                 window.toggleFullscreen();
@@ -112,7 +113,7 @@ public class SodiumGameOptionPages {
                         .setControl(option -> new SliderControl(option, 5, 260, 5, ControlValueFormatter.fpsLimit()))
                         .setBinding((opts, value) -> {
                             opts.maxFps = value;
-                            MinecraftClient.getInstance().getWindow().setFramerateLimit(value);
+                            MinecraftClient.getInstance().window.setFramerateLimit(value);
                         }, opts -> opts.maxFps)
                         .build())
                 .build());
@@ -138,17 +139,18 @@ public class SodiumGameOptionPages {
     public static OptionPage quality() {
         List<OptionGroup> groups = new ArrayList<>();
 
-        groups.add(OptionGroup.createBuilder()
+        //Fixme:
+        /*groups.add(OptionGroup.createBuilder()
                 .add(OptionImpl.createBuilder(GraphicsMode.class, vanillaOpts)
                         .setName(I18n.translate("options.graphics"))
                         .setTooltip(I18n.translate("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsMode.class, new String[] { I18n.translate("options.graphics.fast"), I18n.translate("options.graphics.fancy"), I18n.translate("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, GameOptions.class, new String[] { I18n.translate("options.graphics.fast"), I18n.translate("options.graphics.fancy"), I18n.translate("options.graphics.fabulous") }))
                         .setBinding(
                                 (opts, value) -> opts.graphicsMode = value,
                                 opts -> opts.graphicsMode)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
-                .build());
+                .build());*/
 
         groups.add(OptionGroup.createBuilder()
                 .add(OptionImpl.createBuilder(SodiumGameOptions.GraphicsQuality.class, sodiumOpts)
@@ -183,13 +185,6 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.biomeBlendRadius = value, opts -> opts.biomeBlendRadius)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
-                .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setName(I18n.translate("options.entityDistanceScaling"))
-                        .setTooltip(I18n.translate("sodium.options.entity_distance.tooltip"))
-                        .setControl(option -> new SliderControl(option, 50, 500, 25, ControlValueFormatter.percentage()))
-                        .setBinding((opts, value) -> opts.entityDistanceScaling = value / 100.0F, opts -> Math.round(opts.entityDistanceScaling * 100.0F))
-                        .build()
-                )
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
                         .setName(I18n.translate("options.entityShadows"))
                         .setTooltip(I18n.translate("sodium.options.entity_shadows.tooltip"))

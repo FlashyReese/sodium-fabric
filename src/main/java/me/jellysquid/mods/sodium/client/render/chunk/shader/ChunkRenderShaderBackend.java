@@ -6,7 +6,6 @@ import me.jellysquid.mods.sodium.client.gl.shader.*;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 import java.util.EnumMap;
@@ -82,12 +81,12 @@ public abstract class ChunkRenderShaderBackend<T extends ChunkGraphicsState, P e
 
     protected abstract P createShaderProgram(Identifier name, int handle, ChunkProgramComponentBuilder components);
 
-    protected void beginRender(MatrixStack matrixStack, BlockRenderPass pass) {
+    protected void beginRender(BlockRenderPass pass) {
         this.activeProgram = this.programs.get(ChunkFogMode.getActiveMode());
-        this.activeProgram.bind(matrixStack);
+        this.activeProgram.bind();
     }
 
-    protected void endRender(MatrixStack matrixStack) {
+    protected void endRender() {
         this.activeProgram.unbind();
     }
 

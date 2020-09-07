@@ -9,7 +9,7 @@ import java.util.Collection;
 public interface Option<T> {
     String getName();
 
-    Text getTooltip();
+    String getTooltip();
 
     Control<T> getControl();
 

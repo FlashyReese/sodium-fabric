@@ -44,7 +44,7 @@ public class FluidRenderer {
 
     private final Sprite[] lavaSprites = new Sprite[2];
     private final Sprite[] waterSprites = new Sprite[2];
-    private final Sprite waterOverlaySprite;
+    private final Sprite waterOverlaySprite = null;//Fixme:
 
     private final ModelQuadViewMutable quad = new ModelQuad();
 
@@ -58,12 +58,12 @@ public class FluidRenderer {
         BlockModels models = client.getBakedModelManager().getBlockModels();
 
         this.lavaSprites[0] = models.getModel(Blocks.LAVA.getDefaultState()).getSprite();
-        this.lavaSprites[1] = ModelLoader.LAVA_FLOW.getSprite();
+        //this.lavaSprites[1] = ModelLoader.LAVA_FLOW.getSprite();
 
         this.waterSprites[0] = models.getModel(Blocks.WATER.getDefaultState()).getSprite();
-        this.waterSprites[1] = ModelLoader.WATER_FLOW.getSprite();
+        //this.waterSprites[1] = ModelLoader.WATER_FLOW.getSprite();
 
-        this.waterOverlaySprite = ModelLoader.WATER_OVERLAY.getSprite();
+        //this.waterOverlaySprite = ModelLoader.WATER_OVERLAY.getSprite();
 
         int normal = Norm3b.pack(0.0f, 1.0f, 0.0f);
 
@@ -97,7 +97,7 @@ public class FluidRenderer {
 
             VoxelShape threshold = VoxelShapes.cuboid(0.0D, 0.0D, 0.0D, 1.0D, height, 1.0D);
 
-            return !VoxelShapes.isSideCovered(threshold, shape, dir);
+            return !VoxelShapes.method_1080(threshold, shape, dir);//Fixme:
         }
 
         return true;
@@ -122,7 +122,7 @@ public class FluidRenderer {
             return false;
         }
 
-        boolean lava = fluidState.isIn(FluidTags.LAVA);
+        boolean lava = fluidState.matches(FluidTags.LAVA);
         Sprite[] sprites = lava ? this.lavaSprites : this.waterSprites;
 
         boolean rendered = false;

@@ -72,10 +72,10 @@ public abstract class LightDataAccess {
         // FIX: Fluids are always non-translucent despite blocking light, so we need a special check here in order to
         // solve lighting issues underwater.
         boolean op = state.getFluidState() != EMPTY_FLUID_STATE || state.getOpacity(world, pos) == 0;
-        boolean fo = state.isOpaqueFullCube(world, pos);
+        boolean fo = state.isFullOpaque(world, pos);//state.isOpaqueFullCube(world, pos);
 
         // OPTIMIZE: Do not calculate lightmap data if the block is full and opaque
-        int lm = fo ? 0 : WorldRenderer.getLightmapCoordinates(world, state, pos);
+        int lm = 0;//fo ? 0 : WorldRenderer.getLightmapCoordinates(world, state, pos);//Fixme:
 
         return packAO(ao) | packLM(lm) | packOP(op) | packFO(fo) | (1L << 60);
     }

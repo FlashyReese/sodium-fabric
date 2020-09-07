@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.shader;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramTextureComponent;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -42,8 +41,8 @@ public abstract class ChunkProgram extends GlProgram {
     }
 
     @Override
-    public void bind(MatrixStack matrixStack) {
-        super.bind(matrixStack);
+    public void bind() {
+        super.bind();
 
         for (ShaderComponent component : this.components) {
              component.bind();
@@ -51,7 +50,7 @@ public abstract class ChunkProgram extends GlProgram {
 
         GL20.glUniform3f(this.uModelScale, MODEL_SIZE, MODEL_SIZE, MODEL_SIZE);
 
-        MatrixStack.Entry matrices = matrixStack.peek();
+        //MatrixStack.Entry matrices = matrixStack.peek();
 
         // Since vanilla doesn't expose the projection matrix anywhere, we need to grab it from the OpenGL state
         // This isn't super fast, but should be sufficient enough to remain compatible with any state modifying code
@@ -61,7 +60,7 @@ public abstract class ChunkProgram extends GlProgram {
             FloatBuffer bufModelViewProjection = stack.mallocFloat(16);
 
             GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, bufProjection);
-            matrices.getModel().writeToBuffer(bufModelView);
+            //matrices.getModel().writeToBuffer(bufModelView);
 
             GL11.glPushMatrix();
             GL11.glLoadMatrixf(bufProjection);

@@ -45,7 +45,7 @@ public class BlockRenderer {
     private final boolean useAmbientOcclusion;
 
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, BiomeColorBlender biomeColorBlender) {
-        this.blockColors = (BlockColorsExtended) client.getBlockColors();
+        this.blockColors = (BlockColorsExtended) client.getBlockColorMap();
         this.biomeColorBlender = biomeColorBlender;
 
         this.lighters = lighters;
@@ -56,7 +56,7 @@ public class BlockRenderer {
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ModelQuadSinkDelegate builder, boolean cull, long seed) {
         LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model));
-        Vec3d offset = state.getModelOffset(world, pos);
+        Vec3d offset = state.getOffsetPos(world, pos);
 
         boolean rendered = false;
 
@@ -99,7 +99,7 @@ public class BlockRenderer {
             BakedQuad quad = quads.get(i);
 
             QuadLightData light = this.cachedQuadLightData;
-            lighter.calculate((ModelQuadView) quad, pos, light, quad.getFace(), quad.hasShade());
+            lighter.calculate((ModelQuadView) quad, pos, light, quad.getFace(), quad.hasColor());
 
             if (quad.hasColor() && colorizer == null) {
                 colorizer = this.blockColors.getColorProvider(state);

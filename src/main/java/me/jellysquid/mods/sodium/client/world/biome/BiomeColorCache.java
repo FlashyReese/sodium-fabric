@@ -4,12 +4,10 @@ import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.level.ColorResolver;
 
 import java.util.Arrays;
 
 public class BiomeColorCache {
-    private final ColorResolver resolver;
     private final WorldSlice slice;
 
     private final int[] blendedColors;
@@ -19,8 +17,7 @@ public class BiomeColorCache {
     private final int length;
     private final int minX, minZ;
 
-    public BiomeColorCache(ColorResolver resolver, WorldSlice slice) {
-        this.resolver = resolver;
+    public BiomeColorCache(WorldSlice slice) {
         this.slice = slice;
         this.radius = MinecraftClient.getInstance().options.biomeBlendRadius;
 
@@ -83,13 +80,14 @@ public class BiomeColorCache {
         int color = this.cache[index];
 
         if (color == -1) {
-            this.cache[index] = color = this.calculateColor(x, z);
+            //Fixme:
+            //this.cache[index] = color = this.calculateColor(x, z);
         }
 
         return color;
     }
 
-    private int calculateColor(int x, int z) {
+    /*private int calculateColor(int x, int z) {
         return this.resolver.getColor(this.slice.getCachedBiome(x, z), x, z);
-    }
+    }*/
 }

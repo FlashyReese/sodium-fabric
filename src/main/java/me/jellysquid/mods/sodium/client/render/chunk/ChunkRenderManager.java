@@ -22,9 +22,7 @@ import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.ChunkSection;
@@ -246,7 +244,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         this.cameraZ = camera.getPos().z;
 
         this.lastFrameUpdated = frame;
-        this.useOcclusionCulling = MinecraftClient.getInstance().chunkCullingEnabled;
+        this.useOcclusionCulling = true;//MinecraftClient.getInstance().chunkCullingEnabled; //Fixme:
         this.useAggressiveCulling = SodiumClientMod.options().advanced.useChunkFaceCulling;
 
         this.resetGraph();
@@ -262,7 +260,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
             node.resetGraphState();
             node.setVisibleFrame(frame);
 
-            if (spectator && this.world.getBlockState(origin).isOpaqueFullCube(this.world, origin)) {
+            if (spectator/* && this.world.getBlockState(origin).isOpaqueFullCube(this.world, origin)*/) {//Fixme:
                 this.useOcclusionCulling = false;
             }
 
@@ -396,11 +394,11 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         return render;
     }
 
-    public void renderChunks(MatrixStack matrixStack, BlockRenderPass pass, double x, double y, double z) {
+    public void renderChunks(BlockRenderPass pass, double x, double y, double z) {
         ChunkRenderListIterator<T> iterator = this.chunkRenderLists[pass.ordinal()]
                 .iterator(pass.isForwardRendering());
 
-        this.backend.renderChunks(matrixStack, pass, iterator, new ChunkCameraContext(x, y, z));
+        this.backend.renderChunks(pass, iterator, new ChunkCameraContext(x, y, z));
     }
 
     public void tickVisibleRenders() {

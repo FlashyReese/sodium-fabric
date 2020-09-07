@@ -13,7 +13,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.passes.impl.MultiTextureRenderPipeline;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 /**
@@ -46,10 +45,10 @@ public class GL33ChunkRenderBackend extends ChunkRenderBackendOneshot<GL33Graphi
     }
 
     @Override
-    public void endRender(MatrixStack matrixStack) {
+    public void endRender() {
         GlFunctions.VERTEX_ARRAY.glBindVertexArray(0);
 
-        super.endRender(matrixStack);
+        super.endRender();
     }
 
     @Override

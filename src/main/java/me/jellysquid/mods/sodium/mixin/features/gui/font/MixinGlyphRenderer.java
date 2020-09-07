@@ -1,13 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.font;
 
-import me.jellysquid.mods.sodium.client.model.consumer.GlyphVertexConsumer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import net.minecraft.client.font.GlyphRenderer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(GlyphRenderer.class)
@@ -48,8 +43,10 @@ public class MixinGlyphRenderer {
      * @reason Use intrinsics
      * @author JellySquid
      */
-    @Overwrite
-    public void draw(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int light) {
+    //Fixme:
+    /*@Overwrite
+    //public void draw(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int light) {
+    public void draw(TextureManager textureManager, boolean italic, float x, float y, BufferBuilder buffer, float red, float green, float blue, float alpha){
         float x1 = x + this.xMin;
         float x2 = x + this.xMax;
         float y1 = this.yMin - 3.0F;
@@ -62,9 +59,9 @@ public class MixinGlyphRenderer {
         int color = ColorABGR.pack(red, green, blue, alpha);
 
         GlyphVertexConsumer glyphs = ((GlyphVertexConsumer) vertexConsumer);
-        glyphs.vertexGlyph(matrix, x1 + w1, h1, 0.0F, color, this.uMin, this.vMin, light);
-        glyphs.vertexGlyph(matrix, x1 + w2, h2, 0.0F, color, this.uMin, this.vMax, light);
+        glyphs.vertexGlyph(x1 + w1, h1, 0.0F, color, this.uMin, this.vMin, light);
+        glyphs.vertexGlyph(x1 + w2, h2, 0.0F, color, this.uMin, this.vMax, light);
         glyphs.vertexGlyph(matrix, x2 + w2, h2, 0.0F, color, this.uMax, this.vMax, light);
         glyphs.vertexGlyph(matrix, x2 + w1, h1, 0.0F, color, this.uMax, this.vMin, light);
-    }
+    }*/
 }

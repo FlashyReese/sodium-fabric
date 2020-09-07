@@ -1,13 +1,8 @@
 package me.jellysquid.mods.sodium.client.util.math;
 
-import me.jellysquid.mods.sodium.client.util.Norm3b;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Matrix3f;
-import net.minecraft.util.math.Matrix4f;
-
 @SuppressWarnings("ConstantConditions")
 public class MatrixUtil {
-    public static int computeNormal(Matrix3f normalMatrix, Direction facing) {
+    /*public static int computeNormal(Matrix3f normalMatrix, Direction facing) {
         return ((Matrix3fExtended) (Object) normalMatrix).computeNormal(facing);
     }
 
@@ -31,5 +26,5 @@ public class MatrixUtil {
         float normZ2 = mat.transformVecZ(normX1, normY1, normZ1);
 
         return Norm3b.pack(normX2, normY2, normZ2);
-    }
+    }*/
 }

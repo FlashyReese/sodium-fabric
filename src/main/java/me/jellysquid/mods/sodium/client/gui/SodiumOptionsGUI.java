@@ -15,11 +15,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.VideoOptionsScreen;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -105,7 +101,7 @@ public class SodiumOptionsGUI extends Screen {
         int y = 6;
 
         for (OptionPage page : this.pages) {
-            int width = 10 + this.textRenderer.getWidth(page.getName());
+            int width = 10 + this.font.getStringWidth(page.getName());
 
             FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 16), page.getName(), () -> this.setPage(page));
             button.setSelected(this.currentPage == page);
@@ -139,17 +135,17 @@ public class SodiumOptionsGUI extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
-        super.renderBackground(matrixStack);
+    public void render(int mouseX, int mouseY, float delta) {
+        super.renderBackground();
 
         this.updateControls();
 
         for (Drawable drawable : this.drawable) {
-            drawable.render(matrixStack, mouseX, mouseY, delta);
+            drawable.render(mouseX, mouseY, delta);
         }
 
         if (this.hoveredElement != null) {
-            this.renderOptionTooltip(matrixStack, this.hoveredElement);
+            this.renderOptionTooltip(this.hoveredElement);
         }
     }
 
@@ -187,7 +183,7 @@ public class SodiumOptionsGUI extends Screen {
         return this.controls.stream();
     }
 
-    private void renderOptionTooltip(MatrixStack matrixStack, ControlElement<?> element) {
+    private void renderOptionTooltip(ControlElement<?> element) {
         Dim2i dim = element.getDimensions();
 
         int textPadding = 3;
@@ -201,10 +197,8 @@ public class SodiumOptionsGUI extends Screen {
 
         Option<?> option = element.getOption();
 
-        StringRenderable title = new LiteralText(option.getName()).formatted(Formatting.GRAY);
-
-        List<StringRenderable> text = this.textRenderer.wrapLines(title, textWidth);
-        text.addAll(this.textRenderer.wrapLines(option.getTooltip(), textWidth));
+        List<String> text = new ArrayList<String>(this.font.wrapStringToWidthAsList(option.getName(), textWidth));
+        text.addAll(this.font.wrapStringToWidthAsList(option.getTooltip(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
@@ -215,16 +209,16 @@ public class SodiumOptionsGUI extends Screen {
             boxY -= boxYLimit - boxYCutoff;
         }
 
-        this.fillGradient(matrixStack, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
+        this.fillGradient(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
 
         for (int i = 0; i < text.size(); i++) {
-            StringRenderable str = text.get(i);
+            String str = text.get(i);
 
-            if (str.getString().isEmpty()) {
+            if (str.isEmpty()) {
                 continue;
             }
 
-            this.textRenderer.draw(matrixStack, str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
+            this.font.draw(str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
     }
 
@@ -250,7 +244,8 @@ public class SodiumOptionsGUI extends Screen {
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
-            client.resetMipmapLevels(client.options.mipmapLevels);
+            //Fixme: somewhere not here;
+            //client.resetMipmapLevels(client.options.mipmapLevels);
             client.reloadResourcesConcurrently();
         }
 
@@ -282,6 +277,6 @@ public class SodiumOptionsGUI extends Screen {
 
     @Override
     public void onClose() {
-        this.client.openScreen(this.prevScreen);
+        this.minecraft.openScreen(this.prevScreen);
     }
 }

@@ -1,36 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.intrinsics;
 
-import me.jellysquid.mods.sodium.client.model.consumer.GlyphVertexConsumer;
-import me.jellysquid.mods.sodium.client.model.consumer.ParticleVertexConsumer;
-import me.jellysquid.mods.sodium.client.model.consumer.QuadVertexConsumer;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.client.util.Norm3b;
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import me.jellysquid.mods.sodium.client.util.color.ColorU8;
-import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
-import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.FixedColorVertexConsumer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector4f;
-import net.minecraft.util.math.Matrix3f;
-import net.minecraft.util.math.Matrix4f;
-import org.lwjgl.system.MemoryUtil;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import sun.misc.Unsafe;
-
-import java.nio.ByteBuffer;
-
+//Fixme:
 @SuppressWarnings({ "SameParameterValue", "SuspiciousNameCombination" })
-@Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
-        implements ParticleVertexConsumer, QuadVertexConsumer, GlyphVertexConsumer {
-    @Shadow
+//@Mixin(BufferBuilder.class)
+public /*abstract*/ class MixinBufferBuilder
+        /*implements ParticleVertexConsumer, QuadVertexConsumer, GlyphVertexConsumer*/ {
+    /*@Shadow
     private VertexFormat format;
 
     @Shadow
@@ -384,5 +359,5 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
         unsafe.putInt(i, light);
         i += 4;
-    }
+    }*/
 }

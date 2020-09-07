@@ -1,18 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.particle.fast_render;
 
 import me.jellysquid.mods.sodium.client.model.consumer.ParticleVertexConsumer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import net.minecraft.client.particle.BillboardParticle;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BillboardParticle.class)
@@ -40,8 +33,9 @@ public abstract class MixinBillboardParticle extends Particle {
      * @reason Optimize function
      * @author JellySquid
      */
-    @Overwrite
-    public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+    //Fixme:
+    /*@Overwrite
+    public void buildGeometry(BufferBuilder bufferBuilder, Camera camera, float tickDelta, float f, float g, float h, float i, float j) {
         Vec3d vec3d = camera.getPos();
 
         float x = (float) (MathHelper.lerp(tickDelta, this.prevPosX, this.x) - vec3d.getX());
@@ -75,16 +69,16 @@ public abstract class MixinBillboardParticle extends Particle {
         addVertex(vertices, quaternion,-1.0F, 1.0F, x, y, z, maxU, minV, color, light, size);
         addVertex(vertices, quaternion,1.0F, 1.0F, x, y, z, minU, minV, color, light, size);
         addVertex(vertices, quaternion,1.0F, -1.0F, x, y, z, minU, maxV, color, light, size);
-    }
+    }*/
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     private static void addVertex(ParticleVertexConsumer vertices, Quaternion rotation,
                            float x, float y, float posX, float posY, float posZ, float u, float v, int color, int light, float size) {
         // Quaternion q0 = new Quaternion(rotation);
-        float q0x = rotation.getX();
-        float q0y = rotation.getY();
-        float q0z = rotation.getZ();
-        float q0w = rotation.getW();
+        float q0x = rotation.getB();
+        float q0y = rotation.getC();
+        float q0z = rotation.getD();
+        float q0w = rotation.getA();
 
         // q0.hamiltonProduct(x, y, 0.0f, 0.0f)
         float q1x = (q0w * x) - (q0z * y);

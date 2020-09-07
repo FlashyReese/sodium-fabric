@@ -1,23 +1,12 @@
 package me.jellysquid.mods.sodium.mixin.core.matrix;
 
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
-import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Quaternion;
-import org.lwjgl.system.MemoryUtil;
+import net.minecraft.client.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import sun.misc.Unsafe;
-
-import java.nio.BufferUnderflowException;
-import java.nio.FloatBuffer;
 
 @Mixin(Matrix4f.class)
-public class MixinMatrix4f implements Matrix4fExtended {
-    @Shadow
+public class MixinMatrix4f {//implements Matrix4fExtended {
+    //Fixme:
+   /* @Shadow
     protected float a00;
 
     @Shadow
@@ -90,9 +79,9 @@ public class MixinMatrix4f implements Matrix4fExtended {
 
     @Override
     public void rotate(Quaternion quaternion) {
-        boolean x = quaternion.getX() != 0.0F;
-        boolean y = quaternion.getY() != 0.0F;
-        boolean z = quaternion.getZ() != 0.0F;
+        boolean x = quaternion.getB() != 0.0F;
+        boolean y = quaternion.getC() != 0.0F;
+        boolean z = quaternion.getD() != 0.0F;
 
         // Try to determine if this is a simple rotation on one axis component only
         if (x) {
@@ -113,8 +102,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateX(Quaternion quaternion) {
-        float x = quaternion.getX();
-        float w = quaternion.getW();
+        float x = quaternion.getB();
+        float w = quaternion.getA();
 
         float xx = 2.0F * x * x;
         float ta11 = 1.0F - xx;
@@ -145,8 +134,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateY(Quaternion quaternion) {
-        float y = quaternion.getY();
-        float w = quaternion.getW();
+        float y = quaternion.getC();
+        float w = quaternion.getA();
 
         float yy = 2.0F * y * y;
         float ta00 = 1.0F - yy;
@@ -175,8 +164,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateZ(Quaternion quaternion) {
-        float z = quaternion.getZ();
-        float w = quaternion.getW();
+        float z = quaternion.getD();
+        float w = quaternion.getA();
 
         float zz = 2.0F * z * z;
         float ta00 = 1.0F - zz;
@@ -205,10 +194,10 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateXYZ(Quaternion quaternion) {
-        float x = quaternion.getX();
-        float y = quaternion.getY();
-        float z = quaternion.getZ();
-        float w = quaternion.getW();
+        float x = quaternion.getB();
+        float y = quaternion.getC();
+        float z = quaternion.getD();
+        float w = quaternion.getA();
 
         float xx = 2.0F * x * x;
         float yy = 2.0F * y * y;
@@ -256,10 +245,10 @@ public class MixinMatrix4f implements Matrix4fExtended {
         this.a32 = a32;
     }
 
-    /**
+    *//**
      * @reason Optimize
      * @author JellySquid
-     */
+     *//*
     @Environment(EnvType.CLIENT)
     @Overwrite
     public void writeToBuffer(FloatBuffer buf) {
@@ -313,5 +302,5 @@ public class MixinMatrix4f implements Matrix4fExtended {
         buf.put(13, this.a13);
         buf.put(14, this.a23);
         buf.put(15, this.a33);
-    }
+    }*/
 }

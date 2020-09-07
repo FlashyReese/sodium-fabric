@@ -16,9 +16,9 @@ public class EntityLighter {
         boolean calcBlockLight = !entity.isOnFire();
 
         // Find the interpolated position of the entity
-        double x1 = MathHelper.lerp(tickDelta, entity.prevX, entity.getX());
-        double y1 = MathHelper.lerp(tickDelta, entity.prevY, entity.getY());
-        double z1 = MathHelper.lerp(tickDelta, entity.prevZ, entity.getZ());
+        double x1 = MathHelper.lerp(tickDelta, entity.prevX, entity.x);
+        double y1 = MathHelper.lerp(tickDelta, entity.prevY, entity.y);
+        double z1 = MathHelper.lerp(tickDelta, entity.prevZ, entity.z);
 
         // Bounding boxes with no volume cause issues, ensure they're non-zero
         // Notably, armor stands in "Marker" mode decide this is a cute thing to do
@@ -62,7 +62,7 @@ public class EntityLighter {
                     BlockState blockState = entity.world.getBlockState(pos);
 
                     // Do not consider light-blocking volumes
-                    if (blockState.isOpaqueFullCube(entity.world, pos) && blockState.getLuminance() <= 0) {
+                    if (blockState.isFullOpaque(entity.world, pos) && blockState.getLuminance() <= 0) {
                         continue;
                     }
 
