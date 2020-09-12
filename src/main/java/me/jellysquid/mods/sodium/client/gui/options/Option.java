@@ -7,11 +7,9 @@ import net.minecraft.text.Text;
 import java.util.Collection;
 
 public interface Option<T> {
-    String getName();
+    Text getName();
 
     Text getTooltip();
-
-    OptionImpact getImpact();
 
     Control<T> getControl();
 

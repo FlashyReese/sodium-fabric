@@ -1,6 +1,10 @@
 package me.jellysquid.mods.sodium.client.gui;
 
-import me.jellysquid.mods.sodium.client.gui.options.*;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gui.options.Option;
+import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
+import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
+import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
@@ -11,6 +15,7 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.VideoOptionsScreen;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
@@ -47,6 +52,7 @@ public class SodiumOptionsGUI extends Screen {
         this.pages.add(SodiumGameOptionPages.general());
         this.pages.add(SodiumGameOptionPages.quality());
         this.pages.add(SodiumGameOptionPages.advanced());
+        this.pages.addAll(SodiumClientMod.getOptionPages());
     }
 
     public void setPage(OptionPage page) {
@@ -79,9 +85,12 @@ public class SodiumOptionsGUI extends Screen {
         this.rebuildGUIPages();
         this.rebuildGUIOptions();
 
-        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 30, 65, 20), "Undo", this::undoChanges);
-        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 30, 65, 20), "Apply", this::applyChanges);
-        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 30, 65, 20), "Close", this::onClose);
+        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 30, 65, 20),
+                I18n.translate("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 30, 65, 20),
+                I18n.translate("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 30, 65, 20),
+                I18n.translate("sodium.options.buttons.close"), this::onClose);
 
         this.children.add(this.undoButton);
         this.children.add(this.applyButton);
@@ -139,11 +148,13 @@ public class SodiumOptionsGUI extends Screen {
         this.updateControls();
 
         for (Drawable drawable : this.drawable) {
+            if (drawable == this.hoveredElement) continue;
             drawable.render(matrixStack, mouseX, mouseY, delta);
         }
 
         if (this.hoveredElement != null) {
             this.renderOptionTooltip(matrixStack, this.hoveredElement);
+            this.hoveredElement.render(matrixStack, mouseX, mouseY, delta);
         }
     }
 
@@ -188,6 +199,7 @@ public class SodiumOptionsGUI extends Screen {
         int boxPadding = 3;
 
         int boxWidth = 200;
+        int textWidth = boxWidth - (textPadding * 2);
 
         int boxY = dim.getOriginY();
         int boxX = dim.getLimitX() + boxPadding;
@@ -195,13 +207,13 @@ public class SodiumOptionsGUI extends Screen {
         Option<?> option = element.getOption();
         List<OrderedText> tooltip = new ArrayList<>(this.textRenderer.wrapLines(option.getTooltip(), boxWidth - (textPadding * 2)));
 
-        OptionImpact impact = option.getImpact();
+        Text name = option.getName();
+        StringRenderable title = new LiteralText(name.getString()).setStyle(name.getStyle()).formatted(Formatting.GRAY);
 
-        /*if (impact != null) {
-            tooltip.add(new LiteralText(Formatting.GRAY + "Performance Impact: " + impact.toDisplayString()));
-        }*/
+        List<StringRenderable> text = this.textRenderer.wrapLines(title, textWidth);
+        text.addAll(this.textRenderer.wrapLines(option.getTooltip(), textWidth));
 
-        int boxHeight = (tooltip.size() * 12) + boxPadding;
+        int boxHeight = (text.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
         int boxYCutoff = this.height - 40;
 
