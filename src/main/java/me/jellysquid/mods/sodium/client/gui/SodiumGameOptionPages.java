@@ -17,6 +17,7 @@ import net.minecraft.client.options.AttackIndicator;
 import net.minecraft.client.options.GraphicsMode;
 import net.minecraft.client.options.Option;
 import net.minecraft.client.options.ParticlesMode;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -163,9 +164,9 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.quality.weatherQuality = value, opts -> opts.quality.weatherQuality)
                         .build())
                 .add(OptionImpl.createBuilder(ParticlesMode.class, vanillaOpts)
-                        .setName("Particle Quality")
-                        .setTooltip("Controls the maximum number of particles which can be present on screen at any one time.")
-                        .setControl(opt -> new CyclingControl<>(opt, ParticlesMode.class, new String[] { "High", "Medium", "Low" }))
+                        .setName(new TranslatableText("sodium.options.particle_quality.name"))
+                        .setTooltip(new TranslatableText("sodium.options.particle_quality.tooltip"))
+                        .setControl(opt -> new CyclingControl<>(opt, ParticlesMode.class, new String[] { I18n.translate("options.particles.all"), I18n.translate("options.particles.decreased"), I18n.translate("options.particles.minimal") }))
                         .setBinding((opts, value) -> opts.particles = value, (opts) -> opts.particles)
                         .build())
                 .add(OptionImpl.createBuilder(SodiumGameOptions.LightingQuality.class, sodiumOpts)

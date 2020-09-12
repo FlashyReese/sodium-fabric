@@ -13,7 +13,8 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
@@ -209,9 +210,9 @@ public class OptionPageContainerWidget extends FocusControlElement {
         Option<?> option = element.getOption();
 
         Text name = option.getName();
-        StringRenderable title = new LiteralText(name.getString()).setStyle(name.getStyle()).formatted(Formatting.GRAY);
+        StringVisitable title = new LiteralText(name.getString()).setStyle(name.getStyle()).formatted(Formatting.GRAY);
 
-        List<StringRenderable> text = this.textRenderer.wrapLines(title, textWidth);
+        List<OrderedText> text = new ArrayList<>(this.textRenderer.wrapLines(title, textWidth));
         text.addAll(this.textRenderer.wrapLines(option.getTooltip(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
@@ -226,9 +227,9 @@ public class OptionPageContainerWidget extends FocusControlElement {
         this.drawRect(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xF0000000);
 
         for (int i = 0; i < text.size(); i++) {
-            StringRenderable str = text.get(i);
+            OrderedText str = text.get(i);
 
-            if (str.getString().isEmpty()) {
+            if (str.toString().isEmpty()) {
                 continue;
             }
 

@@ -17,10 +17,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.VideoOptionsScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
@@ -208,9 +205,9 @@ public class SodiumOptionsGUI extends Screen {
         List<OrderedText> tooltip = new ArrayList<>(this.textRenderer.wrapLines(option.getTooltip(), boxWidth - (textPadding * 2)));
 
         Text name = option.getName();
-        StringRenderable title = new LiteralText(name.getString()).setStyle(name.getStyle()).formatted(Formatting.GRAY);
+        StringVisitable title = new LiteralText(name.getString()).setStyle(name.getStyle()).formatted(Formatting.GRAY);
 
-        List<StringRenderable> text = this.textRenderer.wrapLines(title, textWidth);
+        List<OrderedText> text = new ArrayList<>(this.textRenderer.wrapLines(title, textWidth));
         text.addAll(this.textRenderer.wrapLines(option.getTooltip(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
