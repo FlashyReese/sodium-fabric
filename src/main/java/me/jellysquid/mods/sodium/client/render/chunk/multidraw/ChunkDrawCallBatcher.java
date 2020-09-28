@@ -30,9 +30,12 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
         return UnsafeUtil.isAvailable() ? new UnsafeChunkDrawCallBatcher(capacity) : new NioChunkDrawCallBatcher(capacity);
     }
 
-    public void upload() {
+    public void uploadBind() {
         GL15.glBindBuffer(GL40.GL_DRAW_INDIRECT_BUFFER, this.handle);
-        GL15.glBufferData(GL40.GL_DRAW_INDIRECT_BUFFER, this.buffer, GL15.GL_STREAM_DRAW);
+    }
+
+    public void uploadData() {
+        GL15.glBufferData(GL40.GL_DRAW_INDIRECT_BUFFER, this.buffer, GL15.GL_DYNAMIC_DRAW);
     }
 
     @Override
@@ -68,9 +71,9 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
                 throw new BufferUnderflowException();
             }
 
-            UNSAFE.putInt(this.writePointer     , count);         // Vertex Count
-            UNSAFE.putInt(this.writePointer +  4, instanceCount); // Instance Count
-            UNSAFE.putInt(this.writePointer +  8, first);         // Vertex Start
+            UNSAFE.putInt(this.writePointer, count);         // Vertex Count
+            UNSAFE.putInt(this.writePointer + 4, instanceCount); // Instance Count
+            UNSAFE.putInt(this.writePointer + 8, first);         // Vertex Start
             UNSAFE.putInt(this.writePointer + 12, baseInstance);  // Base Instance
 
             this.writePointer += STRUCT_SIZE;
@@ -94,9 +97,9 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
         @Override
         public void addIndirectDrawCall(int first, int count, int baseInstance, int instanceCount) {
             ByteBuffer buf = this.buffer;
-            buf.putInt(this.writeOffset     , count);             // Vertex Count
-            buf.putInt(this.writeOffset +  4, instanceCount);     // Instance Count
-            buf.putInt(this.writeOffset +  8, first);             // Vertex Start
+            buf.putInt(this.writeOffset, count);             // Vertex Count
+            buf.putInt(this.writeOffset + 4, instanceCount);     // Instance Count
+            buf.putInt(this.writeOffset + 8, first);             // Vertex Start
             buf.putInt(this.writeOffset + 12, baseInstance);      // Base Instance
 
             this.writeOffset += STRUCT_SIZE;

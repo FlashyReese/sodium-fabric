@@ -88,8 +88,8 @@ public class GL43ChunkRenderBackend extends ChunkRenderBackendMultiDraw<LCBGraph
         super(format);
 
         this.bufferManager = new ChunkRegionManager<>(this.memoryTracker);
-        this.uploadBuffer = new GlMutableBuffer(GL15.GL_STREAM_COPY);
-        this.uniformBuffer = new GlMutableBuffer(GL15.GL_STATIC_DRAW);
+        this.uploadBuffer = new GlMutableBuffer(GL15.GL_DYNAMIC_COPY);
+        this.uniformBuffer = new GlMutableBuffer(GL15.GL_DYNAMIC_DRAW);
 
         this.uniformBufferBuilder = ChunkDrawParamsVector.create(2048);
     }
@@ -175,8 +175,9 @@ public class GL43ChunkRenderBackend extends ChunkRenderBackendMultiDraw<LCBGraph
 
             ChunkDrawCallBatcher batch = region.getDrawBatcher();
             batch.end();
+            batch.uploadBind();
+            batch.uploadData();
 
-            batch.upload();
             GlFunctions.INDIRECT_DRAW.glMultiDrawArraysIndirect(GL11.GL_QUADS, 0, batch.getCount(), 0 /* tightly packed */);
 
             prevVao = vao;
