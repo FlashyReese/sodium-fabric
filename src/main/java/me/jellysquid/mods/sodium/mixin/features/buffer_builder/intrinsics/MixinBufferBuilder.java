@@ -42,11 +42,12 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     @Shadow
     private int vertexCount;
 
-    @Shadow
+    //Fixme: Doesn't exist
+    /*@Shadow
     private boolean field_21595; // has overlay
 
     @Shadow
-    private boolean field_21594; // is baked quad format
+    private boolean field_21594; // is baked quad format*/
 
     @Shadow
     protected abstract void grow(int size);
@@ -139,10 +140,10 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
             throw new IllegalStateException();
         }
 
-        if (!this.field_21594) {
+        /*if (!this.field_21594) {
             this.vertexQuadFallback(x, y, z, color, u, v, overlay, light, normal);
             return;
-        }
+        }*/
 
         int size = this.format.getVertexSize();
 
@@ -164,9 +165,10 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
                 ColorABGR.unpackAlpha(color));
         this.texture(u, v);
 
-        if (this.field_21595) {
+        this.overlay(overlay);
+        /*if (this.field_21595) {
             this.overlay(overlay);
-        }
+        }*/
 
         this.light(light);
         this.normal(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
@@ -196,10 +198,10 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
         unsafe.putFloat(i, v);
         i += 4;
 
-        if (this.field_21595) {
+        /*if (this.field_21595) {
             unsafe.putInt(i, overlay);
             i += 4;
-        }
+        }*/
 
         unsafe.putInt(i, light);
         i += 4;
@@ -229,10 +231,10 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
         buffer.putFloat(i, v);
         i += 4;
 
-        if (this.field_21595) {
+        /*if (this.field_21595) {
             buffer.putInt(i, overlay);
             i += 4;
-        }
+        }*/
 
         buffer.putInt(i, light);
         i += 4;
@@ -242,11 +244,11 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
     @Override
     public void quad(MatrixStack.Entry matrices, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
-        if (!this.field_21594) {
+        /*if (!this.field_21594) {
             super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
             return;
-        }
+        }*/
 
         if (this.colorFixed) {
             throw new IllegalStateException();

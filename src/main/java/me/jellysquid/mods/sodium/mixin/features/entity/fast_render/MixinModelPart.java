@@ -18,19 +18,22 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
+
 @Mixin(ModelPart.class)
 public class MixinModelPart {
     private static final float NORM = 1.0F / 16.0F;
 
     @Shadow
     @Final
-    private ObjectList<ModelPart.Cuboid> cuboids;
+    private List<ModelPart.Cuboid> cuboids;
 
     /**
      * @author JellySquid
      * @reason Use optimized vertex writer, avoid allocations, use quick matrix transformations
      */
-    @Overwrite
+    //Fixme: Port
+    /*@Overwrite
     private void renderCuboids(MatrixStack.Entry matrices, VertexConsumer vertexConsumer, int light, int overlay, Sprite sprite, float red, float green, float blue) {
         Matrix3fExtended normalExt = MatrixUtil.getExtendedMatrix(matrices.getNormal());
         Matrix4fExtended modelExt = MatrixUtil.getExtendedMatrix(matrices.getModel());
@@ -62,5 +65,5 @@ public class MixinModelPart {
                 }
             }
         }
-    }
+    }*/
 }
