@@ -54,7 +54,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
     @Override
     public void vertexParticle(float x, float y, float z, float u, float v, int color, int light) {
-        if (this.format != VertexFormats.POSITION_TEXTURE_COLOR_LIGHT) {
+        if (this.format != VertexFormats.POSITION_UV_COLOR_LMAP) {
             this.vertexParticleFallback(x, y, z, u, v, color, light);
             return;
         }
@@ -165,7 +165,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
                 ColorABGR.unpackAlpha(color));
         this.texture(u, v);
 
-        this.overlay(overlay);
+        this.defaultOverlay(overlay);
         /*if (this.field_21595) {
             this.overlay(overlay);
         }*/
@@ -305,7 +305,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
         float y2 = matrixExt.transformVecY(x, y, z);
         float z2 = matrixExt.transformVecZ(x, y, z);
 
-        if (this.format != VertexFormats.POSITION_COLOR_TEXTURE_LIGHT) {
+        if (this.format != VertexFormats.field_20888) {
             this.vertexGlyphFallback(x2, y2, z2, color, u, v, light);
             return;
         }

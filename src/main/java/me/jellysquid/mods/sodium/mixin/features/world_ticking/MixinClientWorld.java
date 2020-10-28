@@ -58,7 +58,7 @@ public abstract class MixinClientWorld extends World {
             this.performBlockDisplayTick(blockState, pos, random, spawnBarrierParticles);
         }
 
-        if (!blockState.isFullCube(this, pos)) {
+        if (!blockState.method_21743(this, pos)) {
             //this.performBiomeParticleDisplayTick(pos, random);
         }
 
@@ -106,7 +106,7 @@ public abstract class MixinClientWorld extends World {
             boolean solid = blockState.isSideSolidFullSquare(this, pos, Direction.DOWN);
 
             // FIXME: don't allocate here
-            BlockPos blockPos = (BlockPos) pos.down();
+            BlockPos blockPos = (BlockPos) pos.method_23228();
             this.addParticle(blockPos, this.getBlockState(blockPos), particleEffect, solid);
         }
     }
