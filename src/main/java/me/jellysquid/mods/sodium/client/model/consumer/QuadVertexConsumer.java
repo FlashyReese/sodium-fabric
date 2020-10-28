@@ -2,6 +2,8 @@ package me.jellysquid.mods.sodium.client.model.consumer;
 
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
 import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
+import net.minecraft.client.util.math.Matrix3f;
+import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 
 public interface QuadVertexConsumer {
@@ -20,14 +22,14 @@ public interface QuadVertexConsumer {
      */
     void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal);
 
-    default void vertexQuad(MatrixStack.Entry entry, float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
-        Matrix4fExtended modelMatrix = MatrixUtil.getExtendedMatrix(entry.method_23761());
+    default void vertexQuad(Matrix4f matrix4f, Matrix3f matrix3f, float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
+        Matrix4fExtended modelMatrix = MatrixUtil.getExtendedMatrix(matrix4f);
 
         float x2 = modelMatrix.transformVecX(x, y, z);
         float y2 = modelMatrix.transformVecY(x, y, z);
         float z2 = modelMatrix.transformVecZ(x, y, z);
 
-        int norm = MatrixUtil.transformPackedNormal(normal, entry.method_23762());
+        int norm = MatrixUtil.transformPackedNormal(normal, matrix3f);
 
         this.vertexQuad(x2, y2, z2, color, u, v, light, overlay, norm);
     }

@@ -32,8 +32,8 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
 
     public FallbackQuadSink(VertexConsumer consumer, MatrixStack matrixStack) {
         this.consumer = consumer;
-        this.modelMatrix = matrixStack.method_23760().method_23761();
-        this.normalMatrix = matrixStack.method_23760().method_23762();
+        this.modelMatrix = matrixStack.peekModel();
+        this.normalMatrix = matrixStack.peekNormal();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
         this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
     }
@@ -48,7 +48,8 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
             float y = quad.getY(i);
             float z = quad.getZ(i);
 
-            posVec.method_23851(x, y, z, 1.0F);
+            //posVec.method_23851(x, y, z, 1.0F); fixme:
+            posVec = new Vector4f(x, y, z, 1.0F);
             posVec.multiply(this.modelMatrix);
 
             int color = quad.getColor(i);
@@ -71,7 +72,7 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
             normVec.set(normX, normY, normZ);
             normVec.multiply(this.normalMatrix);
 
-            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).color(r ,g ,b, a).texture(u, v).normal(normVec.getX(), normVec.getY(), normVec.getZ()).next();
+            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).color(r ,g ,b, a).texture(u, v)/*.light(OverlayTexture.DEFAULT_UV, light)*/.normal(normVec.getX(), normVec.getY(), normVec.getZ()).next();
             //this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ(), r, g, b, a, u, v, OverlayTexture.DEFAULT_UV, light, normVec.getX(), normVec.getY(), normVec.getZ());
         }
     }

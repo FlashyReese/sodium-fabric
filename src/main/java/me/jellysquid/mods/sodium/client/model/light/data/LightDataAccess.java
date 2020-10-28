@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.model.light.data;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
@@ -11,16 +10,16 @@ import net.minecraft.world.BlockRenderView;
 /**
  * The light data cache is used to make accessing the light data and occlusion properties of blocks cheaper. The data
  * for each block is stored as a long integer with packed fields in order to work around the lack of value types in Java.
- *
+ * <p>
  * This code is not very pretty, but it does perform significantly faster than the vanilla implementation and has
  * good cache locality.
- *
+ * <p>
  * Each long integer contains the following fields:
  * - OP: Block opacity test, true if opaque
  * - FO: Full block opaque test, true if opaque
  * - AO: Ambient occlusion, floating point value in the range of 0.0..1.0 encoded as an 12-bit unsigned integer
  * - LM: Light map texture coordinates, two packed UV shorts in an integer
- *
+ * <p>
  * You can use the various static pack/unpack methods to extract these values in a usable format.
  */
 public abstract class LightDataAccess {
@@ -75,7 +74,7 @@ public abstract class LightDataAccess {
         boolean fo = state.isFullOpaque(world, pos);
 
         // OPTIMIZE: Do not calculate lightmap data if the block is full and opaque
-        int lm = fo ? 0 : WorldRenderer.method_23793(world, state, pos);
+        int lm = fo ? 0 : world.getLightmapCoordinates(state, pos);//WorldRenderer.method_23793(world, state, pos);
 
         return packAO(ao) | packLM(lm) | packOP(op) | packFO(fo) | (1L << 60);
     }

@@ -51,8 +51,6 @@ public abstract class ChunkProgram extends GlProgram {
 
         GL20.glUniform3f(this.uModelScale, MODEL_SIZE, MODEL_SIZE, MODEL_SIZE);
 
-        MatrixStack.Entry matrices = matrixStack.method_23760();
-
         // Since vanilla doesn't expose the projection matrix anywhere, we need to grab it from the OpenGL state
         // This isn't super fast, but should be sufficient enough to remain compatible with any state modifying code
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -61,7 +59,8 @@ public abstract class ChunkProgram extends GlProgram {
             FloatBuffer bufModelViewProjection = stack.mallocFloat(16);
 
             GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, bufProjection);
-            matrices.method_23761().writeToBuffer(bufModelView);
+
+            matrixStack.peekModel().writeToBuffer(bufModelView);
 
             GL11.glPushMatrix();
             GL11.glLoadMatrixf(bufProjection);

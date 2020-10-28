@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCacheManager;
@@ -23,7 +22,6 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.ChunkLightingView;
 import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraft.world.level.ColorResolver;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -71,12 +69,13 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     private final BiomeCache[] biomeCaches;
     private final BiomeArray[] biomeArrays;
 
+    //Fixme:
     // The biome blend caches for each color resolver type
     // This map is always re-initialized, but the caches themselves are taken from an object pool
-    private final Map<ColorResolver, BiomeColorCache> colorResolvers = new Reference2ObjectOpenHashMap<>();
+    //private final Map<ColorResolver, BiomeColorCache> colorResolvers = new Reference2ObjectOpenHashMap<>();
 
     // The previously accessed and cached color resolver, used in conjunction with the cached color cache field
-    private ColorResolver prevColorResolver;
+    //private ColorResolver prevColorResolver;
 
     // The cached lookup result for the previously accessed color resolver to avoid excess hash table accesses
     // for vertex color blending
@@ -245,6 +244,11 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     }
 
     @Override
+    public BiomeAccess getBiomeAccess() {
+        return this.world.getBiomeAccess();
+    }
+
+    @Override
     public LightingProvider getLightingProvider() {
         return this.world.getLightingProvider();
     }
@@ -258,7 +262,8 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         return this.chunks[this.getChunkIndexForBlock(pos)].getBlockEntity(pos, type);
     }
 
-    @Override
+    //Fixme:
+    /*@Override
     public int method_23752(BlockPos pos, ColorResolver resolver) {
         BiomeColorCache cache;
 
@@ -276,7 +281,7 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         }
 
         return cache.getBlendedColor(pos);
-    }
+    }*/
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
@@ -413,9 +418,9 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
         this.chunks = null;
         this.world = null;
 
-        this.colorResolvers.clear();
+        //this.colorResolvers.clear();
         this.prevColorCache = null;
-        this.prevColorResolver = null;
+        //this.prevColorResolver = null;
     }
 
     public int getBlockOffsetX() {

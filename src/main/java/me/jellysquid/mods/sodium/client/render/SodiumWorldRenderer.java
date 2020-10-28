@@ -303,14 +303,13 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
                 int stage = breakingInfos.last().getStage();
 
                 if (stage >= 0) {
-                    MatrixStack.Entry entry = matrices.method_23760();
-                    VertexConsumer transformer = new TransformingVertexConsumer(bufferBuilders.getEffectVertexConsumers().getBuffer(RenderLayer.getEntitySolid(ModelLoader.BLOCK_BREAKING_STAGES.get(stage))), entry);
+                    VertexConsumer transformer = new TransformingVertexConsumer(bufferBuilders.getEffectVertexConsumers().getBuffer(RenderLayer.getEntitySolid(ModelLoader.BLOCK_BREAKING_STAGES.get(stage))), matrices.peekModel());
                     /*layer.method_23037() ? VertexConsumers.dual(transformer, immediate.getBuffer(layer)) : */
                     consumer = immediate;
                 }
             }
 
-            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, consumer);
+            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, consumer, x, y, z);
 
             matrices.pop();
         }
@@ -321,7 +320,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
             matrices.push();
             matrices.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
 
-            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, immediate);
+            BlockEntityRenderDispatcher.INSTANCE.render(blockEntity, tickDelta, matrices, immediate, x, y, z);
 
             matrices.pop();
         }
