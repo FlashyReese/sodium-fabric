@@ -21,13 +21,13 @@ public interface QuadVertexConsumer {
     void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal);
 
     default void vertexQuad(MatrixStack.Entry entry, float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
-        Matrix4fExtended modelMatrix = MatrixUtil.getExtendedMatrix(entry.getModel());
+        Matrix4fExtended modelMatrix = MatrixUtil.getExtendedMatrix(entry.method_23761());
 
         float x2 = modelMatrix.transformVecX(x, y, z);
         float y2 = modelMatrix.transformVecY(x, y, z);
         float z2 = modelMatrix.transformVecZ(x, y, z);
 
-        int norm = MatrixUtil.transformPackedNormal(normal, entry.getNormal());
+        int norm = MatrixUtil.transformPackedNormal(normal, entry.method_23762());
 
         this.vertexQuad(x2, y2, z2, color, u, v, light, overlay, norm);
     }

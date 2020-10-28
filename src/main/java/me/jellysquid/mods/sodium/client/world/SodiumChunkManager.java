@@ -193,7 +193,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         }
 
         // Sodium doesn't actually use vanilla's global color cache, but we keep it around for compatibility purposes
-        this.world.resetChunkColor(x, z);
+        this.world.method_23782(x, z);
 
         // Notify the chunk listener
         if (this.listener != null) {

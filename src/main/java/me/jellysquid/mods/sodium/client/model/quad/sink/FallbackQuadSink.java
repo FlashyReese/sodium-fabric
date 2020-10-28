@@ -32,8 +32,8 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
 
     public FallbackQuadSink(VertexConsumer consumer, MatrixStack matrixStack) {
         this.consumer = consumer;
-        this.modelMatrix = matrixStack.peek().getModel();
-        this.normalMatrix = matrixStack.peek().getNormal();
+        this.modelMatrix = matrixStack.method_23760().method_23761();
+        this.normalMatrix = matrixStack.method_23760().method_23762();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
         this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
     }

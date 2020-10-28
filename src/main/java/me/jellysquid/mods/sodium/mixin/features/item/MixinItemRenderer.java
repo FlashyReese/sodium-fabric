@@ -61,7 +61,7 @@ public class MixinItemRenderer {
      */
     @Overwrite
     private void method_23180(MatrixStack matrices, VertexConsumer vertices, List<BakedQuad> quads, ItemStack stack, int light, int overlay) {
-        MatrixStack.Entry entry = matrices.peek();
+        MatrixStack.Entry entry = matrices.method_23760();
 
         QuadVertexConsumer consumer = (QuadVertexConsumer) vertices;
         ItemColorProvider colorProvider = null;

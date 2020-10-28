@@ -256,8 +256,8 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
         ModelQuadView quadView = (ModelQuadView) quad;
 
-        Matrix4f modelMatrix = matrices.getModel();
-        Matrix3f normalMatrix = matrices.getNormal();
+        Matrix4f modelMatrix = matrices.method_23761();
+        Matrix3f normalMatrix = matrices.method_23762();
 
         int norm = MatrixUtil.computeNormal(normalMatrix, quad.getFace());
 
