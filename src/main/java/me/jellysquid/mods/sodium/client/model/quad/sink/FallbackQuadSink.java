@@ -8,11 +8,11 @@ import me.jellysquid.mods.sodium.client.util.color.ColorU8;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.Matrix3f;
 import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.util.math.Vector4f;
+import net.minecraft.util.math.Matrix3f;
+import net.minecraft.util.math.MatrixStack;
 
 /**
  * A fallback implementation of {@link ModelQuadSink} for when we're writing into an arbitrary {@link BufferBuilder}.
@@ -33,7 +33,7 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
     public FallbackQuadSink(VertexConsumer consumer, MatrixStack matrixStack) {
         this.consumer = consumer;
         this.modelMatrix = matrixStack.peek();
-        this.normalMatrix = matrixStack.peekNormal();
+        this.normalMatrix = matrixStack.method_23478();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
         this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
     }

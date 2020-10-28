@@ -2,8 +2,8 @@ package me.jellysquid.mods.sodium.client.gl.shader;
 
 import me.jellysquid.mods.sodium.client.gl.GlObject;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttribute;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;

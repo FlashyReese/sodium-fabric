@@ -2,9 +2,8 @@ package me.jellysquid.mods.sodium.client.model.consumer;
 
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
 import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
-import net.minecraft.client.util.math.Matrix3f;
 import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix3f;
 
 public interface QuadVertexConsumer {
     /**

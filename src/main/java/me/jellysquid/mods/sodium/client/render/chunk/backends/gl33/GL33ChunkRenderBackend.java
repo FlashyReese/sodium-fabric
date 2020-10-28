@@ -13,8 +13,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.passes.impl.MultiTextureRenderPipeline;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MatrixStack;
 
 /**
  * Shader-based render backend for chunks which uses VAOs to avoid the overhead in setting up vertex attribute pointers

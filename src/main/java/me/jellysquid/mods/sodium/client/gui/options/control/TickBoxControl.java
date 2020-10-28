@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.gui.options.control;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.util.Rect2i;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class TickBoxControl implements Control<Boolean> {
     private final Option<Boolean> option;

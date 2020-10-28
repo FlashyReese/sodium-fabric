@@ -24,7 +24,6 @@ import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.ChunkSection;

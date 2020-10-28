@@ -18,7 +18,6 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.Vec3d;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -30,7 +29,7 @@ import net.minecraft.world.chunk.WorldChunk;
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
  * to graphics memory on the main thread.
- *
+ * <p>
  * This task takes a slice of the world from the thread it is created on. Since these slices require rather large
  * array allocations, they are pooled to ensure that the garbage collector doesn't become overloaded.
  */
@@ -88,7 +87,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     pos.set(x, y, z);
 
                     if (block.getRenderType(blockState) == BlockRenderType.MODEL) {
-                        RenderLayer layer = RenderLayers.getBlockLayer(blockState);
+                        RenderLayer layer = RenderLayer.method_22715(blockState);
 
                         ChunkBuildBuffers.ChunkBuildBufferDelegate builder = buffers.get(layer);
                         builder.setOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());
@@ -101,7 +100,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     FluidState fluidState = block.getFluidState(blockState);
 
                     if (!fluidState.isEmpty()) {
-                        RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
+                        RenderLayer layer = RenderLayer.method_22716(fluidState);
 
                         ChunkBuildBuffers.ChunkBuildBufferDelegate builder = buffers.get(layer);
                         builder.setOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());

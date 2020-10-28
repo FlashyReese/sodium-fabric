@@ -34,7 +34,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MatrixStack;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;

@@ -10,15 +10,14 @@ import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
 import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
+import net.minecraft.client.render.AbstractVertexConsumer;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.FixedColorVertexConsumer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.Matrix3f;
 import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector4f;
+import net.minecraft.util.math.Matrix3f;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +27,7 @@ import java.nio.ByteBuffer;
 
 @SuppressWarnings({ "SameParameterValue", "SuspiciousNameCombination" })
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
+public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         implements ParticleVertexConsumer, QuadVertexConsumer, GlyphVertexConsumer {
     @Shadow
     private VertexFormat format;
@@ -37,7 +36,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     private ByteBuffer buffer;
 
     @Shadow
-    private int elementOffset;
+    private int field_20884;
 
     @Shadow
     private int vertexCount;
@@ -69,7 +68,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
             this.vertexParticleSafe(x, y, z, u, v, color, light);
         }
 
-        this.elementOffset += size;
+        this.field_20884 += size;
         this.vertexCount++;
     }
 
@@ -83,7 +82,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     }
 
     private void vertexParticleSafe(float x, float y, float z, float u, float v, int color, int light) {
-        int i = this.elementOffset;
+        int i = this.field_20884;
 
         ByteBuffer buffer = this.buffer;
         buffer.putFloat(i, x);
@@ -109,7 +108,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     }
 
     private void vertexParticleUnsafe(float x, float y, float z, float u, float v, int color, int light) {
-        long i = MemoryUtil.memAddress(this.buffer, this.elementOffset);
+        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);
@@ -136,7 +135,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
     @Override
     public void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
-        if (this.colorFixed) {
+        if (this.field_20889) {
             throw new IllegalStateException();
         }
 
@@ -155,7 +154,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
             this.vertexQuadSafe(x, y, z, color, u, v, overlay, light, normal);
         }
 
-        this.elementOffset += size;
+        this.field_20884 += size;
         this.vertexCount++;
     }
 
@@ -177,7 +176,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
 
     @SuppressWarnings("SuspiciousNameCombination")
     private void vertexQuadUnsafe(float x, float y, float z, int color, float u, float v, int overlay, int light, int normal) {
-        long i = MemoryUtil.memAddress(this.buffer, this.elementOffset);
+        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);
@@ -210,7 +209,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     }
 
     private void vertexQuadSafe(float x, float y, float z, int color, float u, float v, int overlay, int light, int normal) {
-        int i = this.elementOffset;
+        int i = this.field_20884;
 
         ByteBuffer buffer = this.buffer;
         buffer.putFloat(i, x);
@@ -250,7 +249,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
             return;
         }*/
 
-        if (this.colorFixed) {
+        if (this.field_20889) {
             throw new IllegalStateException();
         }
 
@@ -320,7 +319,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
             this.vertexGlyphSafe(x2, y2, z2, color, u, v, light);
         }
 
-        this.elementOffset += size;
+        this.field_20884 += size;
         this.vertexCount++;
     }
 
@@ -334,7 +333,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     }
 
     private void vertexGlyphSafe(float x, float y, float z, int color, float u, float v, int light) {
-        int i = this.elementOffset;
+        int i = this.field_20884;
 
         ByteBuffer buffer = this.buffer;
         buffer.putFloat(i, x);
@@ -360,7 +359,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer
     }
 
     private void vertexGlyphUnsafe(float x, float y, float z, int color, float u, float v, int light) {
-        long i = MemoryUtil.memAddress(this.buffer, this.elementOffset);
+        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);

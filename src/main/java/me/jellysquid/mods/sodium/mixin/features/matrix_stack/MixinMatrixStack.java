@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.matrix_stack;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(MatrixStack.class)

@@ -7,8 +7,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterator;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
-import net.minecraft.client.util.math.MatrixStack;
-
+import net.minecraft.util.math.MatrixStack;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

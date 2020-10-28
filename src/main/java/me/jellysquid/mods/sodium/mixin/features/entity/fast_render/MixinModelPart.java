@@ -11,7 +11,6 @@ import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

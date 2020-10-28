@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.Shadow;
 public class MixinVector4f implements Vector4fExtended {
 
     @Shadow
-    private float w;
+    private float[] components;
 
     @Override
     public float getW() {
-        return this.w;
+        return this.components[3];
     }
 }

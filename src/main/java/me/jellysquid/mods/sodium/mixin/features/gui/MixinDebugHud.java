@@ -58,7 +58,7 @@ public abstract class MixinDebugHud {
     }
 
     private void renderStrings(List<String> list, boolean right) {
-        LayeredVertexConsumerStorage.Drawer immediate = LayeredVertexConsumerStorage.makeDrawer(Tessellator.getInstance().getBufferBuilder());
+        LayeredVertexConsumerStorage.class_4598 immediate = LayeredVertexConsumerStorage.method_22991(Tessellator.getInstance().getBufferBuilder());
 
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
@@ -74,7 +74,7 @@ public abstract class MixinDebugHud {
             }
         }
 
-        immediate.draw();
+        immediate.method_22993();
     }
 
     private void renderBackdrop(List<String> list, boolean right) {
