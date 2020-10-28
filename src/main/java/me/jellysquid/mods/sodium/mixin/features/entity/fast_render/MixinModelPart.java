@@ -41,9 +41,9 @@ public class MixinModelPart {
 
         for (ModelPart.Cuboid cuboid : this.cuboids) {
             for (ModelPart.Quad quad : ((ModelCuboidAccessor) cuboid).getQuads()) {
-                float normX = normalExt.transformVecX(quad.direction);
-                float normY = normalExt.transformVecY(quad.direction);
-                float normZ = normalExt.transformVecZ(quad.direction);
+                float normX = normalExt.transformVecX(quad.field_21618);
+                float normY = normalExt.transformVecY(quad.field_21618);
+                float normZ = normalExt.transformVecZ(quad.field_21618);
 
                 int norm = Norm3b.pack(normX, normY, normZ);
 
