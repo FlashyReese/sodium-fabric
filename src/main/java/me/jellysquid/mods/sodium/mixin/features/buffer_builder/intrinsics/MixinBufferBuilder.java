@@ -134,7 +134,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
     }
 
     @Override
-    public void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
+    public void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int normal) {
         if (this.field_20889) {
             throw new IllegalStateException();
         }
@@ -149,22 +149,21 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         this.grow(size);
 
         if (UnsafeUtil.isAvailable()) {
-            this.vertexQuadUnsafe(x, y, z, color, u, v, overlay, light, normal);
+            this.vertexQuadUnsafe(x, y, z, color, u, v, light, normal);
         } else {
-            this.vertexQuadSafe(x, y, z, color, u, v, overlay, light, normal);
+            this.vertexQuadSafe(x, y, z, color, u, v, light, normal);
         }
 
         this.field_20884 += size;
         this.vertexCount++;
     }
 
-    private void vertexQuadFallback(float x, float y, float z, int color, float u, float v, int overlay, int light, int normal) {
+    private void vertexQuadFallback(float x, float y, float z, int color, float u, float v, int light, int normal) {
         this.vertex(x, y, z);
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color),
                 ColorABGR.unpackAlpha(color));
         this.texture(u, v);
 
-        this.defaultOverlay(overlay);
         /*if (this.field_21595) {
             this.overlay(overlay);
         }*/
@@ -175,7 +174,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
-    private void vertexQuadUnsafe(float x, float y, float z, int color, float u, float v, int overlay, int light, int normal) {
+    private void vertexQuadUnsafe(float x, float y, float z, int color, float u, float v, int light, int normal) {
         long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
@@ -197,18 +196,13 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         unsafe.putFloat(i, v);
         i += 4;
 
-        /*if (this.field_21595) {
-            unsafe.putInt(i, overlay);
-            i += 4;
-        }*/
-
         unsafe.putInt(i, light);
         i += 4;
 
         unsafe.putInt(i, normal);
     }
 
-    private void vertexQuadSafe(float x, float y, float z, int color, float u, float v, int overlay, int light, int normal) {
+    private void vertexQuadSafe(float x, float y, float z, int color, float u, float v, int light, int normal) {
         int i = this.field_20884;
 
         ByteBuffer buffer = this.buffer;
@@ -230,19 +224,15 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         buffer.putFloat(i, v);
         i += 4;
 
-        /*if (this.field_21595) {
-            buffer.putInt(i, overlay);
-            i += 4;
-        }*/
-
         buffer.putInt(i, light);
         i += 4;
 
         buffer.putInt(i, normal);
     }
 
+
     @Override
-    public void quad(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
+    public void quad(Matrix4f matrix4f, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, boolean colorize) {
         /*if (!this.field_21594) {
             super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
@@ -255,7 +245,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
 
         ModelQuadView quadView = (ModelQuadView) quad;
 
-        int norm = MatrixUtil.computeNormal(matrix3f, quad.getFace());
+        //int norm = MatrixUtil.computeNormal(matrix3f, quad.getFace());
 
         for (int i = 0; i < 4; i++) {
             float x = quadView.getX(i);
@@ -292,7 +282,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
             Vector4f pos = new Vector4f(x, y, z, 1.0F);
             pos.multiply(matrix4f);
 
-            this.vertexQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, light[i], overlay, norm);
+            this.vertexQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, light[i], /*norm*/1);
         }
     }
 

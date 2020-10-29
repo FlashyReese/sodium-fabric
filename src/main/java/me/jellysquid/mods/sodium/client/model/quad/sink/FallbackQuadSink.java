@@ -6,12 +6,10 @@ import me.jellysquid.mods.sodium.client.util.Norm3b;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.util.math.Vector4f;
-import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.MatrixStack;
 
 /**
@@ -24,7 +22,6 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
 
     // Hoisted matrices to avoid lookups in peeking
     private final Matrix4f modelMatrix;
-    private final Matrix3f normalMatrix;
 
     // Cached vectors to avoid allocations
     private final Vector4f vector;
@@ -33,7 +30,6 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
     public FallbackQuadSink(VertexConsumer consumer, MatrixStack matrixStack) {
         this.consumer = consumer;
         this.modelMatrix = matrixStack.peek();
-        this.normalMatrix = matrixStack.method_23478();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
         this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
     }
@@ -70,9 +66,8 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
             float normZ = Norm3b.unpackZ(norm);
 
             normVec.set(normX, normY, normZ);
-            normVec.multiply(this.normalMatrix);
 
-            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).color(r ,g ,b, a).texture(u, v)/*.light(OverlayTexture.DEFAULT_UV, light)*/.normal(normVec.getX(), normVec.getY(), normVec.getZ()).next();
+            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).color(r, g, b, a).texture(u, v)/*.light(OverlayTexture.DEFAULT_UV, light)*/.normal(normVec.getX(), normVec.getY(), normVec.getZ()).next();
             //this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ(), r, g, b, a, u, v, OverlayTexture.DEFAULT_UV, light, normVec.getX(), normVec.getY(), normVec.getZ());
         }
     }

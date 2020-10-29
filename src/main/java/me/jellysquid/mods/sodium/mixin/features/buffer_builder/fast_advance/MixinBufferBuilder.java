@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_advance;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.client.render.AbstractVertexConsumer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexFormat;
@@ -9,8 +8,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
+
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends AbstractVertexConsumer  {
+public abstract class MixinBufferBuilder extends AbstractVertexConsumer {
     @Shadow
     private VertexFormat format;
 
@@ -23,13 +24,14 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer  {
     @Shadow
     private int currentElementId;
 
+    //Fixme: currently disabled in Mixin java.lang.IllegalStateException: Not filled all elements of the vertex
     /**
      * @author JellySquid
      * @reason Remove modulo operations and recursion
      */
     @Overwrite
     public void nextElement() {
-        ImmutableList<VertexFormatElement> elements = this.format.getElements();
+        List<VertexFormatElement> elements = this.format.getElements();
 
         do {
             this.field_20884 += this.currentElement.getSize();

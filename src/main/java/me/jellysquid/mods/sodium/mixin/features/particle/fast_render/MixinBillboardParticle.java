@@ -52,17 +52,17 @@ public abstract class MixinBillboardParticle extends Particle {
 
         if (this.angle == 0.0F) {
             Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-            rotation.copyFrom(Vector3f.POSITIVE_Y.getRotationQuaternion(-camera.getYaw()));
-            rotation.copyFrom(Vector3f.POSITIVE_X.getRotationQuaternion(camera.getPitch()));
+            rotation.copyFrom(Vector3f.POSITIVE_Y.getRotationQuaternion(-camera.getYaw(), true));
+            rotation.copyFrom(Vector3f.POSITIVE_X.getRotationQuaternion(camera.getPitch(), true));
 
             quaternion = rotation;
         } else {
             float angle = MathHelper.lerp(tickDelta, this.prevAngle, this.angle);
             Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-            rotation.copyFrom(Vector3f.POSITIVE_Y.getRotationQuaternion(-camera.getYaw()));
-            rotation.copyFrom(Vector3f.POSITIVE_X.getRotationQuaternion(camera.getPitch()));
+            rotation.copyFrom(Vector3f.POSITIVE_Y.getRotationQuaternion(-camera.getYaw(), true));
+            rotation.copyFrom(Vector3f.POSITIVE_X.getRotationQuaternion(camera.getPitch(), true));
             quaternion = new Quaternion(rotation);
-            quaternion.copyFrom(Vector3f.POSITIVE_Z.method_23626(angle));
+            quaternion.copyFrom(Vector3f.POSITIVE_Z.getRotationQuaternion(angle, false));
         }
 
         float size = this.getSize(tickDelta);

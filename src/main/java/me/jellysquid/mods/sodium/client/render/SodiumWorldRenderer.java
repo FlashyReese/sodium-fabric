@@ -285,7 +285,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
                                    Camera camera, float tickDelta) {
         LayeredVertexConsumerStorage.class_4598 immediate = bufferBuilders.method_23000();
 
-        Vec3d cameraPos = camera.getPos();
+        net.minecraft.util.math.Vec3d cameraPos = camera.getPos();
         double x = cameraPos.getX();
         double y = cameraPos.getY();
         double z = cameraPos.getZ();
@@ -303,7 +303,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
                 int stage = breakingInfos.last().getStage();
 
                 if (stage >= 0) {
-                    VertexConsumer transformer = new MatrixVertexConsumer(bufferBuilders.method_23001().getBuffer(RenderLayer.getEntitySolid(ModelLoader.field_21020.get(stage))), matrices.peek());
+                    //VertexConsumer transformer = new MatrixVertexConsumer(bufferBuilders.method_23001().getBuffer(RenderLayer.getEntitySolid(ModelLoader.field_21020.get(stage))), matrices.peek());
                     /*layer.method_23037() ? VertexConsumers.dual(transformer, immediate.getBuffer(layer)) : */
                     consumer = immediate;
                 }

@@ -37,21 +37,21 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void method_23182(BakedModel model, ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumer vertices) {
+    private void method_23182(BakedModel model, ItemStack stack, int light, MatrixStack matrices, VertexConsumer vertices) {
         XoRoShiRoRandom random = this.random;
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
             List<BakedQuad> quads = model.getQuads(null, direction, random.setSeedAndReturn(42L));
 
             if (!quads.isEmpty()) {
-                this.method_23180(matrices, vertices, quads, stack, light, overlay);
+                this.method_23180(matrices, vertices, quads, stack, light);
             }
         }
 
         List<BakedQuad> quads = model.getQuads(null, null, random.setSeedAndReturn(42L));
 
         if (!quads.isEmpty()) {
-            this.method_23180(matrices, vertices, quads, stack, light, overlay);
+            this.method_23180(matrices, vertices, quads, stack, light);
         }
     }
 
@@ -60,7 +60,7 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void method_23180(MatrixStack matrices, VertexConsumer vertices, List<BakedQuad> quads, ItemStack stack, int light, int overlay) {
+    private void method_23180(MatrixStack matrices, VertexConsumer vertices, List<BakedQuad> quads, ItemStack stack, int light) {
 
         QuadVertexConsumer consumer = (QuadVertexConsumer) vertices;
         ItemColorProvider colorProvider = null;
@@ -79,8 +79,8 @@ public class MixinItemRenderer {
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-                consumer.vertexQuad(matrices.peek(), matrices.method_23478(), quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
-                        light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
+                consumer.vertexQuad(matrices.peek(), quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
+                        light, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 
             SpriteUtil.markSpriteActive(quad.getSprite());

@@ -19,17 +19,17 @@ public interface QuadVertexConsumer {
      * @param overlay The overlay (shadow) of the vertex
      * @param normal  The normal of the vertex
      */
-    void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal);
+    void vertexQuad(float x, float y, float z, int color, float u, float v, int light, /*int overlay, */int normal);
 
-    default void vertexQuad(Matrix4f matrix4f, Matrix3f matrix3f, float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
+    default void vertexQuad(Matrix4f matrix4f, /*Matrix3f matrix3f, */float x, float y, float z, int color, float u, float v, int light,/* int overlay,*/ int normal) {
         Matrix4fExtended modelMatrix = MatrixUtil.getExtendedMatrix(matrix4f);
 
         float x2 = modelMatrix.transformVecX(x, y, z);
         float y2 = modelMatrix.transformVecY(x, y, z);
         float z2 = modelMatrix.transformVecZ(x, y, z);
 
-        int norm = MatrixUtil.transformPackedNormal(normal, matrix3f);
+        /*int norm = MatrixUtil.transformPackedNormal(normal, matrix3f);*/
 
-        this.vertexQuad(x2, y2, z2, color, u, v, light, overlay, norm);
+        this.vertexQuad(x2, y2, z2, color, u, v, light, normal);
     }
 }

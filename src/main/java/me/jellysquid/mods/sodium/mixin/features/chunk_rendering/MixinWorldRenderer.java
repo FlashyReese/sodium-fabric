@@ -77,9 +77,9 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     private void renderLayer(RenderLayer renderLayer, MatrixStack matrixStack, double x, double y, double z) {
-        if (renderLayer == RenderLayer.getSolid()) {
+        if (renderLayer == RenderLayer.SOLID) {
             this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, matrixStack, x, y, z);
-        } else if (renderLayer == RenderLayer.getTranslucent()) {
+        } else if (renderLayer == RenderLayer.TRANSLUCENT) {
             this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, matrixStack, x, y, z);
         }
     }

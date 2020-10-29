@@ -25,9 +25,6 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
     VertexConsumer light(int uv);
 
     @Shadow
-    VertexConsumer overlay(int u, int v);
-
-    @Shadow
     VertexConsumer normal(float x, float y, float z);
 
     @Shadow
@@ -43,11 +40,11 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
     }
 
     @Override
-    default void vertexQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
+    default void vertexQuad(float x, float y, float z, int color, float u, float v, int light,/* int overlay, */int normal) {
         this.vertex(x, y, z);
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color), ColorABGR.unpackAlpha(color));
         this.texture(u, v);
-        this.overlay(overlay & '\uffff', overlay >> 16 & '\uffff');
+        //this.overlay(overlay & '\uffff', overlay >> 16 & '\uffff');
         this.light(light);
         this.normal(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
         this.next();
