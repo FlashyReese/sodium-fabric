@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_advance;
 
-import net.minecraft.client.render.AbstractVertexConsumer;
+import net.minecraft.class_4585;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormatElement;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends AbstractVertexConsumer {
+public abstract class MixinBufferBuilder extends class_4585 {
     @Shadow
     private VertexFormat format;
 

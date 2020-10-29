@@ -21,29 +21,29 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
     public abstract void set(int row, int column, float value);
 
     @Shadow
-    public abstract float get(int row, int column);
+    public abstract float method_22669(int row, int column);
 
     @Override
     public void translate(float x, float y, float z) {
-        this.set(0, 3, this.get(0, 0) * x + this.get(0, 1) * y + this.get(0, 2) * z + this.get(0, 3));
-        this.set(1, 3, this.get(1, 0) * x + this.get(1, 1) * y + this.get(1, 2) * z + this.get(1, 3));
-        this.set(2, 3, this.get(2, 0) * x + this.get(2, 1) * y + this.get(2, 2) * z + this.get(2, 3));
-        this.set(3, 3, this.get(3, 0) * x + this.get(3, 1) * y + this.get(3, 2) * z + this.get(3, 3));
+        this.set(0, 3, this.method_22669(0, 0) * x + this.method_22669(0, 1) * y + this.method_22669(0, 2) * z + this.method_22669(0, 3));
+        this.set(1, 3, this.method_22669(1, 0) * x + this.method_22669(1, 1) * y + this.method_22669(1, 2) * z + this.method_22669(1, 3));
+        this.set(2, 3, this.method_22669(2, 0) * x + this.method_22669(2, 1) * y + this.method_22669(2, 2) * z + this.method_22669(2, 3));
+        this.set(3, 3, this.method_22669(3, 0) * x + this.method_22669(3, 1) * y + this.method_22669(3, 2) * z + this.method_22669(3, 3));
     }
 
     @Override
     public float transformVecX(float x, float y, float z) {
-        return (this.get(0, 0) * x) + (this.get(0, 1) * y) + (this.get(0, 2) * z) + (this.get(0, 3) * 1.0f);
+        return (this.method_22669(0, 0) * x) + (this.method_22669(0, 1) * y) + (this.method_22669(0, 2) * z) + (this.method_22669(0, 3) * 1.0f);
     }
 
     @Override
     public float transformVecY(float x, float y, float z) {
-        return (this.get(1, 0) * x) + (this.get(1, 1) * y) + (this.get(1, 2) * z) + (this.get(1, 3) * 1.0f);
+        return (this.method_22669(1, 0) * x) + (this.method_22669(1, 1) * y) + (this.method_22669(1, 2) * z) + (this.method_22669(1, 3) * 1.0f);
     }
 
     @Override
     public float transformVecZ(float x, float y, float z) {
-        return (this.get(2, 0) * x) + (this.get(2, 1) * y) + (this.get(2, 2) * z) + (this.get(2, 3) * 1.0f);
+        return (this.method_22669(2, 0) * x) + (this.method_22669(2, 1) * y) + (this.method_22669(2, 2) * z) + (this.method_22669(2, 3) * 1.0f);
     }
 
     @Override
@@ -83,14 +83,14 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
         float ta21 = 2.0F * xw;
         float ta12 = 2.0F * -xw;
 
-        float a01 = this.get(0, 1) * ta11 + this.get(0, 2) * ta21;
-        float a02 = this.get(0, 1) * ta12 + this.get(0, 2) * ta22;
-        float a11 = this.get(1, 1) * ta11 + this.get(1, 2) * ta21;
-        float a12 = this.get(1, 1) * ta12 + this.get(1, 2) * ta22;
-        float a21 = this.get(2, 1) * ta11 + this.get(2, 2) * ta21;
-        float a22 = this.get(2, 1) * ta12 + this.get(2, 2) * ta22;
-        float a31 = this.get(3, 1) * ta11 + this.get(3, 2) * ta21;
-        float a32 = this.get(3, 1) * ta12 + this.get(3, 2) * ta22;
+        float a01 = this.method_22669(0, 1) * ta11 + this.method_22669(0, 2) * ta21;
+        float a02 = this.method_22669(0, 1) * ta12 + this.method_22669(0, 2) * ta22;
+        float a11 = this.method_22669(1, 1) * ta11 + this.method_22669(1, 2) * ta21;
+        float a12 = this.method_22669(1, 1) * ta12 + this.method_22669(1, 2) * ta22;
+        float a21 = this.method_22669(2, 1) * ta11 + this.method_22669(2, 2) * ta21;
+        float a22 = this.method_22669(2, 1) * ta12 + this.method_22669(2, 2) * ta22;
+        float a31 = this.method_22669(3, 1) * ta11 + this.method_22669(3, 2) * ta21;
+        float a32 = this.method_22669(3, 1) * ta12 + this.method_22669(3, 2) * ta22;
 
         this.set(0, 1, a01);
         this.set(0, 2, a02);
@@ -113,14 +113,14 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
         float ta20 = 2.0F * -yw;
         float ta02 = 2.0F * yw;
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 2) * ta20;
-        float a02 = this.get(0, 0) * ta02 + this.get(0, 2) * ta22;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 2) * ta20;
-        float a12 = this.get(1, 0) * ta02 + this.get(1, 2) * ta22;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 2) * ta20;
-        float a22 = this.get(2, 0) * ta02 + this.get(2, 2) * ta22;
-        float a30 = this.get(3, 0) * ta00 + this.get(3, 2) * ta20;
-        float a32 = this.get(3, 0) * ta02 + this.get(3, 2) * ta22;
+        float a00 = this.method_22669(0, 0) * ta00 + this.method_22669(0, 2) * ta20;
+        float a02 = this.method_22669(0, 0) * ta02 + this.method_22669(0, 2) * ta22;
+        float a10 = this.method_22669(1, 0) * ta00 + this.method_22669(1, 2) * ta20;
+        float a12 = this.method_22669(1, 0) * ta02 + this.method_22669(1, 2) * ta22;
+        float a20 = this.method_22669(2, 0) * ta00 + this.method_22669(2, 2) * ta20;
+        float a22 = this.method_22669(2, 0) * ta02 + this.method_22669(2, 2) * ta22;
+        float a30 = this.method_22669(3, 0) * ta00 + this.method_22669(3, 2) * ta20;
+        float a32 = this.method_22669(3, 0) * ta02 + this.method_22669(3, 2) * ta22;
 
         this.set(0, 0, a00);
         this.set(0, 2, a02);
@@ -143,14 +143,14 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
         float ta10 = 2.0F * zw;
         float ta01 = 2.0F * -zw;
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 1) * ta10;
-        float a01 = this.get(0, 0) * ta01 + this.get(0, 1) * ta11;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 1) * ta10;
-        float a11 = this.get(1, 0) * ta01 + this.get(1, 1) * ta11;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 1) * ta10;
-        float a21 = this.get(2, 0) * ta01 + this.get(2, 1) * ta11;
-        float a30 = this.get(3, 0) * ta00 + this.get(3, 1) * ta10;
-        float a31 = this.get(3, 0) * ta01 + this.get(3, 1) * ta11;
+        float a00 = this.method_22669(0, 0) * ta00 + this.method_22669(0, 1) * ta10;
+        float a01 = this.method_22669(0, 0) * ta01 + this.method_22669(0, 1) * ta11;
+        float a10 = this.method_22669(1, 0) * ta00 + this.method_22669(1, 1) * ta10;
+        float a11 = this.method_22669(1, 0) * ta01 + this.method_22669(1, 1) * ta11;
+        float a20 = this.method_22669(2, 0) * ta00 + this.method_22669(2, 1) * ta10;
+        float a21 = this.method_22669(2, 0) * ta01 + this.method_22669(2, 1) * ta11;
+        float a30 = this.method_22669(3, 0) * ta00 + this.method_22669(3, 1) * ta10;
+        float a31 = this.method_22669(3, 0) * ta01 + this.method_22669(3, 1) * ta11;
 
         this.set(0, 0, a00);
         this.set(0, 1, a01);
@@ -187,18 +187,18 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
         float ta21 = 2.0F * (yz + xw);
         float ta12 = 2.0F * (yz - xw);
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 1) * ta10 + this.get(0, 2) * ta20;
-        float a01 = this.get(0, 0) * ta01 + this.get(0, 1) * ta11 + this.get(0, 2) * ta21;
-        float a02 = this.get(0, 0) * ta02 + this.get(0, 1) * ta12 + this.get(0, 2) * ta22;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 1) * ta10 + this.get(1, 2) * ta20;
-        float a11 = this.get(1, 0) * ta01 + this.get(1, 1) * ta11 + this.get(1, 2) * ta21;
-        float a12 = this.get(1, 0) * ta02 + this.get(1, 1) * ta12 + this.get(1, 2) * ta22;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 1) * ta10 + this.get(2, 2) * ta20;
-        float a21 = this.get(2, 0) * ta01 + this.get(2, 1) * ta11 + this.get(2, 2) * ta21;
-        float a22 = this.get(2, 0) * ta02 + this.get(2, 1) * ta12 + this.get(2, 2) * ta22;
-        float a30 = this.get(3, 0) * ta00 + this.get(3, 1) * ta10 + this.get(3, 2) * ta20;
-        float a31 = this.get(3, 0) * ta01 + this.get(3, 1) * ta11 + this.get(3, 2) * ta21;
-        float a32 = this.get(3, 0) * ta02 + this.get(3, 1) * ta12 + this.get(3, 2) * ta22;
+        float a00 = this.method_22669(0, 0) * ta00 + this.method_22669(0, 1) * ta10 + this.method_22669(0, 2) * ta20;
+        float a01 = this.method_22669(0, 0) * ta01 + this.method_22669(0, 1) * ta11 + this.method_22669(0, 2) * ta21;
+        float a02 = this.method_22669(0, 0) * ta02 + this.method_22669(0, 1) * ta12 + this.method_22669(0, 2) * ta22;
+        float a10 = this.method_22669(1, 0) * ta00 + this.method_22669(1, 1) * ta10 + this.method_22669(1, 2) * ta20;
+        float a11 = this.method_22669(1, 0) * ta01 + this.method_22669(1, 1) * ta11 + this.method_22669(1, 2) * ta21;
+        float a12 = this.method_22669(1, 0) * ta02 + this.method_22669(1, 1) * ta12 + this.method_22669(1, 2) * ta22;
+        float a20 = this.method_22669(2, 0) * ta00 + this.method_22669(2, 1) * ta10 + this.method_22669(2, 2) * ta20;
+        float a21 = this.method_22669(2, 0) * ta01 + this.method_22669(2, 1) * ta11 + this.method_22669(2, 2) * ta21;
+        float a22 = this.method_22669(2, 0) * ta02 + this.method_22669(2, 1) * ta12 + this.method_22669(2, 2) * ta22;
+        float a30 = this.method_22669(3, 0) * ta00 + this.method_22669(3, 1) * ta10 + this.method_22669(3, 2) * ta20;
+        float a31 = this.method_22669(3, 0) * ta01 + this.method_22669(3, 1) * ta11 + this.method_22669(3, 2) * ta21;
+        float a32 = this.method_22669(3, 0) * ta02 + this.method_22669(3, 1) * ta12 + this.method_22669(3, 2) * ta22;
 
         this.set(0, 0, a00);
         this.set(0, 1, a01);
@@ -220,7 +220,7 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
      */
     @Environment(EnvType.CLIENT)
     @Overwrite
-    public void writeToBuffer(FloatBuffer buf) {
+    public void putIntoBuffer(FloatBuffer buf) {
         if (buf.remaining() < 16) {
             throw new BufferUnderflowException();
         }
@@ -236,40 +236,40 @@ public abstract class MixinMatrix4f implements Matrix4fExtended {
         long addr = MemoryUtil.memAddress(buf);
 
         Unsafe unsafe = UnsafeUtil.instance();
-        unsafe.putFloat(addr + 0, this.get(0, 0));
-        unsafe.putFloat(addr + 4, this.get(1, 0));
-        unsafe.putFloat(addr + 8, this.get(2, 0));
-        unsafe.putFloat(addr + 12, this.get(3, 0));
-        unsafe.putFloat(addr + 16, this.get(0, 1));
-        unsafe.putFloat(addr + 20, this.get(1, 1));
-        unsafe.putFloat(addr + 24, this.get(2, 1));
-        unsafe.putFloat(addr + 28, this.get(3, 1));
-        unsafe.putFloat(addr + 32, this.get(0, 2));
-        unsafe.putFloat(addr + 36, this.get(1, 2));
-        unsafe.putFloat(addr + 40, this.get(2, 2));
-        unsafe.putFloat(addr + 44, this.get(3, 2));
-        unsafe.putFloat(addr + 48, this.get(0, 3));
-        unsafe.putFloat(addr + 52, this.get(1, 3));
-        unsafe.putFloat(addr + 56, this.get(2, 3));
-        unsafe.putFloat(addr + 60, this.get(3, 3));
+        unsafe.putFloat(addr + 0, this.method_22669(0, 0));
+        unsafe.putFloat(addr + 4, this.method_22669(1, 0));
+        unsafe.putFloat(addr + 8, this.method_22669(2, 0));
+        unsafe.putFloat(addr + 12, this.method_22669(3, 0));
+        unsafe.putFloat(addr + 16, this.method_22669(0, 1));
+        unsafe.putFloat(addr + 20, this.method_22669(1, 1));
+        unsafe.putFloat(addr + 24, this.method_22669(2, 1));
+        unsafe.putFloat(addr + 28, this.method_22669(3, 1));
+        unsafe.putFloat(addr + 32, this.method_22669(0, 2));
+        unsafe.putFloat(addr + 36, this.method_22669(1, 2));
+        unsafe.putFloat(addr + 40, this.method_22669(2, 2));
+        unsafe.putFloat(addr + 44, this.method_22669(3, 2));
+        unsafe.putFloat(addr + 48, this.method_22669(0, 3));
+        unsafe.putFloat(addr + 52, this.method_22669(1, 3));
+        unsafe.putFloat(addr + 56, this.method_22669(2, 3));
+        unsafe.putFloat(addr + 60, this.method_22669(3, 3));
     }
 
     private void writeToBufferSafe(FloatBuffer buf) {
-        buf.put(0, this.get(0, 0));
-        buf.put(1, this.get(1, 0));
-        buf.put(2, this.get(2, 0));
-        buf.put(3, this.get(3, 0));
-        buf.put(4, this.get(0, 1));
-        buf.put(5, this.get(1, 1));
-        buf.put(6, this.get(2, 1));
-        buf.put(7, this.get(3, 1));
-        buf.put(8, this.get(0, 2));
-        buf.put(9, this.get(1, 2));
-        buf.put(10, this.get(2, 2));
-        buf.put(11, this.get(3, 2));
-        buf.put(12, this.get(0, 3));
-        buf.put(13, this.get(1, 3));
-        buf.put(14, this.get(2, 3));
-        buf.put(15, this.get(3, 3));
+        buf.put(0, this.method_22669(0, 0));
+        buf.put(1, this.method_22669(1, 0));
+        buf.put(2, this.method_22669(2, 0));
+        buf.put(3, this.method_22669(3, 0));
+        buf.put(4, this.method_22669(0, 1));
+        buf.put(5, this.method_22669(1, 1));
+        buf.put(6, this.method_22669(2, 1));
+        buf.put(7, this.method_22669(3, 1));
+        buf.put(8, this.method_22669(0, 2));
+        buf.put(9, this.method_22669(1, 2));
+        buf.put(10, this.method_22669(2, 2));
+        buf.put(11, this.method_22669(3, 2));
+        buf.put(12, this.method_22669(0, 3));
+        buf.put(13, this.method_22669(1, 3));
+        buf.put(14, this.method_22669(2, 3));
+        buf.put(15, this.method_22669(3, 3));
     }
 }

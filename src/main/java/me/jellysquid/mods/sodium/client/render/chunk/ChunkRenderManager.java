@@ -22,6 +22,7 @@ import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.class_4587;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
@@ -395,7 +396,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         return render;
     }
 
-    public void renderChunks(MatrixStack matrixStack, BlockRenderPass pass, double x, double y, double z) {
+    public void renderChunks(class_4587 matrixStack, BlockRenderPass pass, double x, double y, double z) {
         ChunkRenderListIterator<T> iterator = this.chunkRenderLists[pass.ordinal()]
                 .iterator(pass.isForwardRendering());
 

@@ -13,8 +13,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.passes.impl.MultiTextureRenderPipeline;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
+import net.minecraft.class_4587;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MatrixStack;
 
 /**
  * Shader-based render backend for chunks which uses VAOs to avoid the overhead in setting up vertex attribute pointers
@@ -46,7 +46,7 @@ public class GL33ChunkRenderBackend extends ChunkRenderBackendOneshot<GL33Graphi
     }
 
     @Override
-    public void endRender(MatrixStack matrixStack) {
+    public void endRender(class_4587 matrixStack) {
         GlFunctions.VERTEX_ARRAY.glBindVertexArray(0);
 
         super.endRender(matrixStack);

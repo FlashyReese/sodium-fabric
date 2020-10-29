@@ -9,7 +9,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockLayer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.block.BlockRenderLayer;
 import net.minecraft.client.util.GlAllocationUtils;
 
 import java.nio.ByteBuffer;
@@ -49,7 +49,7 @@ public class ChunkBuildBuffers {
                 .collect(Collectors.toList());
     }
 
-    public ChunkBuildBufferDelegate get(RenderLayer layer) {
+    public ChunkBuildBufferDelegate get(BlockRenderLayer layer) {
         return this.delegates[BlockLayer.fromRenderLayer(layer)];
     }
 

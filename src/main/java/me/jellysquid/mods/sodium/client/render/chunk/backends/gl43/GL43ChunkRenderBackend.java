@@ -34,7 +34,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
-import net.minecraft.util.math.MatrixStack;
+import net.minecraft.class_4587;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -171,7 +171,7 @@ public class GL43ChunkRenderBackend extends ChunkRenderBackendMultiDraw<GL43Grap
     }
 
     @Override
-    public void renderChunks(MatrixStack matrixStack, BlockRenderPass pass, ChunkRenderListIterator<GL43GraphicsState> renders, ChunkCameraContext camera) {
+    public void renderChunks(class_4587 matrixStack, BlockRenderPass pass, ChunkRenderListIterator<GL43GraphicsState> renders, ChunkCameraContext camera) {
         this.beginRender(matrixStack, pass);
 
         this.bufferManager.cleanup();

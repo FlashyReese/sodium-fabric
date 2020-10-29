@@ -3,12 +3,15 @@ package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.WorldRenderPhase;
+import net.minecraft.block.BlockRenderLayer;
+import net.minecraft.class_4587;
+import net.minecraft.class_4599;
+import net.minecraft.class_4604;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -24,7 +27,7 @@ import java.util.SortedSet;
 public abstract class MixinWorldRenderer {
     @Shadow
     @Final
-    private LayeredBufferBuilderStorage field_20951;
+    private class_4599 field_20951;
 
     @Shadow
     @Final
@@ -39,7 +42,7 @@ public abstract class MixinWorldRenderer {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(MinecraftClient client, LayeredBufferBuilderStorage bufferBuilders, CallbackInfo ci) {
+    private void init(MinecraftClient client, class_4599 bufferBuilders, CallbackInfo ci) {
         this.renderer = SodiumWorldRenderer.create();
     }
 
@@ -53,7 +56,7 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    public int getCompletedChunkCount() {
+    public int getChunkNumber() {
         return this.renderer.getVisibleChunkCount();
     }
 
@@ -76,10 +79,10 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void renderLayer(RenderLayer renderLayer, MatrixStack matrixStack, double x, double y, double z) {
-        if (renderLayer == RenderLayer.SOLID) {
+    private void renderLayer(BlockRenderLayer renderLayer, class_4587 matrixStack, double x, double y, double z) {
+        if (renderLayer == BlockRenderLayer.SOLID) {
             this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, matrixStack, x, y, z);
-        } else if (renderLayer == RenderLayer.TRANSLUCENT) {
+        } else if (renderLayer == BlockRenderLayer.TRANSLUCENT) {
             this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, matrixStack, x, y, z);
         }
     }
@@ -89,7 +92,7 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void setUpTerrain(Camera camera, Frustum frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
+    private void setUpTerrain(Camera camera, class_4604 frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
         this.renderer.updateChunks(camera, frustum, hasForcedFrustum, frame, spectator);
     }
 
@@ -135,7 +138,7 @@ public abstract class MixinWorldRenderer {
     }
 
     @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;blockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
-    private void onRenderTileEntities(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, CallbackInfo ci) {
+    private void onRenderTileEntities(class_4587 matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, CallbackInfo ci) {
         this.renderer.renderTileEntities(matrices, this.field_20951, this.field_20950, camera, tickDelta);
     }
 

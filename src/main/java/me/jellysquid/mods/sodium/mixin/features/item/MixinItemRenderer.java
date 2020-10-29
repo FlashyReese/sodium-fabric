@@ -8,15 +8,15 @@ import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
+import net.minecraft.class_4587;
+import net.minecraft.class_4588;
 import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -37,7 +37,7 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void method_23182(BakedModel model, ItemStack stack, int light, MatrixStack matrices, VertexConsumer vertices) {
+    private void method_23182(BakedModel model, ItemStack stack, int light, class_4587 matrices, class_4588 vertices) {
         XoRoShiRoRandom random = this.random;
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
@@ -60,7 +60,7 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void method_23180(MatrixStack matrices, VertexConsumer vertices, List<BakedQuad> quads, ItemStack stack, int light) {
+    private void method_23180(class_4587 matrices, class_4588 vertices, List<BakedQuad> quads, ItemStack stack, int light) {
 
         QuadVertexConsumer consumer = (QuadVertexConsumer) vertices;
         ItemColorProvider colorProvider = null;
@@ -79,7 +79,7 @@ public class MixinItemRenderer {
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-                consumer.vertexQuad(matrices.peek(), quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
+                consumer.vertexQuad(matrices.method_22910(), quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
                         light, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 

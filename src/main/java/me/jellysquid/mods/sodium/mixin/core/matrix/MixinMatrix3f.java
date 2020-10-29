@@ -2,34 +2,34 @@ package me.jellysquid.mods.sodium.mixin.core.matrix;
 
 import me.jellysquid.mods.sodium.client.util.Norm3b;
 import me.jellysquid.mods.sodium.client.util.math.Matrix3fExtended;
+import net.minecraft.class_4581;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(Matrix3f.class)
+@Mixin(class_4581.class)
 public abstract class MixinMatrix3f implements Matrix3fExtended {
     @Shadow
-    public abstract void set(int row, int column, float value);
+    public abstract void method_22851(int row, int column, float value);
 
     @Shadow
-    public abstract float get(int row, int column);
+    public abstract float method_22850(int row, int column);
 
     @Override
     public float transformVecX(float x, float y, float z) {
-        return this.get(0, 0) * x + this.get(0, 1) * y + this.get(0, 2) * z;
+        return this.method_22850(0, 0) * x + this.method_22850(0, 1) * y + this.method_22850(0, 2) * z;
     }
 
     @Override
     public float transformVecY(float x, float y, float z) {
-        return this.get(1, 0) * x + this.get(1, 1) * y + this.get(1, 2) * z;
+        return this.method_22850(1, 0) * x + this.method_22850(1, 1) * y + this.method_22850(1, 2) * z;
     }
 
     @Override
     public float transformVecZ(float x, float y, float z) {
-        return this.get(2, 0) * x + this.get(2, 1) * y + this.get(2, 2) * z;
+        return this.method_22850(2, 0) * x + this.method_22850(2, 1) * y + this.method_22850(2, 2) * z;
     }
 
     @Override
@@ -64,9 +64,9 @@ public abstract class MixinMatrix3f implements Matrix3fExtended {
         float y = faceNorm.getY();
         float z = faceNorm.getZ();
 
-        float x2 = this.get(0, 0) * x + this.get(0, 1) * y + this.get(0, 2) * z;
-        float y2 = this.get(1, 0) * x + this.get(1, 1) * y + this.get(1, 2) * z;
-        float z2 = this.get(2, 0) * x + this.get(2, 1) * y + this.get(2, 2) * z;
+        float x2 = this.method_22850(0, 0) * x + this.method_22850(0, 1) * y + this.method_22850(0, 2) * z;
+        float y2 = this.method_22850(1, 0) * x + this.method_22850(1, 1) * y + this.method_22850(1, 2) * z;
+        float z2 = this.method_22850(2, 0) * x + this.method_22850(2, 1) * y + this.method_22850(2, 2) * z;
 
         return Norm3b.pack(x2, y2, z2);
     }
@@ -84,19 +84,19 @@ public abstract class MixinMatrix3f implements Matrix3fExtended {
         float ta21 = 2.0F * xw;
         float ta12 = 2.0F * -xw;
 
-        float a01 = this.get(0, 1) * ta11 + this.get(0, 2) * ta21;
-        float a02 = this.get(0, 1) * ta12 + this.get(0, 2) * ta22;
-        float a11 = this.get(1, 1) * ta11 + this.get(1, 2) * ta21;
-        float a12 = this.get(1, 1) * ta12 + this.get(1, 2) * ta22;
-        float a21 = this.get(2, 1) * ta11 + this.get(2, 2) * ta21;
-        float a22 = this.get(2, 1) * ta12 + this.get(2, 2) * ta22;
+        float a01 = this.method_22850(0, 1) * ta11 + this.method_22850(0, 2) * ta21;
+        float a02 = this.method_22850(0, 1) * ta12 + this.method_22850(0, 2) * ta22;
+        float a11 = this.method_22850(1, 1) * ta11 + this.method_22850(1, 2) * ta21;
+        float a12 = this.method_22850(1, 1) * ta12 + this.method_22850(1, 2) * ta22;
+        float a21 = this.method_22850(2, 1) * ta11 + this.method_22850(2, 2) * ta21;
+        float a22 = this.method_22850(2, 1) * ta12 + this.method_22850(2, 2) * ta22;
 
-        this.set(0, 1, a01);
-        this.set(0, 2, a02);
-        this.set(1, 1, a11);
-        this.set(1, 2, a12);
-        this.set(2, 1, a21);
-        this.set(2, 2, a22);
+        this.method_22851(0, 1, a01);
+        this.method_22851(0, 2, a02);
+        this.method_22851(1, 1, a11);
+        this.method_22851(1, 2, a12);
+        this.method_22851(2, 1, a21);
+        this.method_22851(2, 2, a22);
     }
 
     private void rotateY(Quaternion quaternion) {
@@ -113,19 +113,19 @@ public abstract class MixinMatrix3f implements Matrix3fExtended {
         float ta20 = 2.0F * (-yw);
         float ta02 = 2.0F * (+yw);
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 2) * ta20;
-        float a02 = this.get(0, 0) * ta02 + this.get(0, 2) * ta22;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 2) * ta20;
-        float a12 = this.get(1, 0) * ta02 + this.get(1, 2) * ta22;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 2) * ta20;
-        float a22 = this.get(2, 0) * ta02 + this.get(2, 2) * ta22;
+        float a00 = this.method_22850(0, 0) * ta00 + this.method_22850(0, 2) * ta20;
+        float a02 = this.method_22850(0, 0) * ta02 + this.method_22850(0, 2) * ta22;
+        float a10 = this.method_22850(1, 0) * ta00 + this.method_22850(1, 2) * ta20;
+        float a12 = this.method_22850(1, 0) * ta02 + this.method_22850(1, 2) * ta22;
+        float a20 = this.method_22850(2, 0) * ta00 + this.method_22850(2, 2) * ta20;
+        float a22 = this.method_22850(2, 0) * ta02 + this.method_22850(2, 2) * ta22;
 
-        this.set(0, 0, a00);
-        this.set(0, 2, a02);
-        this.set(1, 0, a10);
-        this.set(1, 2, a12);
-        this.set(2, 0, a20);
-        this.set(2, 2, a22);
+        this.method_22851(0, 0, a00);
+        this.method_22851(0, 2, a02);
+        this.method_22851(1, 0, a10);
+        this.method_22851(1, 2, a12);
+        this.method_22851(2, 0, a20);
+        this.method_22851(2, 2, a22);
     }
 
     private void rotateZ(Quaternion quaternion) {
@@ -142,19 +142,19 @@ public abstract class MixinMatrix3f implements Matrix3fExtended {
         float ta10 = 2.0F * (0.0F + zw);
         float ta01 = 2.0F * (0.0F - zw);
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 1) * ta10;
-        float a01 = this.get(0, 0) * ta01 + this.get(0, 1) * ta11;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 1) * ta10;
-        float a11 = this.get(1, 0) * ta01 + this.get(1, 1) * ta11;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 1) * ta10;
-        float a21 = this.get(2, 0) * ta01 + this.get(2, 1) * ta11;
+        float a00 = this.method_22850(0, 0) * ta00 + this.method_22850(0, 1) * ta10;
+        float a01 = this.method_22850(0, 0) * ta01 + this.method_22850(0, 1) * ta11;
+        float a10 = this.method_22850(1, 0) * ta00 + this.method_22850(1, 1) * ta10;
+        float a11 = this.method_22850(1, 0) * ta01 + this.method_22850(1, 1) * ta11;
+        float a20 = this.method_22850(2, 0) * ta00 + this.method_22850(2, 1) * ta10;
+        float a21 = this.method_22850(2, 0) * ta01 + this.method_22850(2, 1) * ta11;
 
-        this.set(0, 0, a00);
-        this.set(0, 1, a01);
-        this.set(1, 0, a10);
-        this.set(1, 1, a11);
-        this.set(2, 0, a20);
-        this.set(2, 1, a21);
+        this.method_22851(0, 0, a00);
+        this.method_22851(0, 1, a01);
+        this.method_22851(1, 0, a10);
+        this.method_22851(1, 1, a11);
+        this.method_22851(2, 0, a20);
+        this.method_22851(2, 1, a21);
     }
 
     private void rotateXYZ(Quaternion quaternion) {
@@ -185,24 +185,24 @@ public abstract class MixinMatrix3f implements Matrix3fExtended {
         float ta21 = 2.0F * (yz + xw);
         float ta12 = 2.0F * (yz - xw);
 
-        float a00 = this.get(0, 0) * ta00 + this.get(0, 1) * ta10 + this.get(0, 2) * ta20;
-        float a01 = this.get(0, 0) * ta01 + this.get(0, 1) * ta11 + this.get(0, 2) * ta21;
-        float a02 = this.get(0, 0) * ta02 + this.get(0, 1) * ta12 + this.get(0, 2) * ta22;
-        float a10 = this.get(1, 0) * ta00 + this.get(1, 1) * ta10 + this.get(1, 2) * ta20;
-        float a11 = this.get(1, 0) * ta01 + this.get(1, 1) * ta11 + this.get(1, 2) * ta21;
-        float a12 = this.get(1, 0) * ta02 + this.get(1, 1) * ta12 + this.get(1, 2) * ta22;
-        float a20 = this.get(2, 0) * ta00 + this.get(2, 1) * ta10 + this.get(2, 2) * ta20;
-        float a21 = this.get(2, 0) * ta01 + this.get(2, 1) * ta11 + this.get(2, 2) * ta21;
-        float a22 = this.get(2, 0) * ta02 + this.get(2, 1) * ta12 + this.get(2, 2) * ta22;
+        float a00 = this.method_22850(0, 0) * ta00 + this.method_22850(0, 1) * ta10 + this.method_22850(0, 2) * ta20;
+        float a01 = this.method_22850(0, 0) * ta01 + this.method_22850(0, 1) * ta11 + this.method_22850(0, 2) * ta21;
+        float a02 = this.method_22850(0, 0) * ta02 + this.method_22850(0, 1) * ta12 + this.method_22850(0, 2) * ta22;
+        float a10 = this.method_22850(1, 0) * ta00 + this.method_22850(1, 1) * ta10 + this.method_22850(1, 2) * ta20;
+        float a11 = this.method_22850(1, 0) * ta01 + this.method_22850(1, 1) * ta11 + this.method_22850(1, 2) * ta21;
+        float a12 = this.method_22850(1, 0) * ta02 + this.method_22850(1, 1) * ta12 + this.method_22850(1, 2) * ta22;
+        float a20 = this.method_22850(2, 0) * ta00 + this.method_22850(2, 1) * ta10 + this.method_22850(2, 2) * ta20;
+        float a21 = this.method_22850(2, 0) * ta01 + this.method_22850(2, 1) * ta11 + this.method_22850(2, 2) * ta21;
+        float a22 = this.method_22850(2, 0) * ta02 + this.method_22850(2, 1) * ta12 + this.method_22850(2, 2) * ta22;
 
-        this.set(0, 0, a00);
-        this.set(0, 1, a01);
-        this.set(0, 2, a02);
-        this.set(1, 0, a10);
-        this.set(1, 1, a11);
-        this.set(1, 2, a12);
-        this.set(2, 0, a20);
-        this.set(2, 1, a21);
-        this.set(2, 2, a22);
+        this.method_22851(0, 0, a00);
+        this.method_22851(0, 1, a01);
+        this.method_22851(0, 2, a02);
+        this.method_22851(1, 0, a10);
+        this.method_22851(1, 1, a11);
+        this.method_22851(1, 2, a12);
+        this.method_22851(2, 0, a20);
+        this.method_22851(2, 1, a21);
+        this.method_22851(2, 2, a22);
     }
 }

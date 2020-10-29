@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.gui;
 
 import com.google.common.base.Strings;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.class_4597;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -58,7 +59,7 @@ public abstract class MixinDebugHud {
     }
 
     private void renderStrings(List<String> list, boolean right) {
-        LayeredVertexConsumerStorage.class_4598 immediate = LayeredVertexConsumerStorage.method_22991(Tessellator.getInstance().getBufferBuilder());
+        class_4597.class_4598 immediate = class_4597.method_22991(Tessellator.getInstance().getBufferBuilder());
 
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
@@ -110,10 +111,10 @@ public abstract class MixinDebugHud {
             float x2 = x + width + 1;
             float y2 = y + height - 1;
 
-            bufferBuilder.vertex(x1, y2, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(x2, y2, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(x2, y1, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(x1, y1, 0.0F).color(g, h, k, f).next();
+            bufferBuilder.vertex(x1, y2, 0.0F).method_22915(g, h, k, f).next();
+            bufferBuilder.vertex(x2, y2, 0.0F).method_22915(g, h, k, f).next();
+            bufferBuilder.vertex(x2, y1, 0.0F).method_22915(g, h, k, f).next();
+            bufferBuilder.vertex(x1, y1, 0.0F).method_22915(g, h, k, f).next();
         }
 
         bufferBuilder.end();

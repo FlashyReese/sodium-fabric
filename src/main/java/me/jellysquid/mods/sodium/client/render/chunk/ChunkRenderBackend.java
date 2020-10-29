@@ -7,7 +7,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterator;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
-import net.minecraft.util.math.MatrixStack;
+import net.minecraft.class_4587;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +38,7 @@ public interface ChunkRenderBackend<T extends ChunkGraphicsState> {
      * @param renders An iterator over the list of chunks to be rendered
      * @param camera The camera context containing chunk offsets for the current render
      */
-    void renderChunks(MatrixStack matrixStack, BlockRenderPass pass, ChunkRenderListIterator<T> renders, ChunkCameraContext camera);
+    void renderChunks(class_4587 matrixStack, BlockRenderPass pass, ChunkRenderListIterator<T> renders, ChunkCameraContext camera);
 
     /**
      * Deletes this render backend and any resources attached to it.

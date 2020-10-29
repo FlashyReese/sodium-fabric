@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.passes.impl;
 
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockLayer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.block.BlockRenderLayer;
 import net.minecraft.util.Identifier;
 
 public class TranslucentRenderPass extends BlockRenderPass {
@@ -12,11 +12,11 @@ public class TranslucentRenderPass extends BlockRenderPass {
 
     @Override
     public void beginRender() {
-        RenderLayer.TRANSLUCENT.begin();
+        BlockRenderLayer.TRANSLUCENT.method_22723();
     }
 
     @Override
     public void endRender() {
-        RenderLayer.TRANSLUCENT.end();
+        BlockRenderLayer.TRANSLUCENT.method_22724();
     }
 }

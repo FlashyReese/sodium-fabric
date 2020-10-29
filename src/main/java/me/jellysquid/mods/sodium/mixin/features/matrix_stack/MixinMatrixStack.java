@@ -1,9 +1,9 @@
 package me.jellysquid.mods.sodium.mixin.features.matrix_stack;
 
-import net.minecraft.util.math.MatrixStack;
+import net.minecraft.class_4587;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(MatrixStack.class)
+@Mixin(class_4587.class)
 public class MixinMatrixStack {
     //fixme:
     /*@Shadow

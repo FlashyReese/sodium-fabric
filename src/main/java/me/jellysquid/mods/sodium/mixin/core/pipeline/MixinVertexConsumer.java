@@ -5,27 +5,27 @@ import me.jellysquid.mods.sodium.client.model.consumer.ParticleVertexConsumer;
 import me.jellysquid.mods.sodium.client.model.consumer.QuadVertexConsumer;
 import me.jellysquid.mods.sodium.client.util.Norm3b;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.class_4588;
 import net.minecraft.client.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(VertexConsumer.class)
+@Mixin(class_4588.class)
 public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexConsumer, GlyphVertexConsumer {
     @Shadow
-    VertexConsumer vertex(double x, double y, double z);
+    class_4588 vertex(double x, double y, double z);
 
     @Shadow
-    VertexConsumer texture(float u, float v);
+    class_4588 texture(float u, float v);
 
     @Shadow
-    VertexConsumer color(int red, int green, int blue, int alpha);
+    class_4588 color(int red, int green, int blue, int alpha);
 
     @Shadow
-    VertexConsumer light(int uv);
+    class_4588 method_22921(int u, int v);
 
     @Shadow
-    VertexConsumer normal(float x, float y, float z);
+    class_4588 method_22914(float x, float y, float z);
 
     @Shadow
     void next();
@@ -35,7 +35,7 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
         this.vertex(x, y, z);
         this.texture(u, v);
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color), ColorABGR.unpackAlpha(color));
-        this.light(light);
+        this.method_22921(light & '\uffff', light >> 16 & '\uffff');
         this.next();
     }
 
@@ -45,8 +45,8 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color), ColorABGR.unpackAlpha(color));
         this.texture(u, v);
         //this.overlay(overlay & '\uffff', overlay >> 16 & '\uffff');
-        this.light(light);
-        this.normal(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
+        this.method_22921(light & '\uffff', light >> 16 & '\uffff');
+        this.method_22914(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
         this.next();
     }
 
@@ -55,7 +55,7 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
         this.vertex(x, y, z);
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color), ColorABGR.unpackAlpha(color));
         this.texture(u, v);
-        this.light(light);
+        this.method_22921(light & '\uffff', light >> 16 & '\uffff');
         this.next();
     }
 }

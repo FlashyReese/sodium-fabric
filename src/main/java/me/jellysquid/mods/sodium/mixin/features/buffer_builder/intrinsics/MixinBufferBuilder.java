@@ -10,14 +10,13 @@ import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
 import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
-import net.minecraft.client.render.AbstractVertexConsumer;
+import net.minecraft.class_4585;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.Vector4f;
-import net.minecraft.util.math.Matrix3f;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,13 +26,13 @@ import java.nio.ByteBuffer;
 
 @SuppressWarnings({ "SameParameterValue", "SuspiciousNameCombination" })
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends AbstractVertexConsumer
+public abstract class MixinBufferBuilder extends class_4585
         implements ParticleVertexConsumer, QuadVertexConsumer, GlyphVertexConsumer {
     @Shadow
     private VertexFormat format;
 
     @Shadow
-    private ByteBuffer buffer;
+    private ByteBuffer bufByte;
 
     @Shadow
     private int field_20884;
@@ -77,14 +76,14 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         this.texture(u, v);
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color),
                 ColorABGR.unpackAlpha(color));
-        this.light(light);
+        this.method_22916(light);
         this.next();
     }
 
     private void vertexParticleSafe(float x, float y, float z, float u, float v, int color, int light) {
         int i = this.field_20884;
 
-        ByteBuffer buffer = this.buffer;
+        ByteBuffer buffer = this.bufByte;
         buffer.putFloat(i, x);
         i += 4;
 
@@ -108,7 +107,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
     }
 
     private void vertexParticleUnsafe(float x, float y, float z, float u, float v, int color, int light) {
-        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
+        long i = MemoryUtil.memAddress(this.bufByte, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);
@@ -168,14 +167,14 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
             this.overlay(overlay);
         }*/
 
-        this.light(light);
-        this.normal(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
+        this.method_22916(light);
+        this.method_22914(Norm3b.unpackX(normal), Norm3b.unpackY(normal), Norm3b.unpackZ(normal));
         this.next();
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
     private void vertexQuadUnsafe(float x, float y, float z, int color, float u, float v, int light, int normal) {
-        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
+        long i = MemoryUtil.memAddress(this.bufByte, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);
@@ -205,7 +204,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
     private void vertexQuadSafe(float x, float y, float z, int color, float u, float v, int light, int normal) {
         int i = this.field_20884;
 
-        ByteBuffer buffer = this.buffer;
+        ByteBuffer buffer = this.bufByte;
         buffer.putFloat(i, x);
         i += 4;
 
@@ -232,7 +231,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
 
 
     @Override
-    public void quad(Matrix4f matrix4f, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, boolean colorize) {
+    public void method_22920(Matrix4f matrix4f, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, boolean colorize) {
         /*if (!this.field_21594) {
             super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
@@ -280,7 +279,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
             int color = ColorABGR.pack(fR, fG, fB, 1.0F);
 
             Vector4f pos = new Vector4f(x, y, z, 1.0F);
-            pos.multiply(matrix4f);
+            pos.method_22674(matrix4f);
 
             this.vertexQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, light[i], /*norm*/1);
         }
@@ -318,14 +317,14 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
         this.color(ColorABGR.unpackRed(color), ColorABGR.unpackGreen(color), ColorABGR.unpackBlue(color),
                 ColorABGR.unpackAlpha(color));
         this.texture(u, v);
-        this.light(light);
+        this.method_22916(light);
         this.next();
     }
 
     private void vertexGlyphSafe(float x, float y, float z, int color, float u, float v, int light) {
         int i = this.field_20884;
 
-        ByteBuffer buffer = this.buffer;
+        ByteBuffer buffer = this.bufByte;
         buffer.putFloat(i, x);
         i += 4;
 
@@ -349,7 +348,7 @@ public abstract class MixinBufferBuilder extends AbstractVertexConsumer
     }
 
     private void vertexGlyphUnsafe(float x, float y, float z, int color, float u, float v, int light) {
-        long i = MemoryUtil.memAddress(this.buffer, this.field_20884);
+        long i = MemoryUtil.memAddress(this.bufByte, this.field_20884);
 
         Unsafe unsafe = UnsafeUtil.instance();
         unsafe.putFloat(i, x);
