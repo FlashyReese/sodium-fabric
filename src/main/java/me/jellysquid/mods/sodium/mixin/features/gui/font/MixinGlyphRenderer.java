@@ -48,7 +48,7 @@ public class MixinGlyphRenderer {
      * @reason Use intrinsics
      * @author JellySquid
      */
-    @Overwrite
+    /*@Overwrite
     public void draw(boolean italic, float x, float y, Matrix4f matrix, class_4588 vertexConsumer, float red, float green, float blue, float alpha, int light) {
         float x1 = x + this.xMin;
         float x2 = x + this.xMax;
@@ -61,10 +61,11 @@ public class MixinGlyphRenderer {
 
         int color = ColorABGR.pack(red, green, blue, alpha);
 
+        //fixme:
         GlyphVertexConsumer glyphs = ((GlyphVertexConsumer) vertexConsumer);
         glyphs.vertexGlyph(matrix, x1 + w1, h1, 0.0F, color, this.uMin, this.vMin, light);
         glyphs.vertexGlyph(matrix, x1 + w2, h2, 0.0F, color, this.uMin, this.vMax, light);
         glyphs.vertexGlyph(matrix, x2 + w2, h2, 0.0F, color, this.uMax, this.vMax, light);
         glyphs.vertexGlyph(matrix, x2 + w1, h1, 0.0F, color, this.uMax, this.vMin, light);
-    }
+    }*/
 }

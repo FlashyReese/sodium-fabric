@@ -50,6 +50,7 @@ public interface MixinVertexConsumer extends ParticleVertexConsumer, QuadVertexC
         this.next();
     }
 
+    //Fixme:
     @Override
     default void vertexGlyph(Matrix4f matrix, float x, float y, float z, int color, float u, float v, int light) {
         this.vertex(x, y, z);
