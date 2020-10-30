@@ -28,7 +28,6 @@
     "features.entity.smooth_lighting.MixinEntityRenderer",
     "features.gui.MixinDebugHud",
     "features.gui.font.MixinGlyphRenderer",
-    "features.item.MixinItemRenderer",
     "features.model.MixinMultipartBakedModel",
     "features.options.MixinGameOptions",
     "features.options.MixinInGameHud",
