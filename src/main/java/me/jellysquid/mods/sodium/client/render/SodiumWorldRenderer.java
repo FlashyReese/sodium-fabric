@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -23,22 +22,20 @@ import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListenerManager;
 import me.jellysquid.mods.sodium.common.util.ListUtil;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.class_4587;
-import net.minecraft.class_4597;
-import net.minecraft.class_4599;
-import net.minecraft.class_4604;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.FrustumWithOrigin;
+import net.minecraft.client.render.VisibleRegion;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.profiler.Profiler;
 
 import java.util.Set;
-import java.util.SortedSet;
 
 /**
  * Provides an extension to vanilla's {@link WorldRenderer}.
@@ -59,7 +56,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     private final LongSet loadedChunkPositions = new LongOpenHashSet();
     private final Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
 
-    private class_4604 frustum;
+    private FrustumWithOrigin frustum;
     private ChunkRenderManager<?> chunkRenderManager;
     private ChunkRenderBackend<?> chunkRenderBackend;
 
@@ -75,8 +72,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
     /**
-     * @throws IllegalStateException If the renderer has not yet been created
      * @return The current instance of this type
+     * @throws IllegalStateException If the renderer has not yet been created
      */
     public static SodiumWorldRenderer getInstance() {
         if (instance == null) {
@@ -141,8 +138,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     /**
      * Called prior to any chunk rendering in order to update necessary state.
      */
-    public void updateChunks(Camera camera, class_4604 frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
-        this.frustum = frustum;
+    public void updateChunks(Camera camera, VisibleRegion visibleRegion, int frame, boolean spectator) {
+        this.frustum = (FrustumWithOrigin) visibleRegion;
 
         this.useEntityCulling = SodiumClientMod.options().advanced.useAdvancedEntityCulling;
 
@@ -183,7 +180,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         this.chunkRenderManager.updateChunks();
 
-        if (!hasForcedFrustum && this.chunkRenderManager.isDirty()) {
+        if (this.chunkRenderManager.isDirty()) {
             profiler.swap("chunk_graph_rebuild");
 
             this.chunkRenderManager.updateGraph(camera, (FrustumExtended) frustum, frame, spectator);
@@ -199,16 +196,16 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
 
-    public void drawChunkLayers(WorldRenderPhase phase, class_4587 matrixStack, double x, double y, double z) {
+    public void drawChunkLayers(WorldRenderPhase phase, double x, double y, double z) {
         for (BlockRenderPass pass : this.chunkRenderBackend.getRenderPassManager().getPassesForPhase(phase)) {
-            this.drawChunkLayer(pass, matrixStack, x, y, z);
+            this.drawChunkLayer(pass, x, y, z);
         }
     }
 
     /**
      * Performs a render pass for the given {@link RenderLayer} and draws all visible chunks for it.
      */
-    public void drawChunkLayer(BlockRenderPass pass, class_4587 matrixStack, double x, double y, double z) {
+    public void drawChunkLayer(BlockRenderPass pass, double x, double y, double z) {
         pass.beginRender();
 
         // We don't have a great way to check if underwater fog is being used, so assume that terrain will only ever
@@ -217,7 +214,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
             RenderSystem.disableFog();
         }
 
-        this.chunkRenderManager.renderChunks(matrixStack, pass, x, y, z);
+        this.chunkRenderManager.renderChunks(pass, x, y, z);
 
         pass.endRender();
 
@@ -263,7 +260,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
     private static ChunkRenderBackend<?> createChunkRenderBackend(SodiumGameOptions.ChunkRendererBackendOption opt,
-                                                           GlVertexFormat<SodiumVertexFormats.ChunkMeshAttribute> vertexFormat) {
+                                                                  GlVertexFormat<SodiumVertexFormats.ChunkMeshAttribute> vertexFormat) {
         boolean disableBlacklist = SodiumClientMod.options().advanced.disableDriverBlacklist;
 
         switch (opt) {
@@ -284,9 +281,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         }
     }
 
-    public void renderTileEntities(class_4587 matrices, class_4599 bufferBuilders, Long2ObjectMap<SortedSet<PartiallyBrokenBlockEntry>> blockBreakingProgressions,
-                                   Camera camera, float tickDelta) {
-        class_4597.class_4598 immediate = bufferBuilders.method_23000();
+    /*public void renderTileEntities(BackgroundRenderer chunkRendererList, Map<Integer, PartiallyBrokenBlockEntry> partiallyBrokenBlocks, Camera camera, float tickDelta) {
+        class_4597.class_4598 immediate = partiallyBrokenBlocks.method_23000();
 
         net.minecraft.util.math.Vec3d cameraPos = camera.getPos();
         double x = cameraPos.getX();
@@ -307,7 +303,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
                 if (stage >= 0) {
                     //VertexConsumer transformer = new MatrixVertexConsumer(bufferBuilders.method_23001().getBuffer(RenderLayer.getEntitySolid(ModelLoader.field_21020.get(stage))), matrices.peek());
-                    /*layer.method_23037() ? VertexConsumers.dual(transformer, immediate.getBuffer(layer)) : */
+                    *//*layer.method_23037() ? VertexConsumers.dual(transformer, immediate.getBuffer(layer)) : *//*
                     consumer = immediate;
                 }
             }
@@ -327,7 +323,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
             matrices.method_22909();
         }
-    }
+    }*/
 
     @Override
     public void onChunkAdded(int x, int z) {
@@ -347,6 +343,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
     /**
      * Returns whether or not the entity intersects with any visible chunks in the graph.
+     *
      * @return True if the entity is visible, otherwise false
      */
     public boolean isEntityVisible(Entity entity) {
@@ -386,7 +383,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     /**
      * @return The frustum of the current player's camera used to cull chunks
      */
-    public class_4604 getFrustum() {
+    public FrustumWithOrigin getFrustum() {
         return this.frustum;
     }
 

@@ -2,11 +2,13 @@ package me.jellysquid.mods.sodium.mixin.features.gui;
 
 import com.google.common.base.Strings;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.class_4597;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.DebugHud;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
 import org.apache.commons.lang3.Validate;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
@@ -59,8 +61,6 @@ public abstract class MixinDebugHud {
     }
 
     private void renderStrings(List<String> list, boolean right) {
-        class_4597.class_4598 immediate = class_4597.method_22991(Tessellator.getInstance().getBufferBuilder());
-
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
 
@@ -68,14 +68,12 @@ public abstract class MixinDebugHud {
                 int height = 9;
                 int width = this.fontRenderer.getStringWidth(string);
 
-                float x1 = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
+                float x1 = right ? this.client.method_22683().getScaledWidth() - 2 - width : 2;
                 float y1 = 2 + (height * i);
 
                 this.fontRenderer.draw(string, x1, y1, 0xe0e0e0);
             }
         }
-
-        immediate.method_22993();
     }
 
     private void renderBackdrop(List<String> list, boolean right) {
@@ -103,7 +101,7 @@ public abstract class MixinDebugHud {
             int height = 9;
             int width = this.fontRenderer.getStringWidth(string);
 
-            int x = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
+            int x = right ? this.client.method_22683().getScaledWidth() - 2 - width : 2;
             int y = 2 + height * i;
 
             float x1 = x - 1;
@@ -111,10 +109,10 @@ public abstract class MixinDebugHud {
             float x2 = x + width + 1;
             float y2 = y + height - 1;
 
-            bufferBuilder.vertex(x1, y2, 0.0F).method_22915(g, h, k, f).next();
-            bufferBuilder.vertex(x2, y2, 0.0F).method_22915(g, h, k, f).next();
-            bufferBuilder.vertex(x2, y1, 0.0F).method_22915(g, h, k, f).next();
-            bufferBuilder.vertex(x1, y1, 0.0F).method_22915(g, h, k, f).next();
+            bufferBuilder.vertex(x1, y2, 0.0F).color(g, h, k, f).next();
+            bufferBuilder.vertex(x2, y2, 0.0F).color(g, h, k, f).next();
+            bufferBuilder.vertex(x2, y1, 0.0F).color(g, h, k, f).next();
+            bufferBuilder.vertex(x1, y1, 0.0F).color(g, h, k, f).next();
         }
 
         bufferBuilder.end();

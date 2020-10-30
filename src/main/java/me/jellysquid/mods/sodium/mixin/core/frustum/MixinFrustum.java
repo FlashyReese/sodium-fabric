@@ -1,19 +1,14 @@
 package me.jellysquid.mods.sodium.mixin.core.frustum;
 
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
-import me.jellysquid.mods.sodium.client.util.math.Vector4fExtended;
-import net.minecraft.class_4604;
-import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.client.util.math.Vector4f;
+import net.minecraft.client.render.FrustumWithOrigin;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(class_4604.class)
-public class MixinFrustum implements FrustumExtended {
-    private float xF, yF, zF;
+//:concern:
+@Mixin(FrustumWithOrigin.class)
+public abstract class MixinFrustum implements FrustumExtended {
+    /*private float xF, yF, zF;
 
     private float nxX, nxY, nxZ, nxW;
     private float pxX, pxY, pxZ, pxW;
@@ -75,25 +70,20 @@ public class MixinFrustum implements FrustumExtended {
             default:
                 throw new IllegalArgumentException("Invalid index");
         }
-    }
+    }*/
 
     @Override
     public boolean fastAabbTest(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-        return this.method_23090(minX - this.xF, minY - this.yF, minZ - this.zF,
-                maxX - this.xF, maxY - this.yF, maxZ - this.zF);
+        return this.intersects(minX, minY, minZ,
+                maxX, maxY, maxZ);
     }
 
     /**
      * @author JellySquid
      * @reason Optimize away object allocations and for-loop
      */
-    @Overwrite
-    private boolean method_23090(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-        return this.nxX * (this.nxX < 0 ? minX : maxX) + this.nxY * (this.nxY < 0 ? minY : maxY) + this.nxZ * (this.nxZ < 0 ? minZ : maxZ) >= -this.nxW &&
-                this.pxX * (this.pxX < 0 ? minX : maxX) + this.pxY * (this.pxY < 0 ? minY : maxY) + this.pxZ * (this.pxZ < 0 ? minZ : maxZ) >= -this.pxW &&
-                this.nyX * (this.nyX < 0 ? minX : maxX) + this.nyY * (this.nyY < 0 ? minY : maxY) + this.nyZ * (this.nyZ < 0 ? minZ : maxZ) >= -this.nyW &&
-                this.pyX * (this.pyX < 0 ? minX : maxX) + this.pyY * (this.pyY < 0 ? minY : maxY) + this.pyZ * (this.pyZ < 0 ? minZ : maxZ) >= -this.pyW &&
-                this.nzX * (this.nzX < 0 ? minX : maxX) + this.nzY * (this.nzY < 0 ? minY : maxY) + this.nzZ * (this.nzZ < 0 ? minZ : maxZ) >= -this.nzW &&
-                this.pzX * (this.pzX < 0 ? minX : maxX) + this.pzY * (this.pzY < 0 ? minY : maxY) + this.pzZ * (this.pzZ < 0 ? minZ : maxZ) >= -this.pzW;
+    @Shadow
+    public boolean intersects(double minX, double minY, double minZ, double maxX, double maxY, double maxZ){
+        return true;
     }
 }

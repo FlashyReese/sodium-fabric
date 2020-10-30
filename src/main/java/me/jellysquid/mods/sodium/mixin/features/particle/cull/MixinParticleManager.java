@@ -2,12 +2,11 @@ package me.jellysquid.mods.sodium.mixin.features.particle.cull;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
-import net.minecraft.class_4604;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.FrustumWithOrigin;
 import net.minecraft.util.math.Box;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,11 +28,11 @@ public class MixinParticleManager {
 
     private final Queue<Particle> cachedQueue = new ArrayDeque<>();
 
-    private class_4604 cullingFrustum;
+    private FrustumWithOrigin cullingFrustum;
 
     @Inject(method = "renderParticles", at = @At("HEAD"))
     private void preRenderParticles(Camera camera, float f, CallbackInfo ci) {
-        class_4604 frustum = SodiumWorldRenderer.getInstance().getFrustum();
+        FrustumWithOrigin frustum = SodiumWorldRenderer.getInstance().getFrustum();
         boolean useCulling = SodiumClientMod.options().advanced.useParticleCulling;
 
         // Setup the frustum state before rendering particles
@@ -66,7 +65,7 @@ public class MixinParticleManager {
             Box box = particle.getBoundingBox();
 
             // Hack: Grow the particle's bounding box in order to work around mis-behaved particles
-            if (this.cullingFrustum.method_23089(box.minX - 1.0D, box.minY - 1.0D, box.minZ - 1.0D, box.maxX + 1.0D, box.maxY + 1.0D, box.maxZ + 1.0D)) {
+            if (this.cullingFrustum.intersects(box.minX - 1.0D, box.minY - 1.0D, box.minZ - 1.0D, box.maxX + 1.0D, box.maxY + 1.0D, box.maxZ + 1.0D)) {
                 filtered.add(particle);
             }
         }

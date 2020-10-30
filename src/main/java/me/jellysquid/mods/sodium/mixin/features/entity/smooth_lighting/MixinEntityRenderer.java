@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.entity.smooth_lighting;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.entity.EntityLightSampler;
-import net.minecraft.class_4604;
+import net.minecraft.client.render.VisibleRegion;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +21,8 @@ public abstract class MixinEntityRenderer<T extends Entity> implements EntityLig
         }
     }*/
 
-    @Inject(method = "isVisible", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_4604;method_23093(Lnet/minecraft/util/math/Box;)Z", shift = At.Shift.AFTER), cancellable = true)
-    private void preShouldRender(T entity, class_4604 frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "isVisible", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/VisibleRegion;intersects(Lnet/minecraft/util/math/Box;)Z", shift = At.Shift.AFTER), cancellable = true)
+    private void preShouldRender(T entity, VisibleRegion frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         // If the entity isn't culled already by other means, try to perform a second pass
         if (cir.getReturnValue() && !SodiumWorldRenderer.getInstance().isEntityVisible(entity)) {
             cir.setReturnValue(false);

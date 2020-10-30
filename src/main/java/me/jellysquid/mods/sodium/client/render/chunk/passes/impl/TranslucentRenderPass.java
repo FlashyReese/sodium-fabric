@@ -12,11 +12,11 @@ public class TranslucentRenderPass extends BlockRenderPass {
 
     @Override
     public void beginRender() {
-        BlockRenderLayer.TRANSLUCENT.method_22723();
+        BlockRenderLayer.field_9179.method_22723();
     }
 
     @Override
     public void endRender() {
-        BlockRenderLayer.TRANSLUCENT.method_22724();
+        BlockRenderLayer.field_9179.method_22724();
     }
 }

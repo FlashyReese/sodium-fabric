@@ -5,10 +5,7 @@ import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.util.Norm3b;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
-import net.minecraft.class_4587;
-import net.minecraft.class_4588;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.util.math.Vector4f;
 
@@ -18,25 +15,21 @@ import net.minecraft.client.util.math.Vector4f;
  * vertex and unpack values as assumptions can't be made about what the backing buffer type is.
  */
 public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
-    private final class_4588 consumer;
-
-    // Hoisted matrices to avoid lookups in peeking
-    private final Matrix4f modelMatrix;
+    private final BufferBuilder consumer;
 
     // Cached vectors to avoid allocations
     private final Vector4f vector;
     private final Vector3f normal;
 
-    public FallbackQuadSink(class_4588 consumer, class_4587 matrixStack) {
+    public FallbackQuadSink(BufferBuilder consumer) {
         this.consumer = consumer;
-        this.modelMatrix = matrixStack.method_22910();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
         this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
     }
 
     @Override
     public void write(ModelQuadViewMutable quad) {
-        Vector4f posVec = this.vector;
+        Vector4f posVec;
         Vector3f normVec = this.normal;
 
         for (int i = 0; i < 4; i++) {
@@ -44,9 +37,7 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
             float y = quad.getY(i);
             float z = quad.getZ(i);
 
-            //posVec.method_23851(x, y, z, 1.0F); fixme:
             posVec = new Vector4f(x, y, z, 1.0F);
-            posVec.method_22674(this.modelMatrix);
 
             int color = quad.getColor(i);
 
@@ -58,7 +49,6 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
             float u = quad.getTexU(i);
             float v = quad.getTexV(i);
 
-            int light = quad.getLight(i);
             int norm = quad.getNormal(i);
 
             float normX = Norm3b.unpackX(norm);
@@ -67,8 +57,7 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
 
             normVec.set(normX, normY, normZ);
 
-            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).method_22915(r, g, b, a).texture(u, v)/*.light(OverlayTexture.DEFAULT_UV, light)*/.method_22914(normVec.getX(), normVec.getY(), normVec.getZ()).next();
-            //this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ(), r, g, b, a, u, v, OverlayTexture.DEFAULT_UV, light, normVec.getX(), normVec.getY(), normVec.getZ());
+            this.consumer.vertex(posVec.getX(), posVec.getY(), posVec.getZ()).color(r, g, b, a).texture(u, v).normal(normVec.getX(), normVec.getY(), normVec.getZ()).next();
         }
     }
 

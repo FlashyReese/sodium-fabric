@@ -1,12 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.WorldRenderPhase;
 import net.minecraft.block.BlockRenderLayer;
-import net.minecraft.class_4587;
-import net.minecraft.class_4599;
-import net.minecraft.class_4604;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.*;
@@ -21,17 +17,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.SortedSet;
+import java.util.Map;
 
 @Mixin(WorldRenderer.class)
 public abstract class MixinWorldRenderer {
     @Shadow
     @Final
-    private class_4599 field_20951;
+    private BackgroundRenderer chunkRendererList;
 
     @Shadow
     @Final
-    private Long2ObjectMap<SortedSet<PartiallyBrokenBlockEntry>> field_20950;
+    private Map<Integer, PartiallyBrokenBlockEntry> partiallyBrokenBlocks;
 
     private SodiumWorldRenderer renderer;
 
@@ -42,7 +38,7 @@ public abstract class MixinWorldRenderer {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(MinecraftClient client, class_4599 bufferBuilders, CallbackInfo ci) {
+    private void init(MinecraftClient client, CallbackInfo ci) {
         this.renderer = SodiumWorldRenderer.create();
     }
 
@@ -79,11 +75,11 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void renderLayer(BlockRenderLayer renderLayer, class_4587 matrixStack, double x, double y, double z) {
-        if (renderLayer == BlockRenderLayer.SOLID) {
-            this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, matrixStack, x, y, z);
-        } else if (renderLayer == BlockRenderLayer.TRANSLUCENT) {
-            this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, matrixStack, x, y, z);
+    private void renderLayer(BlockRenderLayer renderLayer, Camera camera, LightmapTextureManager lightmapTextureManager) {
+        if (renderLayer == BlockRenderLayer.field_9178) {
+            this.renderer.drawChunkLayers(WorldRenderPhase.OPAQUE, camera.getBlockPos().getX(), camera.getBlockPos().getY(), camera.getBlockPos().getZ());
+        } else if (renderLayer == BlockRenderLayer.field_9179) {
+            this.renderer.drawChunkLayers(WorldRenderPhase.TRANSLUCENT, camera.getBlockPos().getX(), camera.getBlockPos().getY(), camera.getBlockPos().getZ());
         }
     }
 
@@ -92,8 +88,8 @@ public abstract class MixinWorldRenderer {
      * @author JellySquid
      */
     @Overwrite
-    private void setUpTerrain(Camera camera, class_4604 frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
-        this.renderer.updateChunks(camera, frustum, hasForcedFrustum, frame, spectator);
+    private void setUpTerrain(Camera camera, VisibleRegion visibleRegion, int frame, boolean spectator) {
+        this.renderer.updateChunks(camera, visibleRegion, frame, spectator);
     }
 
     /**
@@ -137,9 +133,9 @@ public abstract class MixinWorldRenderer {
         this.renderer.reload();
     }
 
-    @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;blockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
-    private void onRenderTileEntities(class_4587 matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, CallbackInfo ci) {
-        this.renderer.renderTileEntities(matrices, this.field_20951, this.field_20950, camera, tickDelta);
+    @Inject(method = "method_22710", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;blockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
+    private void onRenderTileEntities(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, CallbackInfo ci) {
+        //Fixme: this.renderer.renderTileEntities(this.chunkRendererList, this.partiallyBrokenBlocks, camera, tickDelta);
     }
 
     /**

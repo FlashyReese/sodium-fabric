@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader.texture;
 
 import me.jellysquid.mods.sodium.client.gl.sampler.GlSampler;
+import me.jellysquid.mods.sodium.client.render.GameRendererAccess;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgram;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.AbstractTexture;
@@ -41,9 +42,9 @@ public class ChunkProgramMultiTexture extends ChunkProgramTextureComponent {
         TextureManager textureManager = client.getTextureManager();
 
         LightmapTextureManagerAccessor lightmapTextureManager =
-                ((LightmapTextureManagerAccessor) client.gameRenderer.method_22974());
+                ((LightmapTextureManagerAccessor) ((GameRendererAccess)client.gameRenderer).getLightmapTextureManager());
 
-        AbstractTexture blockAtlasTex = textureManager.getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
+        AbstractTexture blockAtlasTex = (AbstractTexture) textureManager.getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
         AbstractTexture lightTex = lightmapTextureManager.getTexture();
 
         this.bindTexture(blockAtlasTex, ChunkProgramTextureUnit.BLOCK_ATLAS);

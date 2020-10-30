@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.gui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.class_4588;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
@@ -33,7 +32,7 @@ public abstract class AbstractWidget implements Drawable, Element {
         this.drawQuads(vertices -> addQuad(vertices, x1, y1, x2, y2, a, r, g, b));
     }
 
-    protected void drawQuads(Consumer<class_4588> consumer) {
+    protected void drawQuads(Consumer<BufferBuilder> consumer) {
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
@@ -50,11 +49,11 @@ public abstract class AbstractWidget implements Drawable, Element {
         RenderSystem.disableBlend();
     }
 
-    protected static void addQuad(class_4588 consumer, int x1, int y1, int x2, int y2, float a, float r, float g, float b) {
-        consumer.vertex(x2, y1, 0.0D).method_22915(r, g, b, a).next();
-        consumer.vertex(x1, y1, 0.0D).method_22915(r, g, b, a).next();
-        consumer.vertex(x1, y2, 0.0D).method_22915(r, g, b, a).next();
-        consumer.vertex(x2, y2, 0.0D).method_22915(r, g, b, a).next();
+    protected static void addQuad(BufferBuilder consumer, int x1, int y1, int x2, int y2, float a, float r, float g, float b) {
+        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
     }
 
     protected void playClickSound() {

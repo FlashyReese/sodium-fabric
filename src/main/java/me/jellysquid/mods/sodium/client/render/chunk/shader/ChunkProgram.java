@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.shader;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramTextureComponent;
-import net.minecraft.class_4587;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -42,8 +41,8 @@ public abstract class ChunkProgram extends GlProgram {
     }
 
     @Override
-    public void bind(class_4587 matrixStack) {
-        super.bind(matrixStack);
+    public void bind() {
+        super.bind();
 
         for (ShaderComponent component : this.components) {
              component.bind();
@@ -59,8 +58,6 @@ public abstract class ChunkProgram extends GlProgram {
             FloatBuffer bufModelViewProjection = stack.mallocFloat(16);
 
             GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, bufProjection);
-
-            matrixStack.method_22910().putIntoBuffer(bufModelView);
 
             GL11.glPushMatrix();
             GL11.glLoadMatrixf(bufProjection);

@@ -1,13 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.font;
 
-import me.jellysquid.mods.sodium.client.model.consumer.GlyphVertexConsumer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import net.minecraft.class_4588;
 import net.minecraft.client.font.GlyphRenderer;
-import net.minecraft.client.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(GlyphRenderer.class)

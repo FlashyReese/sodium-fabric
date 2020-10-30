@@ -1,18 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.particle.fast_render;
 
 import me.jellysquid.mods.sodium.client.model.consumer.ParticleVertexConsumer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import net.minecraft.class_4588;
 import net.minecraft.client.particle.BillboardParticle;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BillboardParticle.class)
@@ -40,7 +33,7 @@ public abstract class MixinBillboardParticle extends Particle {
      * @reason Optimize function
      * @author JellySquid
      */
-    @Overwrite
+    /*@Overwrite
     public void buildGeometry(class_4588 vertexConsumer, Camera camera, float tickDelta, float f, float g, float h, float i, float j) {
         Vec3d vec3d = camera.getPos();
 
@@ -81,7 +74,7 @@ public abstract class MixinBillboardParticle extends Particle {
         addVertex(vertices, quaternion,-1.0F, 1.0F, x, y, z, maxU, minV, color, light, size);
         addVertex(vertices, quaternion,1.0F, 1.0F, x, y, z, minU, minV, color, light, size);
         addVertex(vertices, quaternion,1.0F, -1.0F, x, y, z, minU, maxV, color, light, size);
-    }
+    }*/
     @SuppressWarnings("UnnecessaryLocalVariable")
     private static void addVertex(ParticleVertexConsumer vertices, Quaternion rotation,
                                   float x, float y, float posX, float posY, float posZ, float u, float v, int color, int light, float size) {

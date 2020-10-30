@@ -22,8 +22,6 @@ import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.class_4587;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.*;
@@ -246,7 +244,8 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         this.cameraZ = camera.getPos().z;
 
         this.lastFrameUpdated = frame;
-        this.useOcclusionCulling = true;/*MinecraftClient.getInstance().chunkCullingEnabled*/;
+        this.useOcclusionCulling = true;/*MinecraftClient.getInstance().chunkCullingEnabled*/
+        ;
         this.useAggressiveCulling = SodiumClientMod.options().advanced.useChunkFaceCulling;
 
         this.resetGraph();
@@ -396,11 +395,11 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         return render;
     }
 
-    public void renderChunks(class_4587 matrixStack, BlockRenderPass pass, double x, double y, double z) {
+    public void renderChunks(BlockRenderPass pass, double x, double y, double z) {
         ChunkRenderListIterator<T> iterator = this.chunkRenderLists[pass.ordinal()]
                 .iterator(pass.isForwardRendering());
 
-        this.backend.renderChunks(matrixStack, pass, iterator, new ChunkCameraContext(x, y, z));
+        this.backend.renderChunks(pass, iterator, new ChunkCameraContext(x, y, z));
     }
 
     public void tickVisibleRenders() {

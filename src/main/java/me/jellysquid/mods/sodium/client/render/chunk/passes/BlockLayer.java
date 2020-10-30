@@ -32,11 +32,11 @@ public enum BlockLayer {
         layerMappings = new Reference2IntArrayMap<>();
         layerMappings.defaultReturnValue(-1);
 
-        layerMappings.put(BlockRenderLayer.SOLID, BlockLayer.SOLID_MIPPED.ordinal());
+        layerMappings.put(BlockRenderLayer.field_9178, BlockLayer.SOLID_MIPPED.ordinal());
         layerMappings.put(BlockRenderLayer.CUTOUT_MIPPED, BlockLayer.SOLID_MIPPED.ordinal());
-        layerMappings.put(BlockRenderLayer.CUTOUT, BlockLayer.SOLID.ordinal());
+        layerMappings.put(BlockRenderLayer.field_9174, BlockLayer.SOLID.ordinal());
         //layerMappings.put(RenderLayer.getTripwire(), BlockLayer.SOLID.ordinal());
-        layerMappings.put(BlockRenderLayer.TRANSLUCENT, BlockLayer.TRANSLUCENT_MIPPED.ordinal());
+        layerMappings.put(BlockRenderLayer.field_9179, BlockLayer.TRANSLUCENT_MIPPED.ordinal());
     }
 
     public static int fromRenderLayer(BlockRenderLayer layer) {

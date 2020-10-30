@@ -13,7 +13,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.passes.impl.SingleTextureRenderPipeline;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramSingleTexture;
-import net.minecraft.class_4587;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -45,8 +44,8 @@ public class GL20ChunkRenderBackend extends ChunkRenderBackendOneshot<GL20Graphi
     }
 
     @Override
-    public void beginRender(class_4587 matrixStack, BlockRenderPass pass) {
-        super.beginRender(matrixStack, pass);
+    public void beginRender(BlockRenderPass pass) {
+        super.beginRender(pass);
 
         this.vertexFormat.enableVertexAttributes();
 
@@ -55,11 +54,11 @@ public class GL20ChunkRenderBackend extends ChunkRenderBackendOneshot<GL20Graphi
     }
 
     @Override
-    public void endRender(class_4587 matrixStack) {
+    public void endRender() {
         this.vertexFormat.disableVertexAttributes();
         GL20.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
-        super.endRender(matrixStack);
+        super.endRender();
     }
 
     @Override

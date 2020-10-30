@@ -34,7 +34,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkProgramComponentBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.texture.ChunkProgramMultiTexture;
-import net.minecraft.class_4587;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -45,28 +44,28 @@ import java.util.List;
 /**
  * Shader-based chunk renderer which makes use of a custom memory allocator on top of large buffer objects to allow
  * for draw call batching without buffer switching.
- *
+ * <p>
  * The biggest bottleneck after setting up vertex attribute state is the sheer number of buffer switches and draw calls
  * being performed. In vanilla, the game uses one buffer for every chunk section, which means we need to bind, setup,
  * and draw every chunk individually.
- *
+ * <p>
  * In order to reduce the number of these calls, we need to firstly reduce the number of buffer switches. We do this
  * through sub-dividing the world into larger "chunk regions" which then have one large buffer object in OpenGL. From
  * here, we can allocate slices of this buffer to each individual chunk and then only bind it once before drawing. Then,
  * our draw calls can simply point to individual sections within the buffer by manipulating the offset and count
  * parameters.
- *
+ * <p>
  * However, an unfortunate consequence is that if we run out of space in a buffer, we need to re-allocate the entire
  * storage, which can take a ton of time! With old OpenGL 2.1 code, the only way to do this would be to copy the buffer's
  * memory from the graphics card over the host bus into CPU memory, allocate a new buffer, and then copy it back over
  * the bus and into graphics card. For reasons that should be obvious, this is extremely inefficient and requires the
  * CPU and GPU to be synchronized.
- *
+ * <p>
  * If we make use of more modern OpenGL 3.0 features, we can avoid this transfer over the memory bus and instead just
  * perform the copy between buffers in GPU memory with the aptly named "copy buffer" function. It's still not blazing
  * fast, but it's much better than what we're stuck with in older versions. We can help prevent these re-allocations by
  * sizing our buffers to be a bit larger than what we expect all the chunk data to be, but this wastes memory.
- *
+ * <p>
  * In the initial implementation, this solution worked fine enough, but the amount of time being spent on uploading
  * chunks to the large buffers was now a magnitude more than what it was before all of this and it made chunk updates
  * *very* slow. It took some tinkering to figure out what was going wrong here, but at least on the NVIDIA drivers, it
@@ -74,7 +73,7 @@ import java.util.List;
  * create a scratch buffer object and upload the chunk data there *first*, re-allocating the storage each time. Then,
  * you can copy the contents of the scratch buffer into the chunk region buffer, rise and repeat. I'm not happy with
  * this solution, but it performs surprisingly well across all hardware I tried.
- *
+ * <p>
  * With both of these changes, the amount of CPU time taken by rendering chunks linearly decreases with the reduction
  * in buffer bind/setup/draw calls. Using the default settings of 4x2x4 chunk region buffers, the number of calls can be
  * reduced up to a factor of ~32x.
@@ -171,8 +170,8 @@ public class GL43ChunkRenderBackend extends ChunkRenderBackendMultiDraw<GL43Grap
     }
 
     @Override
-    public void renderChunks(class_4587 matrixStack, BlockRenderPass pass, ChunkRenderListIterator<GL43GraphicsState> renders, ChunkCameraContext camera) {
-        this.beginRender(matrixStack, pass);
+    public void renderChunks(BlockRenderPass pass, ChunkRenderListIterator<GL43GraphicsState> renders, ChunkCameraContext camera) {
+        this.beginRender(pass);
 
         this.bufferManager.cleanup();
         this.setupDrawBatches(renders, camera);
@@ -212,7 +211,7 @@ public class GL43ChunkRenderBackend extends ChunkRenderBackendMultiDraw<GL43Grap
 
         this.uniformBuffer.unbind(GL15.GL_ARRAY_BUFFER);
 
-        this.endRender(matrixStack);
+        this.endRender();
     }
 
     private void setupArrayBufferState(GlBufferArena arena) {

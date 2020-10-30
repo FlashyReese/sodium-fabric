@@ -85,7 +85,7 @@ public class SodiumGameOptionPages {
                             opts.fullscreen = value;
 
                             MinecraftClient client = MinecraftClient.getInstance();
-                            Window window = client.getWindow();
+                            Window window = client.method_22683();
 
                             if (window != null && window.isFullscreen() != opts.fullscreen) {
                                 window.toggleFullscreen();
@@ -107,7 +107,7 @@ public class SodiumGameOptionPages {
                         .setControl(option -> new SliderControl(option, 5, 260, 5, ControlValueFormatter.fpsLimit()))
                         .setBinding((opts, value) -> {
                             opts.maxFps = value;
-                            MinecraftClient.getInstance().getWindow().setFramerateLimit(value);
+                            MinecraftClient.getInstance().method_22683().setFramerateLimit(value);
                         }, opts -> opts.maxFps)
                         .build())
                 .build());

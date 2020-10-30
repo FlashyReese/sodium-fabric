@@ -13,7 +13,7 @@ public class SolidRenderPass extends BlockRenderPass {
 
     @Override
     public void beginRender() {
-        BlockRenderLayer.SOLID.method_22723();
+        BlockRenderLayer.field_9178.method_22723();
 
         RenderSystem.enableAlphaTest();
     }
@@ -22,6 +22,6 @@ public class SolidRenderPass extends BlockRenderPass {
     public void endRender() {
         RenderSystem.disableAlphaTest();
 
-        BlockRenderLayer.SOLID.method_22724();
+        BlockRenderLayer.field_9178.method_22724();
     }
 }
