@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.mixin.features.world_ticking;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.class_5217;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleEffect;
@@ -16,6 +15,7 @@ import net.minecraft.world.biome.BiomeParticleConfig;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.LevelProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +32,7 @@ public abstract class MixinClientWorld extends World {
     @Shadow
     protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
 
-    protected MixinClientWorld(class_5217 levelProperties, DimensionType dimensionType, BiFunction<World, Dimension, ChunkManager> chunkManagerProvider, Supplier<Profiler> profiler, boolean isClient) {
+    protected MixinClientWorld(LevelProperties levelProperties, DimensionType dimensionType, BiFunction<World, Dimension, ChunkManager> chunkManagerProvider, Supplier<Profiler> profiler, boolean isClient) {
         super(levelProperties, dimensionType, chunkManagerProvider, profiler, isClient);
     }
 

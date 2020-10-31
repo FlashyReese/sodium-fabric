@@ -15,7 +15,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.VideoOptionsScreen;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -139,17 +138,17 @@ public class SodiumOptionsGUI extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
-        super.renderBackground(matrixStack);
+    public void render(int mouseX, int mouseY, float delta) {
+        super.renderBackground();
 
         this.updateControls();
 
         for (Drawable drawable : this.drawable) {
-            drawable.render(matrixStack, mouseX, mouseY, delta);
+            drawable.render(mouseX, mouseY, delta);
         }
 
         if (this.hoveredElement != null) {
-            this.renderOptionTooltip(matrixStack, this.hoveredElement);
+            this.renderOptionTooltip(this.hoveredElement);
         }
     }
 
@@ -187,7 +186,7 @@ public class SodiumOptionsGUI extends Screen {
         return this.controls.stream();
     }
 
-    private void renderOptionTooltip(MatrixStack matrixStack, ControlElement<?> element) {
+    private void renderOptionTooltip(ControlElement<?> element) {
         Dim2i dim = element.getDimensions();
 
         int textPadding = 3;
@@ -203,8 +202,8 @@ public class SodiumOptionsGUI extends Screen {
 
         Text title = new LiteralText(option.getName()).formatted(Formatting.GRAY);
 
-        List<Text> text = this.textRenderer.wrapStringToWidthAsList(title, textWidth);
-        text.addAll(this.textRenderer.wrapStringToWidthAsList(option.getTooltip(), textWidth));
+        List<String> text = this.textRenderer.wrapStringToWidthAsList(title.asFormattedString(), textWidth);
+        text.addAll(this.textRenderer.wrapStringToWidthAsList(option.getTooltip().asFormattedString(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
@@ -215,11 +214,11 @@ public class SodiumOptionsGUI extends Screen {
             boxY -= boxYLimit - boxYCutoff;
         }
 
-        this.fillGradient(matrixStack, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
+        this.fillGradient(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
 
         for (int i = 0; i < text.size(); i++) {
-            Text str = text.get(i);
-            this.textRenderer.draw(matrixStack, str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
+            String str = text.get(i);
+            this.textRenderer.draw(str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
     }
 
