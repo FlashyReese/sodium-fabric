@@ -84,7 +84,7 @@ public class SliderControl implements Control<Integer> {
             int sliderHeight = this.sliderBounds.getHeight();
 
             String label = this.formatter.format(this.option.getValue());
-            int labelWidth = this.font.getWidth(label);
+            int labelWidth = this.font.getStringWidth(label);
 
             this.drawString(matrixStack, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
         }
@@ -105,7 +105,7 @@ public class SliderControl implements Control<Integer> {
 
             String label = String.valueOf(this.getIntValue());
 
-            int labelWidth = this.font.getWidth(label);
+            int labelWidth = this.font.getStringWidth(label);
 
             this.drawString(matrixStack, label, sliderX - labelWidth - 6, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
         }

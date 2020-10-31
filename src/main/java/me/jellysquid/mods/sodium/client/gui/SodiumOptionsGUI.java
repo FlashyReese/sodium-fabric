@@ -105,7 +105,7 @@ public class SodiumOptionsGUI extends Screen {
         int y = 6;
 
         for (OptionPage page : this.pages) {
-            int width = 10 + this.textRenderer.getWidth(page.getName());
+            int width = 10 + this.textRenderer.getStringWidth(page.getName());
 
             FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 16), page.getName(), () -> this.setPage(page));
             button.setSelected(this.currentPage == page);
@@ -203,8 +203,8 @@ public class SodiumOptionsGUI extends Screen {
 
         Text title = new LiteralText(option.getName()).formatted(Formatting.GRAY);
 
-        List<Text> text = this.textRenderer.wrapLines(title, textWidth);
-        text.addAll(this.textRenderer.wrapLines(option.getTooltip(), textWidth));
+        List<Text> text = this.textRenderer.wrapStringToWidthAsList(title, textWidth);
+        text.addAll(this.textRenderer.wrapStringToWidthAsList(option.getTooltip(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;

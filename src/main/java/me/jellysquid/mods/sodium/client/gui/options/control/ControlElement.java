@@ -27,7 +27,7 @@ public class ControlElement<T> extends AbstractWidget {
         String name = this.option.getName();
         String label;
 
-        if (this.hovered && this.font.getWidth(name) > (this.dim.getWidth() - this.option.getControl().getMaxWidth())) {
+        if (this.hovered && this.font.getStringWidth(name) > (this.dim.getWidth() - this.option.getControl().getMaxWidth())) {
             name = name.substring(0, Math.min(name.length(), 10)) + "...";
         }
 

@@ -69,7 +69,7 @@ public abstract class MixinDebugHud {
 
             if (!Strings.isNullOrEmpty(string)) {
                 int height = 9;
-                int width = this.fontRenderer.getWidth(string);
+                int width = this.fontRenderer.getStringWidth(string);
 
                 float x1 = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
                 float y1 = 2 + (height * i);
@@ -108,7 +108,7 @@ public abstract class MixinDebugHud {
             }
 
             int height = 9;
-            int width = this.fontRenderer.getWidth(string);
+            int width = this.fontRenderer.getStringWidth(string);
 
             int x = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
             int y = 2 + height * i;
