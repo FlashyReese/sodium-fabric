@@ -25,9 +25,8 @@ public abstract class MixinClientWorld implements ClientWorldExtended {
      * Captures the biome generation seed so that our own caches can make use of it.
      */
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.class_5271 properties, DimensionType dimensionType, int chunkLoadDistance, Supplier<Profiler> supplier, WorldRenderer worldRenderer, boolean bl, long seed,
-                      CallbackInfo ci) {
-        this.biomeSeed = seed;
+    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.class_5271 levelInfo, DimensionType dimensionType, int chunkLoadDistance, Supplier<Profiler> supplier, WorldRenderer worldRenderer, CallbackInfo ci) {
+        this.biomeSeed = levelInfo.getSeed();
     }
 
     /**
@@ -35,7 +34,7 @@ public abstract class MixinClientWorld implements ClientWorldExtended {
      * features needed to pull off event-based rendering.
      */
     @Dynamic
-    @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientChunkManager"))
+    @Redirect(method = "method_2940", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientChunkManager"))
     private static ClientChunkManager redirectCreateChunkManager(ClientWorld world, int renderDistance) {
         return new SodiumChunkManager(world, renderDistance);
     }
