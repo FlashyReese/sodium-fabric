@@ -104,7 +104,7 @@ public class SodiumOptionsGUI extends Screen {
         int y = 6;
 
         for (OptionPage page : this.pages) {
-            int width = 10 + this.textRenderer.getStringWidth(page.getName());
+            int width = 10 + this.font.getStringWidth(page.getName());
 
             FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 16), page.getName(), () -> this.setPage(page));
             button.setSelected(this.currentPage == page);
@@ -202,8 +202,8 @@ public class SodiumOptionsGUI extends Screen {
 
         Text title = new LiteralText(option.getName()).formatted(Formatting.GRAY);
 
-        List<String> text = this.textRenderer.wrapStringToWidthAsList(title.asFormattedString(), textWidth);
-        text.addAll(this.textRenderer.wrapStringToWidthAsList(option.getTooltip().asFormattedString(), textWidth));
+        List<String> text = this.font.wrapStringToWidthAsList(title.asFormattedString(), textWidth);
+        text.addAll(this.font.wrapStringToWidthAsList(option.getTooltip().asFormattedString(), textWidth));
 
         int boxHeight = (text.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
@@ -218,7 +218,7 @@ public class SodiumOptionsGUI extends Screen {
 
         for (int i = 0; i < text.size(); i++) {
             String str = text.get(i);
-            this.textRenderer.draw(str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
+            this.font.draw(str, boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
     }
 
@@ -276,6 +276,6 @@ public class SodiumOptionsGUI extends Screen {
 
     @Override
     public void onClose() {
-        this.client.openScreen(this.prevScreen);
+        this.minecraft.openScreen(this.prevScreen);
     }
 }
