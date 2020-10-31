@@ -122,7 +122,7 @@ public class FluidRenderer {
             return false;
         }
 
-        boolean lava = fluidState.isIn(FluidTags.LAVA);
+        boolean lava = fluidState.matches(FluidTags.LAVA);
         Sprite[] sprites = lava ? this.lavaSprites : this.waterSprites;
 
         boolean rendered = false;

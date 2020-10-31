@@ -17,7 +17,6 @@ import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.options.AttackIndicator;
-import net.minecraft.client.options.GraphicsMode;
 import net.minecraft.client.options.Option;
 import net.minecraft.client.options.ParticlesOption;
 import net.minecraft.client.resource.language.I18n;
@@ -54,8 +53,8 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> {
                             opts.quality.enableClouds = value;
 
-                            if (MinecraftClient.isFabulousGraphicsOrBetter()) {
-                                Framebuffer framebuffer = MinecraftClient.getInstance().worldRenderer.getCloudsFramebuffer();
+                            if (MinecraftClient.isFancyGraphicsEnabled()) {
+                                Framebuffer framebuffer = MinecraftClient.getInstance().worldRenderer.getEntityOutlinesFramebuffer();
                                 if (framebuffer != null) {
                                     framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
                                 }
@@ -139,13 +138,13 @@ public class SodiumGameOptionPages {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(GraphicsMode.class, vanillaOpts)
+                .add(OptionImpl.createBuilder(SodiumGameOptions.DefaultGraphicsQuality.class, vanillaOpts)
                         .setName(I18n.translate("options.graphics"))
                         .setTooltip(I18n.translate("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsMode.class, new String[] { I18n.translate("options.graphics.fast"), I18n.translate("options.graphics.fancy"), I18n.translate("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, SodiumGameOptions.DefaultGraphicsQuality.class, new String[] { I18n.translate("options.graphics.fast"), I18n.translate("options.graphics.fancy") }))
                         .setBinding(
-                                (opts, value) -> opts.graphicsMode = value,
-                                opts -> opts.graphicsMode)
+                                (opts, value) -> opts.fancyGraphics = value == SodiumGameOptions.DefaultGraphicsQuality.FANCY,
+                                opts -> (opts.fancyGraphics ? SodiumGameOptions.DefaultGraphicsQuality.FANCY : SodiumGameOptions.DefaultGraphicsQuality.FAST))
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());

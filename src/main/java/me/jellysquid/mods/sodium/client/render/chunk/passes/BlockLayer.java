@@ -35,7 +35,6 @@ public enum BlockLayer {
         layerMappings.put(RenderLayer.getSolid(), BlockLayer.SOLID_MIPPED.ordinal());
         layerMappings.put(RenderLayer.getCutoutMipped(), BlockLayer.SOLID_MIPPED.ordinal());
         layerMappings.put(RenderLayer.getCutout(), BlockLayer.SOLID.ordinal());
-        layerMappings.put(RenderLayer.getTripwire(), BlockLayer.SOLID.ordinal());
         layerMappings.put(RenderLayer.getTranslucent(), BlockLayer.TRANSLUCENT_MIPPED.ordinal());
     }
 
