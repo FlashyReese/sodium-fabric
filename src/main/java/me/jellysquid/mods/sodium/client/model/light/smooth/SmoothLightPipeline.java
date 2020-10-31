@@ -85,7 +85,7 @@ public class SmoothLightPipeline implements LightPipeline {
     }
 
     private void applySidedBrightness(QuadLightData out, Direction face, boolean shade) {
-        float brightness = this.lightCache.getWorld().getBrightness(face, shade);
+        float brightness = this.lightCache.getWorld().method_24852(face, shade);
         float[] br = out.br;
 
         for (int i = 0; i < br.length; i++) {

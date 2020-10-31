@@ -33,10 +33,10 @@ import java.util.Map;
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
  * operations. This allows chunk build tasks to see a consistent snapshot of chunk data at the exact moment the task was
  * created.
- *
+ * <p>
  * World slices are not safe to use from multiple threads at once, but the data they contain is safe from modification
  * by the main client thread.
- *
+ * <p>
  * You should use object pooling with this type to avoid huge allocations as instances of this class contain many large
  * arrays.
  */
@@ -45,24 +45,8 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     public static final int NEIGHBOR_BLOCK_RADIUS = 1;
 
     // The number of outward chunks from the origin chunk to slice
-    public static final int NEIGHBOR_CHUNK_RADIUS = roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
-
-    //Fixme: Vanilla Copy snapshot borked
-    public static int roundUp(int i, int j) {
-        if (j == 0) {
-            return 0;
-        } else if (i == 0) {
-            return j;
-        } else {
-            if (i < 0) {
-                j *= -1;
-            }
-
-            int k = i % j;
-            return k == 0 ? i : i + j - k;
-        }
-    }
-
+    public static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    
     // The length of the chunk section array on each axis
     public static final int SECTION_LENGTH = 1 + (NEIGHBOR_CHUNK_RADIUS * 2);
 
@@ -262,8 +246,8 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     }
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
-        return this.world.getBrightness(direction, shaded);
+    public float method_24852(Direction direction, boolean shaded) {
+        return this.world.method_24852(direction, shaded);
     }
 
     @Override
@@ -341,7 +325,7 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     public Biome getBiomeForNoiseGen(int x, int y, int z) {
         BiomeArray array = this.biomeArrays[this.getBiomeIndexForBlock(x, z)];
 
-        if (array != null ) {
+        if (array != null) {
             return array.getBiomeForNoiseGen(x, y, z);
         }
 
