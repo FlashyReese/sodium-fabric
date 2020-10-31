@@ -45,7 +45,23 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
     public static final int NEIGHBOR_BLOCK_RADIUS = 1;
 
     // The number of outward chunks from the origin chunk to slice
-    public static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.method_28139(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    public static final int NEIGHBOR_CHUNK_RADIUS = roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    
+    //Fixme: Vanilla Copy snapshot borked
+    public static int roundUp(int i, int j) {
+        if (j == 0) {
+            return 0;
+        } else if (i == 0) {
+            return j;
+        } else {
+            if (i < 0) {
+                j *= -1;
+            }
+
+            int k = i % j;
+            return k == 0 ? i : i + j - k;
+        }
+    }
 
     // The length of the chunk section array on each axis
     public static final int SECTION_LENGTH = 1 + (NEIGHBOR_CHUNK_RADIUS * 2);

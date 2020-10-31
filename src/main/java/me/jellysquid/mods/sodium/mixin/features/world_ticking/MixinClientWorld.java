@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.mixin.features.world_ticking;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.class_5269;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleEffect;
@@ -10,7 +11,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeParticleConfig;
 import net.minecraft.world.dimension.DimensionType;
@@ -29,7 +29,7 @@ public abstract class MixinClientWorld extends World {
     @Shadow
     protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
 
-    protected MixinClientWorld(MutableWorldProperties mutableWorldProperties, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
+    protected MixinClientWorld(class_5269 mutableWorldProperties, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
         super(mutableWorldProperties, dimensionType, supplier, bl, bl2, l);
     }
 
