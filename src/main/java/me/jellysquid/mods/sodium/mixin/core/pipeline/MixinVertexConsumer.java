@@ -6,7 +6,7 @@ import me.jellysquid.mods.sodium.client.model.consumer.QuadVertexConsumer;
 import me.jellysquid.mods.sodium.client.util.Norm3b;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
