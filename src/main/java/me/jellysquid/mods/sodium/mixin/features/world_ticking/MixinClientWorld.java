@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.mixin.features.world_ticking;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.class_5269;
+import net.minecraft.class_5217;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleEffect;
@@ -32,7 +32,7 @@ public abstract class MixinClientWorld extends World {
     @Shadow
     protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
 
-    protected MixinClientWorld(class_5269 levelProperties, DimensionType dimensionType, BiFunction<World, Dimension, ChunkManager> chunkManagerProvider, Supplier<Profiler> profiler, boolean isClient) {
+    protected MixinClientWorld(class_5217 levelProperties, DimensionType dimensionType, BiFunction<World, Dimension, ChunkManager> chunkManagerProvider, Supplier<Profiler> profiler, boolean isClient) {
         super(levelProperties, dimensionType, chunkManagerProvider, profiler, isClient);
     }
 
@@ -73,7 +73,7 @@ public abstract class MixinClientWorld extends World {
     private void performBlockDisplayTick(BlockState blockState, BlockPos pos, Random random, boolean spawnBarrierParticles) {
         blockState.getBlock().randomDisplayTick(blockState, this, pos, random);
 
-        if (spawnBarrierParticles && blockState.isOf(Blocks.BARRIER)) {
+        if (spawnBarrierParticles && blockState.getBlock() == Blocks.BARRIER) {
             this.performBarrierDisplayTick(pos);
         }
     }

@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
 import me.jellysquid.mods.sodium.client.world.ClientWorldExtended;
 import me.jellysquid.mods.sodium.client.world.SodiumChunkManager;
+import net.minecraft.class_5217;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientChunkManager;
@@ -25,7 +26,7 @@ public abstract class MixinClientWorld implements ClientWorldExtended {
      * Captures the biome generation seed so that our own caches can make use of it.
      */
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.class_5271 levelInfo, DimensionType dimensionType, int chunkLoadDistance, Supplier<Profiler> supplier, WorldRenderer worldRenderer, CallbackInfo ci) {
+    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, class_5217 levelInfo, DimensionType dimensionType, int chunkLoadDistance, Supplier<Profiler> supplier, WorldRenderer worldRenderer, CallbackInfo ci) {
         this.biomeSeed = levelInfo.getSeed();
     }
 
