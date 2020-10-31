@@ -7,8 +7,6 @@ import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,9 +25,7 @@ public abstract class MixinClientWorld implements ClientWorldExtended {
      * Captures the biome generation seed so that our own caches can make use of it.
      */
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(ClientPlayNetworkHandler netHandler, ClientWorld.Properties properties, RegistryKey<World> worldKey,
-                      RegistryKey<DimensionType> dimensionKey, DimensionType dimensionType, int loadDistance,
-                      Supplier<Profiler> profiler, WorldRenderer renderer, boolean debugWorld, long seed,
+    private void init(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.Properties properties, DimensionType dimensionType, int chunkLoadDistance, Supplier<Profiler> supplier, WorldRenderer worldRenderer, boolean bl, long seed,
                       CallbackInfo ci) {
         this.biomeSeed = seed;
     }
