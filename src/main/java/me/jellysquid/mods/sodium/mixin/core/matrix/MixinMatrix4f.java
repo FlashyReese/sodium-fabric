@@ -90,9 +90,9 @@ public class MixinMatrix4f implements Matrix4fExtended {
 
     @Override
     public void rotate(Quaternion quaternion) {
-        boolean x = quaternion.getX() != 0.0F;
-        boolean y = quaternion.getY() != 0.0F;
-        boolean z = quaternion.getZ() != 0.0F;
+        boolean x = quaternion.getB() != 0.0F;
+        boolean y = quaternion.getC() != 0.0F;
+        boolean z = quaternion.getD() != 0.0F;
 
         // Try to determine if this is a simple rotation on one axis component only
         if (x) {
@@ -113,8 +113,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateX(Quaternion quaternion) {
-        float x = quaternion.getX();
-        float w = quaternion.getW();
+        float x = quaternion.getB();
+        float w = quaternion.getA();
 
         float xx = 2.0F * x * x;
         float ta11 = 1.0F - xx;
@@ -145,8 +145,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateY(Quaternion quaternion) {
-        float y = quaternion.getY();
-        float w = quaternion.getW();
+        float y = quaternion.getC();
+        float w = quaternion.getA();
 
         float yy = 2.0F * y * y;
         float ta00 = 1.0F - yy;
@@ -175,8 +175,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateZ(Quaternion quaternion) {
-        float z = quaternion.getZ();
-        float w = quaternion.getW();
+        float z = quaternion.getD();
+        float w = quaternion.getA();
 
         float zz = 2.0F * z * z;
         float ta00 = 1.0F - zz;
@@ -205,10 +205,10 @@ public class MixinMatrix4f implements Matrix4fExtended {
     }
 
     private void rotateXYZ(Quaternion quaternion) {
-        float x = quaternion.getX();
-        float y = quaternion.getY();
-        float z = quaternion.getZ();
-        float w = quaternion.getW();
+        float x = quaternion.getB();
+        float y = quaternion.getC();
+        float z = quaternion.getD();
+        float w = quaternion.getA();
 
         float xx = 2.0F * x * x;
         float yy = 2.0F * y * y;
