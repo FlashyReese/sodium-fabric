@@ -355,17 +355,17 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         // Entities outside the valid world height will never map to a rendered chunk
         // Always render these entities or they'll be culled incorrectly!
-        if (box.maxY < 0.5D || box.minY > 255.5D) {
+        if (box.y2 < 0.5D || box.y1 > 255.5D) {
             return true;
         }
 
-        int minX = MathHelper.floor(box.minX - 0.5D) >> 4;
-        int minY = MathHelper.floor(box.minY - 0.5D) >> 4;
-        int minZ = MathHelper.floor(box.minZ - 0.5D) >> 4;
+        int minX = MathHelper.floor(box.x1 - 0.5D) >> 4;
+        int minY = MathHelper.floor(box.y1 - 0.5D) >> 4;
+        int minZ = MathHelper.floor(box.z1 - 0.5D) >> 4;
 
-        int maxX = MathHelper.floor(box.maxX + 0.5D) >> 4;
-        int maxY = MathHelper.floor(box.maxY + 0.5D) >> 4;
-        int maxZ = MathHelper.floor(box.maxZ + 0.5D) >> 4;
+        int maxX = MathHelper.floor(box.x2 + 0.5D) >> 4;
+        int maxY = MathHelper.floor(box.y2 + 0.5D) >> 4;
+        int maxZ = MathHelper.floor(box.z2 + 0.5D) >> 4;
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {

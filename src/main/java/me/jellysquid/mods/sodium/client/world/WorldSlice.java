@@ -46,7 +46,7 @@ public class WorldSlice extends ReusableObject implements BlockRenderView, Biome
 
     // The number of outward chunks from the origin chunk to slice
     public static final int NEIGHBOR_CHUNK_RADIUS = roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
-    
+
     //Fixme: Vanilla Copy snapshot borked
     public static int roundUp(int i, int j) {
         if (j == 0) {
