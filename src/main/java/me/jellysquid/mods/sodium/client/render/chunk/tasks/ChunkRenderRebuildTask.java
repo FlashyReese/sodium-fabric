@@ -13,9 +13,11 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderConte
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
@@ -108,11 +110,11 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         }
                     }
 
-                    if (block.hasBlockEntity()) {
+                    if (block instanceof BlockEntityProvider) {
                         BlockEntity entity = this.slice.getBlockEntity(pos, WorldChunk.CreationType.CHECK);
 
                         if (entity != null) {
-                            BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
+                            BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().method_31975().get(entity);
 
                             if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));

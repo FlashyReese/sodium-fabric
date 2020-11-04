@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.entity.fast_render;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.jellysquid.mods.sodium.client.model.ModelCuboidAccessor;
 import me.jellysquid.mods.sodium.client.model.consumer.QuadVertexConsumer;
 import me.jellysquid.mods.sodium.client.util.Norm3b;
@@ -17,13 +16,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
+
 @Mixin(ModelPart.class)
 public class MixinModelPart {
     private static final float NORM = 1.0F / 16.0F;
 
     @Shadow
     @Final
-    private ObjectList<ModelPart.Cuboid> cuboids;
+    private List<ModelPart.Cuboid> cuboids;
 
     /**
      * @author JellySquid

@@ -97,13 +97,13 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     }
 
     @Override
-    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask, boolean complete) {
+    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask) {
         long key = createChunkKey(x, z);
 
         WorldChunk chunk = this.chunks.get(key);
 
         // If the chunk does not yet exist, create it now
-        if (!complete && chunk != null) {
+        if (chunk != null) {
             chunk.loadFromPacket(biomes, buf, tag, verticalStripBitmask);
         } else {
             // [VanillaCopy] If the packet didn't contain any biome data and the chunk doesn't exist yet, abort
@@ -193,7 +193,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
         }
 
         // Sodium doesn't actually use vanilla's global color cache, but we keep it around for compatibility purposes
-        this.world.resetChunkColor(x, z);
+        this.world.resetChunkColor(new ChunkPos(x, z));
 
         // Notify the chunk listener
         if (this.listener != null) {
