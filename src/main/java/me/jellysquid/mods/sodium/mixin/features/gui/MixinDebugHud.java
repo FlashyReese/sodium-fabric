@@ -95,7 +95,7 @@ public abstract class MixinDebugHud {
         float k = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        bufferBuilder.begin(VertexFormat.class_5596.field_27382, VertexFormats.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         Matrix4f matrix = matrixStack.peek()
                 .getModel();
