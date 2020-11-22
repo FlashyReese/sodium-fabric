@@ -25,6 +25,7 @@
     "features.chunk_rendering.MixinChunkBuilder",
     "features.chunk_rendering.MixinClientWorld",
     "features.chunk_rendering.MixinWorldRenderer",
+    "features.cloud.MixinWorldRenderer",
     "features.debug.MixinDebugHud",
     "features.entity.fast_render.MixinCuboid",
     "features.entity.fast_render.MixinModelPart",
