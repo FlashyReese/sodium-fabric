@@ -9,10 +9,10 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3f;
 
 /**
  * A fallback implementation of {@link ModelQuadSink} for when we're writing into an arbitrary {@link BufferBuilder}.
@@ -28,20 +28,20 @@ public class FallbackQuadSink implements ModelQuadSink, ModelQuadSinkDelegate {
 
     // Cached vectors to avoid allocations
     private final Vector4f vector;
-    private final Vector3f normal;
+    private final Vec3f normal;
 
     public FallbackQuadSink(VertexConsumer consumer, MatrixStack matrixStack) {
         this.consumer = consumer;
         this.modelMatrix = matrixStack.peek().getModel();
         this.normalMatrix = matrixStack.peek().getNormal();
         this.vector = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
-        this.normal = new Vector3f(0.0f, 0.0f, 0.0f);
+        this.normal = new Vec3f(0.0f, 0.0f, 0.0f);
     }
 
     @Override
     public void write(ModelQuadViewMutable quad) {
         Vector4f posVec = this.vector;
-        Vector3f normVec = this.normal;
+        Vec3f normVec = this.normal;
 
         for (int i = 0; i < 4; i++) {
             float x = quad.getX(i);
