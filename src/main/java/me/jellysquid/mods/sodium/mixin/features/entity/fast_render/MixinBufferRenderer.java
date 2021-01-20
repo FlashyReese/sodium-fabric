@@ -36,7 +36,7 @@ public class MixinBufferRenderer {
 
         vertexFormat.startDrawing(0L);
 
-        GlStateManager.drawArrays(drawMode.mode, 0, count, 0L);
+        GlStateManager.drawElements(drawMode.mode, 0, count, 0L);
 
         vertexFormat.endDrawing();
 

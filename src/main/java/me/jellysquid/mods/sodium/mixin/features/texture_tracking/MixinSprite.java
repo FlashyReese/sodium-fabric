@@ -1,20 +1,14 @@
 package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
-import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.texture.Sprite;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Sprite.class)
 public abstract class MixinSprite implements SpriteExtended {
     private boolean forceNextUpdate;
 
-    @Shadow
+    /*@Shadow
     private int frameTicks;
 
     @Shadow
@@ -34,10 +28,10 @@ public abstract class MixinSprite implements SpriteExtended {
     @Final
     private Sprite.Interpolation interpolation;
 
-    /**
+    *
      * @author JellySquid
      * @reason Allow conditional texture updating
-     */
+
     @Overwrite
     public void tickAnimation() {
         this.frameTicks++;
@@ -71,14 +65,14 @@ public abstract class MixinSprite implements SpriteExtended {
         }
 
         this.forceNextUpdate = false;
-    }
+    }*/
 
     @Override
     public void markActive() {
         this.forceNextUpdate = true;
     }
 
-    private void updateInterpolatedTexture() {
+    /*private void updateInterpolatedTexture() {
         this.interpolation.apply();
-    }
+    }*/
 }

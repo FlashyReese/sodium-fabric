@@ -17,6 +17,7 @@ import net.minecraft.world.chunk.EmptyChunk;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
 
+import java.util.BitSet;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -97,7 +98,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
     }
 
     @Override
-    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask) {
+    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, BitSet verticalStripBitmask) {
         long key = createChunkKey(x, z);
 
         WorldChunk chunk = this.chunks.get(key);

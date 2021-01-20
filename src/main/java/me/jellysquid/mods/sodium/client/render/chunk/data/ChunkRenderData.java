@@ -114,9 +114,9 @@ public class ChunkRenderData {
          * @param sprite The sprite
          */
         public void addSprite(Sprite sprite) {
-            if (sprite.isAnimated()) {
+            /*if (sprite.getAnimationFrameDelta()) {
                 this.animatedSprites.add(sprite);
-            }
+            }*/
         }
 
         public void setMesh(BlockRenderPass pass, ChunkMeshData data) {

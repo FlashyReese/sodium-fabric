@@ -322,7 +322,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
                 }
             }
 
-            MinecraftClient.getInstance().method_31975().render(blockEntity, tickDelta, matrices, consumer);
+            MinecraftClient.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, tickDelta, matrices, consumer);
 
             matrices.pop();
         }
@@ -333,7 +333,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
             matrices.push();
             matrices.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
 
-            MinecraftClient.getInstance().method_31975().render(blockEntity, tickDelta, matrices, immediate);
+            MinecraftClient.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, tickDelta, matrices, immediate);
 
             matrices.pop();
         }

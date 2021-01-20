@@ -111,7 +111,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         BlockEntity entity = this.slice.getBlockEntity(pos.set(x, y, z), WorldChunk.CreationType.CHECK);
 
                         if (entity != null) {
-                            BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().method_31975().get(entity);
+                            BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
 
                             if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));

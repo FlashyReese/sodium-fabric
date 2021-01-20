@@ -8,8 +8,7 @@ import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl30.GL30ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
-import net.minecraft.client.options.GraphicsMode;
-
+import net.minecraft.client.option.GraphicsMode;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
