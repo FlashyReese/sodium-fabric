@@ -56,62 +56,59 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
 
-        pipeline.init(this.slice, this.slice.getBlockOffsetX(), this.slice.getBlockOffsetY(), this.slice.getBlockOffsetZ());
-        buffers.init(renderData);
+        buffers.init();
+        pipeline.init(this.slice, this.slice.getOrigin());
 
-        int minX = this.render.getOriginX();
-        int minY = this.render.getOriginY();
-        int minZ = this.render.getOriginZ();
-
-        int maxX = minX + 16;
-        int maxY = minY + 16;
-        int maxZ = minZ + 16;
+        int baseX = this.render.getOriginX();
+        int baseY = this.render.getOriginY();
+        int baseZ = this.render.getOriginZ();
 
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos offset = this.offset;
 
-        for (int y = minY; y < maxY; y++) {
+        for (int relY = 0; relY < 16; relY++) {
             if (cancellationSource.isCancelled()) {
                 return null;
             }
 
-            for (int z = minZ; z < maxZ; z++) {
-                for (int x = minX; x < maxX; x++) {
-                    BlockState blockState = this.slice.getBlockState(x, y, z);
-                    Block block = blockState.getBlock();
+            for (int relZ = 0; relZ < 16; relZ++) {
+                for (int relX = 0; relX < 16; relX++) {
+                    BlockState blockState = this.slice.getOriginBlockState(relX, relY, relZ);
 
                     if (blockState.isAir()) {
                         continue;
                     }
 
-                    pos.set(x, y, z);
+                    Block block = blockState.getBlock();
+
+                    int x = baseX + relX;
+                    int y = baseY + relY;
+                    int z = baseZ + relZ;
 
                     if (block.getRenderType(blockState) == BlockRenderType.MODEL) {
+                        buffers.setRenderOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());
+
                         RenderLayer layer = RenderLayers.getBlockLayer(blockState);
 
-                        ChunkBuildBuffers.ChunkBuildBufferDelegate builder = buffers.get(layer);
-                        builder.setOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());
-
-                        if (pipeline.renderBlock(this.slice, blockState, pos, builder, true)) {
-                            bounds.addBlock(x, y, z);
+                        if (pipeline.renderBlock(this.slice, blockState, pos.set(x, y, z), buffers.get(layer), true)) {
+                            bounds.addBlock(relX, relY, relZ);
                         }
                     }
 
                     FluidState fluidState = block.getFluidState(blockState);
 
                     if (!fluidState.isEmpty()) {
+                        buffers.setRenderOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());
+
                         RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
 
-                        ChunkBuildBuffers.ChunkBuildBufferDelegate builder = buffers.get(layer);
-                        builder.setOffset(x - offset.getX(), y - offset.getY(), z - offset.getZ());
-
-                        if (pipeline.renderFluid(this.slice, fluidState, pos, builder)) {
-                            bounds.addBlock(x, y, z);
+                        if (pipeline.renderFluid(this.slice, fluidState, pos.set(x, y, z), buffers.get(layer))) {
+                            bounds.addBlock(relX, relY, relZ);
                         }
                     }
 
-                    if (block instanceof BlockEntityProvider) {
-                        BlockEntity entity = this.slice.getBlockEntity(pos, WorldChunk.CreationType.CHECK);
+                    if (blockState.hasBlockEntity()) {
+                        BlockEntity entity = this.slice.getBlockEntity(pos.set(x, y, z), WorldChunk.CreationType.CHECK);
 
                         if (entity != null) {
                             BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().method_31975().get(entity);
@@ -119,7 +116,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
 
-                                bounds.addBlock(x, y, z);
+                                bounds.addBlock(relX, relY, relZ);
                             }
                         }
                     }
@@ -132,7 +129,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         }
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
-            ChunkMeshData mesh = buffers.createMesh(this.camera, this.render.getRenderOrigin(), pass);
+            ChunkMeshData mesh = buffers.createMesh(pass);
 
             if (mesh != null) {
                 renderData.setMesh(pass, mesh);

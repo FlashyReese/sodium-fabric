@@ -6,17 +6,18 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gl.SodiumVertexFormats;
-import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderManager;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl30.GL30ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
+import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
+import me.jellysquid.mods.sodium.client.render.pipeline.context.GlobalRenderContext;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListenerManager;
@@ -88,27 +89,49 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
     public void setWorld(ClientWorld world) {
+        // Check that the world is actually changing
+        if (this.world == world) {
+            return;
+        }
+
+        // If we have a world is already loaded, unload the renderer
+        if (this.world != null) {
+            this.unloadWorld();
+        }
+
+        // If we're loading a new world, load the renderer
+        if (world != null) {
+            this.loadWorld(world);
+        }
+    }
+
+    private void loadWorld(ClientWorld world) {
         this.world = world;
+
+        GlobalRenderContext.createRenderContext(this.world);
+
+        this.initRenderer();
+
+        ((ChunkStatusListenerManager) world.getChunkManager()).setListener(this);
+    }
+
+    private void unloadWorld() {
+        GlobalRenderContext.destroyRenderContext(this.world);
+
+        if (this.chunkRenderManager != null) {
+            this.chunkRenderManager.destroy();
+            this.chunkRenderManager = null;
+        }
+
+        if (this.chunkRenderBackend != null) {
+            this.chunkRenderBackend.delete();
+            this.chunkRenderBackend = null;
+        }
+
         this.loadedChunkPositions.clear();
         this.globalBlockEntities.clear();
 
-        if (world == null) {
-            if (this.chunkRenderManager != null) {
-                this.chunkRenderManager.destroy();
-                this.chunkRenderManager = null;
-            }
-
-            if (this.chunkRenderBackend != null) {
-                this.chunkRenderBackend.delete();
-                this.chunkRenderBackend = null;
-            }
-
-            this.loadedChunkPositions.clear();
-        } else {
-            this.initRenderer();
-
-            ((ChunkStatusListenerManager) world.getChunkManager()).setListener(this);
-        }
+        this.world = null;
     }
 
     /**
@@ -183,7 +206,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         if (!hasForcedFrustum && this.chunkRenderManager.isDirty()) {
             profiler.swap("chunk_graph_rebuild");
 
-            this.chunkRenderManager.updateGraph(camera, (FrustumExtended) frustum, frame, spectator);
+            this.chunkRenderManager.update(camera, (FrustumExtended) frustum, frame, spectator);
         }
 
         profiler.swap("visible_chunk_tick");
@@ -234,12 +257,12 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
 
-        final GlVertexFormat<SodiumVertexFormats.ChunkMeshAttribute> vertexFormat;
+        final ChunkVertexType vertexFormat;
 
         if (opts.advanced.useCompactVertexFormat) {
-            vertexFormat = SodiumVertexFormats.CHUNK_MESH_COMPACT;
+            vertexFormat = DefaultModelVertexFormats.MODEL_VERTEX_HFP;
         } else {
-            vertexFormat = SodiumVertexFormats.CHUNK_MESH_FULL;
+            vertexFormat = DefaultModelVertexFormats.MODEL_VERTEX_SFP;
         }
 
         this.chunkRenderBackend = createChunkRenderBackend(opts.advanced.chunkRendererBackend, vertexFormat);
@@ -250,7 +273,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     }
 
     private static ChunkRenderBackend<?> createChunkRenderBackend(SodiumGameOptions.ChunkRendererBackendOption opt,
-                                                           GlVertexFormat<SodiumVertexFormats.ChunkMeshAttribute> vertexFormat) {
+                                                                  ChunkVertexType vertexFormat) {
         boolean disableBlacklist = SodiumClientMod.options().advanced.disableDriverBlacklist;
 
         switch (opt) {
@@ -328,8 +351,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderManager.onChunkRemoved(x, z);
     }
 
-    public void onChunkRenderUpdated(ChunkRenderData meshBefore, ChunkRenderData meshAfter) {
+    public void onChunkRenderUpdated(int x, int y, int z, ChunkRenderData meshBefore, ChunkRenderData meshAfter) {
         ListUtil.updateList(this.globalBlockEntities, meshBefore.getGlobalBlockEntities(), meshAfter.getGlobalBlockEntities());
+
+        this.chunkRenderManager.onChunkRenderUpdates(x, y, z, meshAfter);
     }
 
     /**
