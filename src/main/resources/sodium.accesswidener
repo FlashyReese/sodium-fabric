@@ -10,4 +10,3 @@ accessible method net/minecraft/client/render/Frustum isVisible (DDDDDD)Z
 
 accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/util/collection/PackedIntegerArray;
 accessible field net/minecraft/world/chunk/PalettedContainer palette Lnet/minecraft/world/chunk/Palette;
-accessible field net/minecraft/client/texture/Sprite$Info animationData Lnet/minecraft/resource/metadata/AnimationResourceMetadata;
