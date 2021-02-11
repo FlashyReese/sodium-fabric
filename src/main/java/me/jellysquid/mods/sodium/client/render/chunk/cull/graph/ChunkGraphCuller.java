@@ -95,7 +95,7 @@ public class ChunkGraphCuller implements ChunkCuller {
 
             this.visible.add(rootNode, null);
         } else {
-            chunkY = MathHelper.clamp(origin.getY() >> 4, 0, 15);
+            chunkY = MathHelper.clamp(origin.getY() >> 4, this.world.getBottomY() >> 4, (this.world.getHeight() >> 4) + (this.world.getBottomY() >> 4) - 1);
 
             List<ChunkGraphNode> bestNodes = new ArrayList<>();
 
