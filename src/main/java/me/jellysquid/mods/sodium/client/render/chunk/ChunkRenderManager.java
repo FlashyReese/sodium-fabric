@@ -314,7 +314,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         int x = column.getX();
         int z = column.getZ();
 
-        for (int y = 0; y < 16; y++) {
+        for (int y = (this.world.getBottomY() >> 4); y < (this.world.getHeight() >> 4) + (this.world.getBottomY() >> 4); y++) {
             ChunkRenderContainer<T> render = this.createChunkRender(column, x, y, z);
             column.setRender(y, render);
 
@@ -326,7 +326,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         int x = column.getX();
         int z = column.getZ();
 
-        for (int y = 0; y < 16; y++) {
+        for (int y = (this.world.getBottomY() >> 4); y < (this.world.getHeight() >> 4) + (this.world.getBottomY() >> 4); y++) {
             ChunkRenderContainer<T> render = column.getRender(y);
 
             if (render != null) {
@@ -374,7 +374,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     private ChunkRenderContainer<T> createChunkRender(ChunkRenderColumn<T> column, int x, int y, int z) {
         ChunkRenderContainer<T> render = new ChunkRenderContainer<>(this.backend, this.renderer, x, y, z, column);
 
-        if (ChunkSection.isEmpty(this.world.getChunk(x, z).getSectionArray()[y])) {
+        if (ChunkSection.isEmpty(this.world.getChunk(x, z).getSectionArray()[y+4])) {
             render.setData(ChunkRenderData.EMPTY);
         } else {
             render.scheduleRebuild(false);
@@ -480,11 +480,11 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     public int getTotalSections() {
-        return this.columns.size() * 16;
+        return this.columns.size() * (this.world.getHeight() >> 4);
     }
 
     public void scheduleRebuild(int x, int y, int z, boolean important) {
-        if (y < 0 || y >= 16) {
+        if (y < (this.world.getBottomY() >> 4) || y >= (this.world.getHeight() >> 4) + (this.world.getBottomY() >> 4)) {
             return;
         }
 

@@ -5,7 +5,7 @@ import net.minecraft.util.math.Direction;
 
 public class ChunkRenderColumn<T extends ChunkGraphicsState> {
     @SuppressWarnings("unchecked")
-    private final ChunkRenderContainer<T>[] renders = new ChunkRenderContainer[16];
+    private final ChunkRenderContainer<T>[] renders = new ChunkRenderContainer[24];//Todo: Adjust size accordingly with world height >> 4
 
     @SuppressWarnings("unchecked")
     private final ChunkRenderColumn<T>[] adjacent = new ChunkRenderColumn[6];
@@ -29,11 +29,12 @@ public class ChunkRenderColumn<T extends ChunkGraphicsState> {
     }
 
     public void setRender(int y, ChunkRenderContainer<T> render) {
-        this.renders[y] = render;
+        this.renders[y + 4] = render;
     }
 
     public ChunkRenderContainer<T> getRender(int y) {
-        return this.renders[y];
+        // Todo: Sum world bottom (y >> 4) * -1
+        return this.renders[y + 4];
     }
 
     public int getX() {
