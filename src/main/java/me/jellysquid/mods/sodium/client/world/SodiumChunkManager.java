@@ -190,7 +190,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
 
         // [VanillaCopy] Notify the light engine that this chunk's sections have been updated
         for (int y = 0; y < sections.length; ++y) {
-            lightEngine.setSectionStatus(ChunkSectionPos.from(x, y, z), ChunkSection.isEmpty(sections[y]));
+            lightEngine.setSectionStatus(ChunkSectionPos.from(x, y + (this.world.getBottomY() >> 4), z), ChunkSection.isEmpty(sections[y]));
         }
 
         // Sodium doesn't actually use vanilla's global color cache, but we keep it around for compatibility purposes
