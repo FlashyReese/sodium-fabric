@@ -25,11 +25,11 @@ import java.util.concurrent.locks.StampedLock;
  * integer key to object hash table. This generally provides improved performance over the vanilla implementation
  * through reducing code complexity, eliminating expensive floor-modulo operations, and removing the usage of atomic
  * references.
- *
+ * <p>
  * The usage of an atomic reference array is not necessary with Sodium's renderer implementation as it does not access
  * world state or chunks concurrently from other worker threads, which fixes a number of synchronization issues in the
  * process.
- *
+ * <p>
  * This implementation allows for a {@link ChunkStatusListener} to be attached, allowing the game renderer to receive
  * notifications when chunks are loaded or unloaded instead of resorting to expensive polling techniques, which would
  * usually resort in chunk queries being slammed every frame when many chunks have pending rebuilds.
@@ -190,7 +190,7 @@ public class SodiumChunkManager extends ClientChunkManager implements ChunkStatu
 
         // [VanillaCopy] Notify the light engine that this chunk's sections have been updated
         for (int y = 0; y < sections.length; ++y) {
-            lightEngine.setSectionStatus(ChunkSectionPos.from(x, y + (this.world.getBottomY() >> 4), z), ChunkSection.isEmpty(sections[y]));
+            lightEngine.setSectionStatus(ChunkSectionPos.from(x, this.world.sectionIndexToCoord(y), z), ChunkSection.isEmpty(sections[y]));
         }
 
         // Sodium doesn't actually use vanilla's global color cache, but we keep it around for compatibility purposes

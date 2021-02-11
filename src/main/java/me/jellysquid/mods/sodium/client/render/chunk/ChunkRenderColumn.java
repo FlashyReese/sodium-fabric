@@ -9,14 +9,13 @@ public class ChunkRenderColumn<T extends ChunkGraphicsState> {
     @SuppressWarnings("unchecked")
     private final ChunkRenderColumn<T>[] adjacent = new ChunkRenderColumn[6];
 
-    private final int x, z, bottomY;
+    private final int x, z;
 
     @SuppressWarnings("unchecked")
-    public ChunkRenderColumn(int x, int z, int worldHeight, int bottomY) {
+    public ChunkRenderColumn(int x, int z, int sectionSize) {
         this.x = x;
         this.z = z;
-        this.renders = new ChunkRenderContainer[worldHeight >> 4];
-        this.bottomY = bottomY;
+        this.renders = new ChunkRenderContainer[sectionSize];
 
         this.setAdjacentColumn(Direction.UP, this);
         this.setAdjacentColumn(Direction.DOWN, this);
@@ -31,11 +30,11 @@ public class ChunkRenderColumn<T extends ChunkGraphicsState> {
     }
 
     public void setRender(int y, ChunkRenderContainer<T> render) {
-        this.renders[y - (this.bottomY >> 4)] = render;
+        this.renders[y] = render;
     }
 
     public ChunkRenderContainer<T> getRender(int y) {
-        return this.renders[y - (this.bottomY >> 4)];
+        return this.renders[y];
     }
 
     public int getX() {
