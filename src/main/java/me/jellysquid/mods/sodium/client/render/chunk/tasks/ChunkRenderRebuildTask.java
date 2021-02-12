@@ -56,7 +56,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
 
-        buffers.init();
+        buffers.init(renderData);
         pipeline.init(this.slice, this.slice.getOrigin());
 
         int baseX = this.render.getOriginX();

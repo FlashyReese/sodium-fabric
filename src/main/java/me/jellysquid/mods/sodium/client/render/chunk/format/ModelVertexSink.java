@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.format;
 
 import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
+import net.minecraft.client.texture.Sprite;
 
 public interface ModelVertexSink extends VertexSink {
     /**
@@ -12,6 +13,7 @@ public interface ModelVertexSink extends VertexSink {
      * @param u The u-texture of the vertex
      * @param v The y-texture of the vertex
      * @param light The packed light-map coordinates of the vertex
+     * @param sprite The sprite of the vertex
      */
-    void writeQuad(float x, float y, float z, int color, float u, float v, int light);
+    void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite);
 }

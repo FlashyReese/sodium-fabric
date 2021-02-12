@@ -3,24 +3,15 @@ package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
 import net.minecraft.client.texture.Sprite;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.List;
 
 @Mixin(Sprite.class_5790.class)
 public abstract class MixinSpriteClass_5790 implements SpriteExtended {
 
     private boolean forceNextUpdate;
-
-    @Shadow
-    protected abstract void tick();
 
     /**
      * @author FlashyReese

@@ -1,8 +1,10 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.buffers;
 
 import me.jellysquid.mods.sodium.client.model.vertex.transformers.AbstractVertexTransformer;
+import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelOffset;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import net.minecraft.client.texture.Sprite;
 
 public class ChunkModelVertexTransformer extends AbstractVertexTransformer<ModelVertexSink> implements ModelVertexSink {
     /**
@@ -15,18 +17,25 @@ public class ChunkModelVertexTransformer extends AbstractVertexTransformer<Model
      */
     private final ChunkModelOffset offset;
 
-    public ChunkModelVertexTransformer(ModelVertexSink delegate, ChunkModelOffset offset) {
+    private final ChunkRenderData.Builder renderData;
+
+    public ChunkModelVertexTransformer(ModelVertexSink delegate, ChunkModelOffset offset, ChunkRenderData.Builder renderData) {
         super(delegate);
 
         this.offset = offset;
+        this.renderData = renderData;
     }
 
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
         x = (x * SCALE_NORM) + (this.offset.x * SCALE_NORM);
         y = (y * SCALE_NORM) + (this.offset.y * SCALE_NORM);
         z = (z * SCALE_NORM) + (this.offset.z * SCALE_NORM);
 
-        this.delegate.writeQuad(x, y, z, color, u, v, light);
+        this.delegate.writeQuad(x, y, z, color, u, v, light, sprite);
+
+        if (sprite != null) {
+            this.renderData.addSprite(sprite);
+        }
     }
 }

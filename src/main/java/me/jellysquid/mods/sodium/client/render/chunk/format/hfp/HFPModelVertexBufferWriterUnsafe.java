@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUn
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexUtil;
+import net.minecraft.client.texture.Sprite;
 
 public class HFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements ModelVertexSink {
     public HFPModelVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {
@@ -12,7 +13,7 @@ public class HFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe i
     }
 
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
         this.writeQuadInternal(
                 ModelVertexUtil.denormalizeFloatAsShort(x),
                 ModelVertexUtil.denormalizeFloatAsShort(y),

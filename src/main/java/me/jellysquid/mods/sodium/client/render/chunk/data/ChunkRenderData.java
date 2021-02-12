@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.jellysquid.mods.sodium.client.gl.util.BufferSlice;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
+import me.jellysquid.mods.sodium.mixin.features.texture_tracking.MixinSprite;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.chunk.ChunkOcclusionData;
 import net.minecraft.client.texture.Sprite;
@@ -111,12 +112,13 @@ public class ChunkRenderData {
         /**
          * Adds a sprite to this data container for tracking. If the sprite is tickable, it will be ticked every frame
          * before rendering as necessary.
+         *
          * @param sprite The sprite
          */
         public void addSprite(Sprite sprite) {
-            /*if (sprite.getAnimationFrameDelta()) {
+            if (sprite.method_33442().count() > 1) {
                 this.animatedSprites.add(sprite);
-            }*/
+            }
         }
 
         public void setMesh(BlockRenderPass pass, ChunkMeshData data) {
@@ -125,8 +127,9 @@ public class ChunkRenderData {
 
         /**
          * Adds a block entity to the data container.
+         *
          * @param entity The block entity itself
-         * @param cull True if the block entity can be culled to this chunk render's volume, otherwise false
+         * @param cull   True if the block entity can be culled to this chunk render's volume, otherwise false
          */
         public void addBlockEntity(BlockEntity entity, boolean cull) {
             (cull ? this.blockEntities : this.globalBlockEntities).add(entity);

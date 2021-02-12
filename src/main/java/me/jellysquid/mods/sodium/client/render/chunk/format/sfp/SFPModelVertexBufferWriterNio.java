@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterNio;
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import net.minecraft.client.texture.Sprite;
 
 import java.nio.ByteBuffer;
 
@@ -13,7 +14,7 @@ public class SFPModelVertexBufferWriterNio extends VertexBufferWriterNio impleme
     }
 
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
         int i = this.writeOffset;
 
         ByteBuffer buffer = this.byteBuffer;

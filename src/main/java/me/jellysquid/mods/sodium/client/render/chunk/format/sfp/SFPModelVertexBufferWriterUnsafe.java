@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUnsafe;
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import net.minecraft.client.texture.Sprite;
 
 public class SFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements ModelVertexSink {
     public SFPModelVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {
@@ -12,7 +13,7 @@ public class SFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe i
 
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
         long i = this.writePointer;
 
         UNSAFE.putFloat(i, x);
