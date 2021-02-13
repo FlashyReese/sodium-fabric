@@ -116,7 +116,7 @@ public class ChunkRenderData {
          * @param sprite The sprite
          */
         public void addSprite(Sprite sprite) {
-            if (sprite.method_33442().count() > 1) {
+            if (((MixinSprite) sprite).getImages().length > 1) {
                 this.animatedSprites.add(sprite);
             }
         }

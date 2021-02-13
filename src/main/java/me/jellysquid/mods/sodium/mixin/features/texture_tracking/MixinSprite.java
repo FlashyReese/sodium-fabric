@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -8,4 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MixinSprite {
     @Accessor("field_28468")
     Sprite.class_5790 field_28468();
+
+    @Accessor("images")
+    NativeImage[] getImages();
 }
