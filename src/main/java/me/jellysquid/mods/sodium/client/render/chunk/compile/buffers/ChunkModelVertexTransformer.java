@@ -19,6 +19,8 @@ public class ChunkModelVertexTransformer extends AbstractVertexTransformer<Model
 
     private final ChunkRenderData.Builder renderData;
 
+    private Sprite sprite;
+
     public ChunkModelVertexTransformer(ModelVertexSink delegate, ChunkModelOffset offset, ChunkRenderData.Builder renderData) {
         super(delegate);
 
@@ -27,15 +29,20 @@ public class ChunkModelVertexTransformer extends AbstractVertexTransformer<Model
     }
 
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
+    }
+
+    @Override
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
         x = (x * SCALE_NORM) + (this.offset.x * SCALE_NORM);
         y = (y * SCALE_NORM) + (this.offset.y * SCALE_NORM);
         z = (z * SCALE_NORM) + (this.offset.z * SCALE_NORM);
 
-        this.delegate.writeQuad(x, y, z, color, u, v, light, sprite);
+        this.delegate.writeQuad(x, y, z, color, u, v, light);
 
-        if (sprite != null) {
-            this.renderData.addSprite(sprite);
+        if (this.sprite != null) {
+            this.renderData.addSprite(this.sprite);
         }
     }
 }

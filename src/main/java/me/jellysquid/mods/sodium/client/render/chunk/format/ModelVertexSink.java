@@ -13,7 +13,12 @@ public interface ModelVertexSink extends VertexSink {
      * @param u The u-texture of the vertex
      * @param v The y-texture of the vertex
      * @param light The packed light-map coordinates of the vertex
-     * @param sprite The sprite of the vertex
      */
-    void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite);
+    void writeQuad(float x, float y, float z, int color, float u, float v, int light);
+
+    /**
+     * Sets a quad's sprite to this sink
+     * @param sprite The sprite of the quad
+     */
+    default void setSprite(Sprite sprite){}
 }

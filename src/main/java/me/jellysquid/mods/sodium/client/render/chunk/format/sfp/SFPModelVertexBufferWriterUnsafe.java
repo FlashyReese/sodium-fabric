@@ -4,7 +4,6 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUnsafe;
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
-import net.minecraft.client.texture.Sprite;
 
 public class SFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements ModelVertexSink {
     public SFPModelVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {
@@ -13,7 +12,7 @@ public class SFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe i
 
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
         long i = this.writePointer;
 
         UNSAFE.putFloat(i, x);
@@ -32,7 +31,7 @@ public class SFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe i
      * texture coordinates as two un-normalized unsigned shorts in the range 0..255. Using the fixed-function pipeline,
      * it then applies a matrix transformation which normalizes these coordinates and applies a centering offset. This
      * operation has non-zero overhead and complicates shader code a bit.
-     *
+     * <p>
      * To work around the problem, this function instead normalizes these light map texture coordinates and applies the
      * centering offset, allowing it to be baked into the vertex data itself.
      *

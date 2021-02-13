@@ -350,7 +350,7 @@ public class FluidRenderer {
         return rendered;
     }
 
-    private void calculateQuadColors(ModelQuadView quad, BlockRenderView world,  BlockPos pos, LightPipeline lighter, Direction dir, float brightness, boolean colorized) {
+    private void calculateQuadColors(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, boolean colorized) {
         QuadLightData light = this.quadLightData;
         lighter.calculate(quad, pos, light, dir, false);
 
@@ -392,8 +392,9 @@ public class FluidRenderer {
             int light = this.quadLightData.lm[vertexIdx];
 
             Sprite sprite = quad.getSprite();
+            sink.setSprite(sprite);
 
-            sink.writeQuad(x, y, z, color, u, v, light, sprite);
+            sink.writeQuad(x, y, z, color, u, v, light);
 
             vertexIdx += lightOrder;
         }

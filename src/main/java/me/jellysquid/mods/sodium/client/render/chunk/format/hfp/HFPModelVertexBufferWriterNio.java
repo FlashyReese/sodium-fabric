@@ -5,7 +5,6 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterNi
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexUtil;
-import net.minecraft.client.texture.Sprite;
 
 import java.nio.ByteBuffer;
 
@@ -15,7 +14,7 @@ public class HFPModelVertexBufferWriterNio extends VertexBufferWriterNio impleme
     }
 
     @Override
-    public void writeQuad(float x, float y, float z, int color, float u, float v, int light, Sprite sprite) {
+    public void writeQuad(float x, float y, float z, int color, float u, float v, int light) {
         this.writeQuadInternal(
                 ModelVertexUtil.denormalizeFloatAsShort(x),
                 ModelVertexUtil.denormalizeFloatAsShort(y),
