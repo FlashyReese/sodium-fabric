@@ -35,7 +35,7 @@ public class MixinLevelLoadingScreen {
      * This implementation differs from vanilla's in the following key ways.
      * - All tiles are batched together in one draw call, reducing CPU overhead by an order of magnitudes.
      * - Identity hashing is used for faster ChunkStatus -> Color lookup.
-     * - Colors are stored in unpacked RGBA format so conversion is not necessary every tile draw
+     * - Colors are stored in packed RGBA format so conversions are necessary every tile draw
      *
      * @reason Significantly optimized implementation.
      * @author JellySquid
