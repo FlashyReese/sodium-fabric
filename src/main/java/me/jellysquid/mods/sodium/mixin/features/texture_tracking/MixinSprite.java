@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Sprite.class)
 public interface MixinSprite {
-    @Accessor("field_28468")
-    Sprite.class_5790 field_28468();
+    @Accessor("animation")
+    Sprite.Animation getAnimation();
 
     @Accessor("images")
     NativeImage[] getImages();

@@ -10,6 +10,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.world.chunk.ChunkStatus;
 import org.spongepowered.asm.mixin.*;
 
@@ -49,6 +50,8 @@ public class MixinLevelLoadingScreen {
                     .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), entry.getIntValue() | -16777216));
         }
 
+        Matrix4f matrix4f = matrixStack.peek().getModel();
+
         Tessellator tessellator = Tessellator.getInstance();
 
         RenderSystem.enableBlend();
@@ -67,10 +70,10 @@ public class MixinLevelLoadingScreen {
             int mapRenderCenterSize = centerSize * tileSize - mapPadding;
             int radius = mapRenderCenterSize / 2 + 1;
 
-            addRect(buffer, mapX - radius, mapY - radius, mapX - radius + 1, mapY + radius, DEFAULT_STATUS_COLOR);
-            addRect(buffer, mapX + radius - 1, mapY - radius, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
-            addRect(buffer, mapX - radius, mapY - radius, mapX + radius, mapY - radius + 1, DEFAULT_STATUS_COLOR);
-            addRect(buffer, mapX - radius, mapY + radius - 1, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
+            addRect(buffer, matrix4f, mapX - radius, mapY - radius, mapX - radius + 1, mapY + radius, DEFAULT_STATUS_COLOR);
+            addRect(buffer, matrix4f, mapX + radius - 1, mapY - radius, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
+            addRect(buffer, matrix4f, mapX - radius, mapY - radius, mapX + radius, mapY - radius + 1, DEFAULT_STATUS_COLOR);
+            addRect(buffer, matrix4f, mapX - radius, mapY + radius - 1, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
         }
 
         int mapRenderSize = size * tileSize - mapPadding;
@@ -98,7 +101,7 @@ public class MixinLevelLoadingScreen {
                     prevColor = color;
                 }
 
-                addRect(buffer, tileX, tileY, tileX + mapScale, tileY + mapScale, color);
+                addRect(buffer, matrix4f, tileX, tileY, tileX + mapScale, tileY + mapScale, color);
             }
         }
 
@@ -108,14 +111,14 @@ public class MixinLevelLoadingScreen {
         GlStateManager.disableBlend();
     }
 
-    private static void addRect(BufferBuilder buffer, double x1, double y1, double x2, double y2, int color) {
+    private static void addRect(BufferBuilder buffer, Matrix4f matrix4f, float x1, float y1, float x2, float y2, int color) {
         float a = (float) (color >> 24 & 255) / 255.0F;
         float r = (float) (color >> 16 & 255) / 255.0F;
         float g = (float) (color >> 8 & 255) / 255.0F;
         float b = (float) (color & 255) / 255.0F;
-        buffer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
-        buffer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
-        buffer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
-        buffer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
+        buffer.vertex(matrix4f, x1, y2, 0.0F).color(r, g, b, a).next();
+        buffer.vertex(matrix4f, x2, y2, 0.0F).color(r, g, b, a).next();
+        buffer.vertex(matrix4f, x2, y1, 0.0F).color(r, g, b, a).next();
+        buffer.vertex(matrix4f, x1, y1, 0.0F).color(r, g, b, a).next();
     }
 }

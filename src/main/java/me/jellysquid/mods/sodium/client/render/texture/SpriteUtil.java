@@ -5,8 +5,8 @@ import net.minecraft.client.texture.Sprite;
 
 public class SpriteUtil {
     public static void markSpriteActive(Sprite sprite) {
-        if (((MixinSprite)sprite).field_28468() instanceof SpriteExtended) {
-            ((SpriteExtended) ((MixinSprite)sprite).field_28468()).markActive();
+        if (((MixinSprite)sprite).getAnimation() instanceof SpriteExtended) {
+            ((SpriteExtended) ((MixinSprite)sprite).getAnimation()).markActive();
         }
     }
 }

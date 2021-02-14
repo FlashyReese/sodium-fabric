@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Sprite.class_5790.class)
-public abstract class MixinSpriteClass_5790 implements SpriteExtended {
+@Mixin(Sprite.Animation.class)
+public abstract class MixinSpriteAnimation implements SpriteExtended {
 
     private boolean forceNextUpdate;
 
