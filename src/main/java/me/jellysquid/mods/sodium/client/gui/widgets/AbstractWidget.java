@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.gui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
@@ -9,19 +10,26 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Consumer;
 
 public abstract class AbstractWidget implements Drawable, Element {
     protected final TextRenderer font;
+    protected final Dim2i dim;
 
-    protected AbstractWidget() {
+    protected AbstractWidget(Dim2i dim) {
+        this.dim = dim;
         this.font = MinecraftClient.getInstance().textRenderer;
     }
 
     protected void drawString(MatrixStack matrixStack, String str, int x, int y, int color) {
         this.font.draw(matrixStack, str, x, y, color);
+    }
+
+    protected void drawString(MatrixStack matrixStack, Text text, int x, int y, int color) {
+        this.font.draw(matrixStack, text, x, y, color);
     }
 
     protected void drawRect(int x1, int y1, int x2, int y2, int color) {
@@ -31,6 +39,20 @@ public abstract class AbstractWidget implements Drawable, Element {
         float b = (float) (color & 255) / 255.0F;
 
         this.drawQuads(vertices -> addQuad(vertices, x1, y1, x2, y2, a, r, g, b));
+    }
+
+    protected void drawRectOutline(int x, int y, int w, int h, int color) {
+        final float a = (float) (color >> 24 & 255) / 255.0F;
+        final float r = (float) (color >> 16 & 255) / 255.0F;
+        final float g = (float) (color >> 8 & 255) / 255.0F;
+        final float b = (float) (color & 255) / 255.0F;
+
+        this.drawQuads(vertices -> {
+            addQuad(vertices, x, y, w, y + 1, a, r, g, b);
+            addQuad(vertices, x, h - 1, w, h, a, r, g, b);
+            addQuad(vertices, x, y, x + 1, h, a, r, g, b);
+            addQuad(vertices, w - 1, y, w, h, a, r, g, b);
+        });
     }
 
     protected void drawQuads(Consumer<VertexConsumer> consumer) {
@@ -64,5 +86,13 @@ public abstract class AbstractWidget implements Drawable, Element {
 
     protected int getStringWidth(String text) {
         return this.font.getWidth(text);
+    }
+
+    protected int getStringWidth(Text text) {
+        return this.font.getWidth(text);
+    }
+
+    public Dim2i getDimensions() {
+        return this.dim;
     }
 }

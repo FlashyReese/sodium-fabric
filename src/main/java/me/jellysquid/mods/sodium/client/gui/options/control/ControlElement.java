@@ -9,13 +9,11 @@ import net.minecraft.util.Formatting;
 public class ControlElement<T> extends AbstractWidget {
     protected final Option<T> option;
 
-    protected final Dim2i dim;
-
     protected boolean hovered;
 
     public ControlElement(Option<T> option, Dim2i dim) {
+        super(dim);
         this.option = option;
-        this.dim = dim;
     }
 
     public boolean isHovered() {
@@ -41,18 +39,19 @@ public class ControlElement<T> extends AbstractWidget {
             label = String.valueOf(Formatting.GRAY) + Formatting.STRIKETHROUGH + name;
         }
 
-        this.hovered = this.dim.containsCursor(mouseX, mouseY);
+        this.hovered = this.isMouseOver(mouseX, mouseY);
 
 
         this.drawRect(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), this.hovered ? 0xE0000000 : 0x90000000);
         this.drawString(matrixStack, label, this.dim.getOriginX() + 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);
     }
 
-    public Option<T> getOption() {
-        return this.option;
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.dim.containsCursor(mouseX, mouseY);
     }
 
-    public Dim2i getDimensions() {
-        return this.dim;
+    public Option<T> getOption() {
+        return this.option;
     }
 }

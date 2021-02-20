@@ -1,12 +1,12 @@
 package me.jellysquid.mods.sodium.client.gui.widgets;
 
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
-public class FlatButtonWidget extends AbstractWidget implements Drawable {
-    private final Dim2i dim;
-    private final String label;
+public class FlatButtonWidget extends AbstractWidget {
+    private final Text label;
     private final Runnable action;
 
     private boolean selected;
@@ -14,7 +14,11 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
     private boolean visible = true;
 
     public FlatButtonWidget(Dim2i dim, String label, Runnable action) {
-        this.dim = dim;
+        this(dim, new LiteralText(label), action);
+    }
+
+    public FlatButtonWidget(Dim2i dim, Text label, Runnable action) {
+        super(dim);
         this.label = label;
         this.action = action;
     }
@@ -64,7 +68,7 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
         this.enabled = enabled;
     }
 
-    public void setVisible(boolean visibel) {
-        this.visible = visibel;
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }
