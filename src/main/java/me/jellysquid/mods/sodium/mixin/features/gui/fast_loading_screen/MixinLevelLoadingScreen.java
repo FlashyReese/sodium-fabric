@@ -1,8 +1,13 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.fast_loading_screen;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
+import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
+import me.jellysquid.mods.sodium.client.model.vertex.formats.screen_quad.BasicScreenQuadVertexSink;
+import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
+import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import net.minecraft.client.gui.WorldGenerationProgressTracker;
 import net.minecraft.client.gui.screen.LevelLoadingScreen;
 import net.minecraft.client.render.BufferBuilder;
@@ -13,8 +18,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.world.chunk.ChunkStatus;
 import org.spongepowered.asm.mixin.*;
-
-import java.util.IdentityHashMap;
 
 /**
  * Re-implements the loading screen with considerations to reduce draw calls and other sources of overhead. This can
@@ -27,16 +30,16 @@ public class MixinLevelLoadingScreen {
     @Final
     private static Object2IntMap<ChunkStatus> STATUS_TO_COLOR;
 
-    private static IdentityHashMap<ChunkStatus, Integer> STATUS_TO_COLOR_FAST;
+    private static Reference2IntOpenHashMap<ChunkStatus> STATUS_TO_COLOR_FAST;
 
-    private static final int NULL_STATUS_COLOR = -16777216;
-    private static final int DEFAULT_STATUS_COLOR = -16772609;
+    private static final int NULL_STATUS_COLOR = ColorABGR.pack(0, 0, 0, 0xFF);
+    private static final int DEFAULT_STATUS_COLOR = ColorARGB.pack(0, 0x11, 0xFF, 0xFF);
 
     /**
      * This implementation differs from vanilla's in the following key ways.
      * - All tiles are batched together in one draw call, reducing CPU overhead by an order of magnitudes.
-     * - Identity hashing is used for faster ChunkStatus -> Color lookup.
-     * - Colors are stored in packed RGBA format so conversions are necessary every tile draw
+     * - Reference hashing is used for faster ChunkStatus -> Color lookup.
+     * - Colors are stored in ABGR format so conversion is not necessary every tile draw.
      *
      * @reason Significantly optimized implementation.
      * @author JellySquid
@@ -44,22 +47,24 @@ public class MixinLevelLoadingScreen {
     @Overwrite
     public static void drawChunkMap(MatrixStack matrixStack, WorldGenerationProgressTracker tracker, int mapX, int mapY, int mapScale, int mapPadding) {
         if (STATUS_TO_COLOR_FAST == null) {
-            STATUS_TO_COLOR_FAST = new IdentityHashMap<>(STATUS_TO_COLOR.size());
+            STATUS_TO_COLOR_FAST = new Reference2IntOpenHashMap<>(STATUS_TO_COLOR.size());
             STATUS_TO_COLOR_FAST.put(null, NULL_STATUS_COLOR);
             STATUS_TO_COLOR.object2IntEntrySet()
-                    .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), entry.getIntValue() | -16777216));
+                    .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), ColorARGB.toABGR(entry.getIntValue(), 0xFF)));
         }
 
-        Matrix4f matrix4f = matrixStack.peek().getModel();
+        Matrix4f matrix = matrixStack.peek().getModel();
 
         Tessellator tessellator = Tessellator.getInstance();
 
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
-
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        
+        BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        BasicScreenQuadVertexSink sink = VertexDrain.of(buffer).createSink(VanillaVertexTypes.BASIC_SCREEN_QUADS);
 
         int centerSize = tracker.getCenterSize();
         int size = tracker.getSize();
@@ -70,10 +75,11 @@ public class MixinLevelLoadingScreen {
             int mapRenderCenterSize = centerSize * tileSize - mapPadding;
             int radius = mapRenderCenterSize / 2 + 1;
 
-            addRect(buffer, matrix4f, mapX - radius, mapY - radius, mapX - radius + 1, mapY + radius, DEFAULT_STATUS_COLOR);
-            addRect(buffer, matrix4f, mapX + radius - 1, mapY - radius, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
-            addRect(buffer, matrix4f, mapX - radius, mapY - radius, mapX + radius, mapY - radius + 1, DEFAULT_STATUS_COLOR);
-            addRect(buffer, matrix4f, mapX - radius, mapY + radius - 1, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
+            sink.ensureCapacity(4 * 4);
+            addRect(matrix, sink, mapX - radius, mapY - radius, mapX - radius + 1, mapY + radius, DEFAULT_STATUS_COLOR);
+            addRect(matrix, sink, mapX + radius - 1, mapY - radius, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
+            addRect(matrix, sink, mapX - radius, mapY - radius, mapX + radius, mapY - radius + 1, DEFAULT_STATUS_COLOR);
+            addRect(matrix, sink, mapX - radius, mapY + radius - 1, mapX + radius, mapY + radius, DEFAULT_STATUS_COLOR);
         }
 
         int mapRenderSize = size * tileSize - mapPadding;
@@ -83,6 +89,7 @@ public class MixinLevelLoadingScreen {
         ChunkStatus prevStatus = null;
         int prevColor = NULL_STATUS_COLOR;
 
+        sink.ensureCapacity(size * size * 4);
         for (int x = 0; x < size; ++x) {
             int tileX = mapStartX + x * tileSize;
 
@@ -95,30 +102,27 @@ public class MixinLevelLoadingScreen {
                 if (prevStatus == status) {
                     color = prevColor;
                 } else {
-                    color = STATUS_TO_COLOR_FAST.get(status);
+                    color = STATUS_TO_COLOR_FAST.getInt(status);
 
                     prevStatus = status;
                     prevColor = color;
                 }
 
-                addRect(buffer, matrix4f, tileX, tileY, tileX + mapScale, tileY + mapScale, color);
+                addRect(matrix, sink, tileX, tileY, tileX + mapScale, tileY + mapScale, color);
             }
         }
 
+        sink.flush();
         tessellator.draw();
 
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
     }
 
-    private static void addRect(BufferBuilder buffer, Matrix4f matrix4f, float x1, float y1, float x2, float y2, int color) {
-        float a = (float) (color >> 24 & 255) / 255.0F;
-        float r = (float) (color >> 16 & 255) / 255.0F;
-        float g = (float) (color >> 8 & 255) / 255.0F;
-        float b = (float) (color & 255) / 255.0F;
-        buffer.vertex(matrix4f, x1, y2, 0.0F).color(r, g, b, a).next();
-        buffer.vertex(matrix4f, x2, y2, 0.0F).color(r, g, b, a).next();
-        buffer.vertex(matrix4f, x2, y1, 0.0F).color(r, g, b, a).next();
-        buffer.vertex(matrix4f, x1, y1, 0.0F).color(r, g, b, a).next();
+    private static void addRect(Matrix4f matrix, BasicScreenQuadVertexSink sink, int x1, int y1, int x2, int y2, int color) {
+        sink.writeQuad(matrix, x1, y2, 0, color);
+        sink.writeQuad(matrix, x2, y2, 0, color);
+        sink.writeQuad(matrix, x2, y1, 0, color);
+        sink.writeQuad(matrix, x1, y1, 0, color);
     }
 }
