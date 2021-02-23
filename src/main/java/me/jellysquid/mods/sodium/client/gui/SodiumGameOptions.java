@@ -9,6 +9,10 @@ import me.jellysquid.mods.sodium.client.render.chunk.backends.gl20.GL20ChunkRend
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl30.GL30ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.gl43.GL43ChunkRenderBackend;
 import net.minecraft.client.option.GraphicsMode;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -56,17 +60,17 @@ public class SodiumGameOptions {
 
         public static final ChunkRendererBackendOption BEST = pickBestBackend();
 
-        private final String name;
+        private final Text text;
         private final SupportCheck supportedFunc;
 
         ChunkRendererBackendOption(String name, SupportCheck supportedFunc) {
-            this.name = name;
+            this.text = new LiteralText(name);
             this.supportedFunc = supportedFunc;
         }
 
         @Override
-        public String getLocalizedName() {
-            return this.name;
+        public Text getText() {
+            return this.text;
         }
 
         public boolean isSupported(boolean disableBlacklist) {
@@ -95,19 +99,19 @@ public class SodiumGameOptions {
     }
 
     public enum GraphicsQuality implements TextProvider {
-        DEFAULT("Default"),
-        FANCY("Fancy"),
-        FAST("Fast");
+        DEFAULT("generator.default"),
+        FANCY("options.clouds.fancy"),
+        FAST("options.clouds.fast");
 
-        private final String name;
+        private final Text text;
 
         GraphicsQuality(String name) {
-            this.name = name;
+            this.text = new TranslatableText(name);
         }
 
         @Override
-        public String getLocalizedName() {
-            return this.name;
+        public Text getText() {
+            return this.text;
         }
 
         public boolean isFancy(GraphicsMode graphicsMode) {
@@ -116,19 +120,19 @@ public class SodiumGameOptions {
     }
 
     public enum LightingQuality implements TextProvider {
-        HIGH("High"),
-        LOW("Low"),
-        OFF("Off");
+        HIGH("options.ao.max"),
+        LOW("options.ao.min"),
+        OFF("options.ao.off");
 
-        private final String name;
+        private final Text text;
 
-        LightingQuality(String name) {
-            this.name = name;
+        LightingQuality(String text) {
+            this.text = new TranslatableText(text);
         }
 
         @Override
-        public String getLocalizedName() {
-            return this.name;
+        public Text getText() {
+            return this.text;
         }
     }
 
