@@ -402,6 +402,12 @@ public class FluidRenderer {
             vertexIdx += lightOrder;
         }
 
+        Sprite sprite = quad.getSprite();
+
+        if (sprite != null) {
+            buffers.getRenderData().addSprite(sprite);
+        }
+
         sink.flush();
     }
 

@@ -61,7 +61,7 @@ public class ChunkBuildBuffers {
                 writers[facing.ordinal()] = new ChunkModelVertexTransformer(this.vertexType.createBufferWriter(this.buffersByLayer[i][facing.ordinal()], UnsafeUtil.isAvailable()), this.offset, renderData);
             }
 
-            this.delegates[i] = new BakedChunkModelBuffers(writers);
+            this.delegates[i] = new BakedChunkModelBuffers(writers, renderData);
         }
     }
 
