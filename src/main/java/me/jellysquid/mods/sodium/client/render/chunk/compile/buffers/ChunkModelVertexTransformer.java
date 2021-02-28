@@ -1,10 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.buffers;
 
 import me.jellysquid.mods.sodium.client.model.vertex.transformers.AbstractVertexTransformer;
-import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelOffset;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
-import net.minecraft.client.texture.Sprite;
 
 public class ChunkModelVertexTransformer extends AbstractVertexTransformer<ModelVertexSink> implements ModelVertexSink {
     /**
@@ -17,20 +15,10 @@ public class ChunkModelVertexTransformer extends AbstractVertexTransformer<Model
      */
     private final ChunkModelOffset offset;
 
-    private final ChunkRenderData.Builder renderData;
-
-    private Sprite sprite;
-
-    public ChunkModelVertexTransformer(ModelVertexSink delegate, ChunkModelOffset offset, ChunkRenderData.Builder renderData) {
+    public ChunkModelVertexTransformer(ModelVertexSink delegate, ChunkModelOffset offset) {
         super(delegate);
 
         this.offset = offset;
-        this.renderData = renderData;
-    }
-
-    @Override
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
     }
 
     @Override
@@ -40,9 +28,5 @@ public class ChunkModelVertexTransformer extends AbstractVertexTransformer<Model
         z = (z * SCALE_NORM) + (this.offset.z * SCALE_NORM);
 
         this.delegate.writeQuad(x, y, z, color, u, v, light);
-
-        if (this.sprite != null) {
-            this.renderData.addSprite(this.sprite);
-        }
     }
 }

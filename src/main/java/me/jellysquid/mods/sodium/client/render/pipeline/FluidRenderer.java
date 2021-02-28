@@ -394,9 +394,6 @@ public class FluidRenderer {
 
             int light = this.quadLightData.lm[vertexIdx];
 
-            Sprite sprite = quad.getSprite();
-            sink.setSprite(sprite);
-
             sink.writeQuad(x, y, z, color, u, v, light);
 
             vertexIdx += lightOrder;

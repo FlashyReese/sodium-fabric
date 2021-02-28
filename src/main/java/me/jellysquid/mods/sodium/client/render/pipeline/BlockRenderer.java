@@ -141,9 +141,6 @@ public class BlockRenderer {
 
             int lm = light.lm[srcIndex];
 
-            Sprite sprite = src.getSprite();
-            sink.setSprite(sprite);
-
             sink.writeQuad(x, y, z, color, u, v, lm);
         }
 
