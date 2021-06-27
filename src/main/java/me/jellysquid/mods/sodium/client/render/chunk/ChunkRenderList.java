@@ -1,45 +1,72 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
-import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.*;
+import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class ChunkRenderList {
-    private final List<Entry> entries = new ObjectArrayList<>();
+    private final Reference2ObjectLinkedOpenHashMap<RenderRegion, List<RenderSection>> entries = new Reference2ObjectLinkedOpenHashMap<>();
 
-    public Iterable<Entry> iterable(boolean reverse) {
-        return reverse ? Lists.reverse(this.entries) : this.entries;
+    public Iterable<Map.Entry<RenderRegion, List<RenderSection>>> sorted(boolean reverse) {
+        if (this.entries.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Reference2ObjectSortedMap.FastSortedEntrySet<RenderRegion, List<RenderSection>> entries =
+                this.entries.reference2ObjectEntrySet();
+
+        if (reverse) {
+            return () -> new Iterator<Map.Entry<RenderRegion, List<RenderSection>>>() {
+                final ObjectBidirectionalIterator<Reference2ObjectMap.Entry<RenderRegion, List<RenderSection>>> iterator =
+                        entries.fastIterator(entries.last());
+
+                @Override
+                public boolean hasNext() {
+                    return this.iterator.hasPrevious();
+                }
+
+                @Override
+                public Map.Entry<RenderRegion, List<RenderSection>> next() {
+                    return this.iterator.previous();
+                }
+            };
+        } else {
+            return () -> new Iterator<Map.Entry<RenderRegion, List<RenderSection>>>() {
+                final ObjectBidirectionalIterator<Reference2ObjectMap.Entry<RenderRegion, List<RenderSection>>> iterator =
+                        entries.fastIterator();
+
+                @Override
+                public boolean hasNext() {
+                    return this.iterator.hasNext();
+                }
+
+                @Override
+                public Map.Entry<RenderRegion, List<RenderSection>> next() {
+                    return this.iterator.next();
+                }
+            };
+        }
     }
 
     public void clear() {
         this.entries.clear();
     }
 
-    public void addChunks(Reference2ObjectMap<RenderRegion, List<RenderChunk>> visibleChunks) {
-        for (Map.Entry<RenderRegion, List<RenderChunk>> entry : Reference2ObjectMaps.fastIterable(visibleChunks)) {
-            this.entries.add(new Entry(entry.getKey(), entry.getValue()));
-        }
+    public void add(RenderSection render) {
+        RenderRegion region = render.getRegion();
+
+        List<RenderSection> sections = this.entries.computeIfAbsent(region, (key) -> new ObjectArrayList<>());
+        sections.add(render);
     }
 
-    public static class Entry {
-        private final RenderRegion region;
-        private final List<RenderChunk> chunks;
-
-        public Entry(RenderRegion region, List<RenderChunk> chunks) {
-            this.region = region;
-            this.chunks = chunks;
-        }
-
-        public RenderRegion getRegion() {
-            return this.region;
-        }
-
-        public Iterable<RenderChunk> iterable(boolean reverse) {
-            return reverse ? Lists.reverse(this.chunks) : this.chunks;
-        }
+    public int getCount() {
+        return this.entries.values()
+                .stream()
+                .mapToInt(List::size)
+                .sum();
     }
 }
