@@ -129,6 +129,10 @@ public class RenderRegion {
         return this.visibility;
     }
 
+    public static int getChunkIndex(int x, int y, int z) {
+        return (x * RenderRegion.REGION_LENGTH * RenderRegion.REGION_HEIGHT) + (y * RenderRegion.REGION_LENGTH) + z;
+    }
+
     public static class RenderRegionArenas {
         public final GlBufferArena vertexBuffers;
         public final GlBufferArena indexBuffers;
@@ -136,8 +140,11 @@ public class RenderRegion {
         public GlTessellation tessellation;
 
         public RenderRegionArenas(CommandList commandList, ChunkRenderer renderer) {
-            this.vertexBuffers = new GlBufferArena(commandList, 24 * 1024, renderer.getVertexType().getBufferVertexFormat().getStride());
-            this.indexBuffers = new GlBufferArena(commandList, 6 * 1024, 4);
+            int expectedVertexCount = 32 * 1024;
+            int expectedIndexCount = (expectedVertexCount / 4) * 6;
+
+            this.vertexBuffers = GlBufferArena.createVertexArena(commandList, expectedVertexCount, renderer.getVertexType().getBufferVertexFormat().getStride());
+            this.indexBuffers = GlBufferArena.createIndexArena(commandList, expectedIndexCount);
         }
 
         public void delete(CommandList commandList) {
