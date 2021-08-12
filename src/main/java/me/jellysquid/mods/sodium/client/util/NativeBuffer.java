@@ -3,6 +3,8 @@ package me.jellysquid.mods.sodium.client.util;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryUtil;
@@ -16,8 +18,6 @@ import java.util.stream.Collectors;
 
 public class NativeBuffer {
     private static final Logger LOGGER = LogManager.getLogger(NativeBuffer.class);
-
-    private static final boolean ENABLE_STACK_TRACE_LOGGING = false;
 
     private static final ReferenceQueue<NativeBuffer> RECLAIM_QUEUE = new ReferenceQueue<>();
     private static final Reference2ReferenceMap<Reference<NativeBuffer>, BufferReference> ACTIVE_BUFFERS =
@@ -33,6 +33,12 @@ public class NativeBuffer {
         ACTIVE_BUFFERS.put(new PhantomReference<>(this, RECLAIM_QUEUE), this.ref);
     }
 
+    public static NativeBuffer copy(ByteBuffer src) {
+        NativeBuffer dst = new NativeBuffer(src.remaining());
+        MemoryUtil.memCopy(src, dst.getDirectBuffer());
+        return dst;
+    }
+
     public ByteBuffer getDirectBuffer() {
         this.ref.checkFreed();
 
@@ -43,7 +49,7 @@ public class NativeBuffer {
         deallocate(this.ref);
     }
 
-    public int size() {
+    public int getLength() {
         return this.ref.length;
     }
 
@@ -81,31 +87,37 @@ public class NativeBuffer {
     }
 
     private static StackTraceElement[] getStackTrace() {
-        return ENABLE_STACK_TRACE_LOGGING ? Thread.currentThread()
+        return SodiumClientMod.options().advanced.enableMemoryTracing ? Thread.currentThread()
                 .getStackTrace() : null;
     }
 
-    private static BufferReference allocate(int capacity) {
-        long address = 0;
+    private static final int MAX_ALLOCATION_ATTEMPTS = 3;
 
-        for (int i = 0; i < 3; i++) {
-            address = MemoryUtil.nmemAlloc(capacity);
+    private static BufferReference allocate(int bytes) {
+        long address = 0;
+        int attempts = 0;
+
+        while (++attempts <= MAX_ALLOCATION_ATTEMPTS) {
+            address = MemoryUtil.nmemAlloc(bytes);
 
             if (address != MemoryUtil.NULL) {
                 break;
             }
+
+            LOGGER.error("EMERGENCY: Tried to allocate {} bytes but the allocator reports failure", bytes);
+            LOGGER.error("EMERGENCY: ... Attempting to force a garbage collection cycle (attempt {}/{})", attempts, MAX_ALLOCATION_ATTEMPTS);
 
             // If memory allocation fails, force a garbage collection
             reclaim(true);
         }
 
         if (address == MemoryUtil.NULL) {
-            throw new OutOfMemoryError("Couldn't allocate %s bytes".formatted(capacity));
+            throw new OutOfMemoryError("Couldn't allocate %s bytes after %s attempts".formatted(bytes, attempts));
         }
 
-        StackTraceElement[] stackTrace = ENABLE_STACK_TRACE_LOGGING ? Thread.currentThread().getStackTrace() : null;
+        StackTraceElement[] stackTrace = getStackTrace();
 
-        BufferReference ref = new BufferReference(address, capacity, stackTrace);
+        BufferReference ref = new BufferReference(address, bytes, stackTrace);
         ALLOCATED += ref.length;
 
         return ref;

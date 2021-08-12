@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderBounds;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
+import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
@@ -22,6 +23,7 @@ import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -50,7 +52,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
 
-        buffers.init(renderData);
+        buffers.init(renderData, this.render.getChunkId());
 
         cache.init(this.context);
 
@@ -81,7 +83,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     }
 
                     blockPos.set(x, y, z);
-                    offset.set(x & 127, y & 63, z & 127);
+                    offset.set(x & 15, y & 15, z & 15);
 
                     boolean rendered = false;
 

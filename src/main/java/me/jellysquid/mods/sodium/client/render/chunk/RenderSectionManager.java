@@ -15,6 +15,7 @@ import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphIterationQueue;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
@@ -33,7 +34,6 @@ import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.collections.FutureQueueDrainingIterator;
-import me.jellysquid.mods.sodium.common.util.collections.QueueDrainingIterator;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
@@ -67,7 +67,6 @@ public class RenderSectionManager implements ChunkStatusListener {
     private static final float FOG_PLANE_OFFSET = 12.0f;
 
     private final ChunkBuilder builder;
-    private final ChunkRenderer chunkRenderer;
 
     private final RenderRegionManager regions;
     private final ClonedChunkSectionCache sectionCache;
@@ -75,7 +74,6 @@ public class RenderSectionManager implements ChunkStatusListener {
     private final Long2ReferenceMap<RenderSection> sections = new Long2ReferenceOpenHashMap<>();
 
     private final Map<ChunkUpdateType, PriorityQueue<RenderSection>> rebuildQueues = new EnumMap<>(ChunkUpdateType.class);
-    private final PriorityQueue<ChunkBuildResult> deferredUploadQueue = new ObjectArrayFIFOQueue<>();
 
     private final ChunkAdjacencyMap adjacencyMap = new ChunkAdjacencyMap();
 
@@ -84,6 +82,8 @@ public class RenderSectionManager implements ChunkStatusListener {
 
     private final ObjectList<RenderSection> tickableChunks = new ObjectArrayList<>();
     private final ObjectList<BlockEntity> visibleBlockEntities = new ObjectArrayList<>();
+
+    private final RegionChunkRenderer chunkRenderer;
 
     private final SodiumWorldRenderer worldRenderer;
     private final ClientWorld world;
@@ -104,18 +104,19 @@ public class RenderSectionManager implements ChunkStatusListener {
 
     private int currentFrame = 0;
 
-    public RenderSectionManager(SodiumWorldRenderer worldRenderer, ChunkRenderer chunkRenderer, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {
-        this.chunkRenderer = chunkRenderer;
+    public RenderSectionManager(SodiumWorldRenderer worldRenderer, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {
+        this.chunkRenderer = new RegionChunkRenderer(RenderDevice.INSTANCE, ChunkModelVertexFormats.DEFAULT);
+
         this.worldRenderer = worldRenderer;
         this.world = world;
 
-        this.builder = new ChunkBuilder(chunkRenderer.getVertexType());
+        this.builder = new ChunkBuilder(ChunkModelVertexFormats.DEFAULT);
         this.builder.init(world, renderPassManager);
 
         this.needsUpdate = true;
         this.renderDistance = renderDistance;
 
-        this.regions = new RenderRegionManager(this.chunkRenderer);
+        this.regions = new RenderRegionManager();
         this.sectionCache = new ClonedChunkSectionCache(this.world);
 
         for (ChunkUpdateType type : ChunkUpdateType.values()) {
@@ -327,6 +328,7 @@ public class RenderSectionManager implements ChunkStatusListener {
         this.needsUpdate |= this.performPendingUploads();
 
         if (!blockingFutures.isEmpty()) {
+            this.needsUpdate = true;
             this.regions.upload(RenderDevice.INSTANCE.createCommandList(), new FutureQueueDrainingIterator<>(blockingFutures));
         }
 
@@ -354,12 +356,15 @@ public class RenderSectionManager implements ChunkStatusListener {
             }
 
             ChunkRenderBuildTask task = this.createRebuildTask(section);
-            CompletableFuture<ChunkBuildResult> future = this.builder.schedule(task);
+            CompletableFuture<?> future;
 
             if (filterType.isImportant()) {
-                immediateFutures.enqueue(future);
+                CompletableFuture<ChunkBuildResult> immediateFuture = this.builder.schedule(task);
+                immediateFutures.enqueue(immediateFuture);
+
+                future = immediateFuture;
             } else {
-                future.thenAccept(this::addToDeferredUploadQueue);
+                future = this.builder.scheduleDeferred(task);
             }
 
             section.onBuildSubmitted(future);
@@ -370,22 +375,16 @@ public class RenderSectionManager implements ChunkStatusListener {
         return immediateFutures;
     }
 
-    private void addToDeferredUploadQueue(ChunkBuildResult result) {
-        synchronized (this.deferredUploadQueue) {
-            this.deferredUploadQueue.enqueue(result);
-        }
-    }
-
     private boolean performPendingUploads() {
-        synchronized (this.deferredUploadQueue) {
-            if (this.deferredUploadQueue.isEmpty()) {
-                return false;
-            }
+        Iterator<ChunkBuildResult> it = this.builder.createDeferredBuildResultDrain();
 
-            this.regions.upload(RenderDevice.INSTANCE.createCommandList(), new QueueDrainingIterator<>(this.deferredUploadQueue));
-
-            return true;
+        if (!it.hasNext()) {
+            return false;
         }
+
+        this.regions.upload(RenderDevice.INSTANCE.createCommandList(), it);
+
+        return true;
     }
 
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {
@@ -418,14 +417,18 @@ public class RenderSectionManager implements ChunkStatusListener {
             this.regions.delete(commandList);
         }
 
+        this.chunkRenderer.delete();
         this.builder.stopWorkers();
     }
 
     public int getTotalSections() {
-        return this.regions.getLoadedRegions()
-                .stream()
-                .mapToInt(RenderRegion::getChunkCount)
-                .sum();
+        int sum = 0;
+
+        for (RenderRegion region : this.regions.getLoadedRegions()) {
+            sum += region.getChunkCount();
+        }
+
+        return sum;
     }
 
     public int getVisibleChunkCount() {
