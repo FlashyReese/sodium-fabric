@@ -56,8 +56,27 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     /**
      * @return The SodiumWorldRenderer based on the current dimension
      */
-    public static SodiumWorldRenderer getInstance() {
-        return ((WorldRendererExtended) MinecraftClient.getInstance().worldRenderer).getSodiumWorldRenderer();
+    public static SodiumWorldRenderer instance() {
+        var instance = instanceNullable();
+
+        if (instance == null) {
+            throw new IllegalStateException("No renderer attached to active world");
+        }
+
+        return instance;
+    }
+
+    /**
+     * @return The SodiumWorldRenderer based on the current dimension, or null if none is attached
+     */
+    public static SodiumWorldRenderer instanceNullable() {
+        var world = MinecraftClient.getInstance().worldRenderer;
+
+        if (world instanceof WorldRendererExtended) {
+            return ((WorldRendererExtended) world).getSodiumWorldRenderer();
+        }
+
+        return null;
     }
 
     public SodiumWorldRenderer(MinecraftClient client) {
@@ -303,6 +322,11 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         // Entities outside the valid world height will never map to a rendered chunk
         // Always render these entities or they'll be culled incorrectly!
         if (box.maxY < 0.5D || box.minY > 255.5D) {
+            return true;
+        }
+
+        // Ensure entities with outlines or nametags are always visible
+        if (this.client.hasOutline(entity) || entity.shouldRenderName()) {
             return true;
         }
 
