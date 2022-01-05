@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.jellysquid.mods.sodium.client.gl.GlObject;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniform;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniformBlock;
-import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderInterface;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ShaderBindingContext;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
@@ -117,20 +116,16 @@ public class GlProgram<T> extends GlObject implements ShaderBindingContext {
             return new GlProgram<>(this.program, factory);
         }
 
-        public Builder bindAttribute(String name, ShaderBindingPoint binding) {
-            GL20C.glBindAttribLocation(this.program, binding.genericAttributeIndex(), name);
+        public Builder bindAttribute(String name, int index) {
+            GL20C.glBindAttribLocation(this.program, index, name);
 
             return this;
         }
 
-        public Builder bindFragmentData(String name, ShaderBindingPoint binding) {
-            GL30C.glBindFragDataLocation(this.program, binding.genericAttributeIndex(), name);
+        public Builder bindFragmentData(String name, int index) {
+            GL30C.glBindFragDataLocation(this.program, index, name);
 
             return this;
         }
-    }
-
-    public interface ProgramFactory<P extends GlProgram> {
-        P create(int handle);
     }
 }
