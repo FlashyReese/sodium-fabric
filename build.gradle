@@ -1,6 +1,8 @@
 plugins {
     id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'maven-publish'
+    id 'signing'
 }
 
 sourceCompatibility = "17"
@@ -59,6 +61,43 @@ java {
 
 jar {
     from "LICENSE.txt"
+}
+
+
+// configure the maven publication
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // add all the jars that should be included when publishing to maven
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        maven {
+            name = "FlashyReeseReleases"
+            url = "https://maven.flashyreese.me/releases"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
+            name = "FlashyReeseSnapshots"
+            url = "https://maven.flashyreese.me/snapshots"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
 
 def getVersionMetadata() {
