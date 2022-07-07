@@ -60,6 +60,9 @@ dependencies {
     includeModImplementation fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version)
     includeModImplementation fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version)
     includeModImplementation fabricApi.module("fabric-resource-loader-v0", project.fabric_version)
+    includeModImplementation fabricApi.module("fabric-models-v0", project.fabric_version)
+    includeModImplementation fabricApi.module("fabric-textures-v0", project.fabric_version)
+    includeModImplementation fabricApi.module("fabric-renderer-api-v1", project.fabric_version)
 
     includeImplementation 'io.github.douira:glsl-transformer:0.27.0'
     includeImplementation "org.joml:joml:1.10.4"
