@@ -3,7 +3,7 @@ package net.caffeinemc.sodium.mixin.features.buffer_builder.intrinsics;
 import net.caffeinemc.sodium.render.terrain.quad.ModelQuadView;
 import net.caffeinemc.sodium.interop.vanilla.vertex.VanillaVertexFormats;
 import net.caffeinemc.sodium.render.vertex.VertexDrain;
-import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
+import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.ModelQuadVertexSink;
 import net.caffeinemc.sodium.util.packed.ColorABGR;
 import net.caffeinemc.sodium.util.packed.ColorU8;
 import net.caffeinemc.sodium.interop.vanilla.math.matrix.MatrixUtil;
@@ -40,9 +40,9 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
         Matrix4f positionMatrix = matrices.getPositionMatrix();
         Matrix3f normalMatrix = matrices.getNormalMatrix();
 
-        int norm = MatrixUtil.computeNormal(normalMatrix, quad.getFace());
+        int norm = MatrixUtil.computeNormal(normalMatrix, quad.getFace().getOpposite());
 
-        QuadVertexSink drain = VertexDrain.of(this)
+        ModelQuadVertexSink drain = VertexDrain.of(this)
                 .createSink(VanillaVertexFormats.QUADS);
         drain.ensureCapacity(4);
 

@@ -1,13 +1,13 @@
 package net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.writer;
 
 import net.caffeinemc.sodium.interop.vanilla.vertex.fallback.VertexWriterFallback;
-import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
+import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.ModelQuadVertexSink;
 import net.caffeinemc.sodium.util.packed.Normal3b;
 import net.caffeinemc.sodium.util.packed.ColorABGR;
 import net.minecraft.client.render.VertexConsumer;
 
-public class QuadVertexWriterFallback extends VertexWriterFallback implements QuadVertexSink {
-    public QuadVertexWriterFallback(VertexConsumer consumer) {
+public class ModelQuadVertexWriterFallback extends VertexWriterFallback implements ModelQuadVertexSink {
+    public ModelQuadVertexWriterFallback(VertexConsumer consumer) {
         super(consumer);
     }
 

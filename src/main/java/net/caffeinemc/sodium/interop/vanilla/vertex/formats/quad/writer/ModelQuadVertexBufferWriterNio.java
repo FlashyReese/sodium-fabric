@@ -3,12 +3,12 @@ package net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.writer;
 import net.caffeinemc.sodium.interop.vanilla.vertex.VanillaVertexFormats;
 import net.caffeinemc.sodium.render.vertex.buffer.VertexBufferView;
 import net.caffeinemc.sodium.render.vertex.buffer.VertexBufferWriterNio;
-import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
+import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.ModelQuadVertexSink;
 
 import java.nio.ByteBuffer;
 
-public class QuadVertexBufferWriterNio extends VertexBufferWriterNio implements QuadVertexSink {
-    public QuadVertexBufferWriterNio(VertexBufferView backingBuffer) {
+public class ModelQuadVertexBufferWriterNio extends VertexBufferWriterNio implements ModelQuadVertexSink {
+    public ModelQuadVertexBufferWriterNio(VertexBufferView backingBuffer) {
         super(backingBuffer, VanillaVertexFormats.QUADS);
     }
 

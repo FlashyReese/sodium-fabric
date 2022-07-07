@@ -3,11 +3,11 @@ package net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.writer;
 import net.caffeinemc.sodium.interop.vanilla.vertex.VanillaVertexFormats;
 import net.caffeinemc.sodium.render.vertex.buffer.VertexBufferView;
 import net.caffeinemc.sodium.render.vertex.buffer.VertexBufferWriterUnsafe;
-import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
+import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.ModelQuadVertexSink;
 import org.lwjgl.system.MemoryUtil;
 
-public class QuadVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements QuadVertexSink {
-    public QuadVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {
+public class ModelQuadVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements ModelQuadVertexSink {
+    public ModelQuadVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {
         super(backingBuffer, VanillaVertexFormats.QUADS);
     }
 

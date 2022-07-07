@@ -2,8 +2,8 @@ package net.caffeinemc.sodium.mixin.features.item;
 
 import net.caffeinemc.sodium.interop.vanilla.mixin.ItemColorProviderRegistry;
 import net.caffeinemc.sodium.interop.vanilla.vertex.VanillaVertexFormats;
-import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
-import net.caffeinemc.sodium.render.terrain.quad.ModelQuadUtil;
+import net.caffeinemc.sodium.interop.vanilla.vertex.formats.quad.ModelQuadVertexSink;
+import net.caffeinemc.sodium.render.batching.ItemRendererExtended;
 import net.caffeinemc.sodium.render.terrain.quad.ModelQuadView;
 import net.caffeinemc.sodium.render.texture.SpriteUtil;
 import net.caffeinemc.sodium.render.vertex.VertexDrain;
@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @Mixin(ItemRenderer.class)
-public class MixinItemRenderer {
+public abstract class MixinItemRenderer implements ItemRendererExtended {
     private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
 
     @Shadow
@@ -69,7 +69,7 @@ public class MixinItemRenderer {
 
         ItemColorProvider colorProvider = null;
 
-        QuadVertexSink drain = VertexDrain.of(vertexConsumer)
+        ModelQuadVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexFormats.QUADS);
         drain.ensureCapacity(quads.size() * 4);
 
@@ -88,7 +88,7 @@ public class MixinItemRenderer {
 
             for (int i = 0; i < 4; i++) {
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
-                        light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
+                        light, overlay, bakedQuad.getFace());
             }
 
             SpriteUtil.markSpriteActive(quad.getSprite());
