@@ -103,12 +103,12 @@ public class RenderRegionManager {
             var geometry = result.geometry();
 
             // De-allocate all storage for the meshes we're about to replace
-            // This will allow it to be cheaply re-allocated later
+            // This will allow it to be cheaply re-allocated later (hopefully)
             render.deleteGeometry();
 
-            // Only submit an upload job if there is data in the first place
             var vertices = geometry.vertices();
-
+    
+            // Only submit an upload job if there is data in the first place
             if (vertices != null) {
                 var upload = new PendingUpload(vertices.buffer());
                 jobs.add(new ChunkGeometryUpload(render, geometry, upload.holder));
@@ -143,9 +143,9 @@ public class RenderRegionManager {
             TerrainBuildResult result = renders.next();
             RenderSection render = result.render();
 
+            // TODO: this is kinda gross, maybe find a way to make the Future dispose of the result when cancelled?
             if (render.isDisposed() || result.buildTime() <= render.getLastAcceptedBuildTime()) {
                 result.delete();
-
                 continue;
             }
 

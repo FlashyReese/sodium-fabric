@@ -1,9 +1,6 @@
 package net.caffeinemc.sodium.gui.frame;
 
-import net.caffeinemc.sodium.config.user.options.Option;
-import net.caffeinemc.sodium.config.user.options.OptionGroup;
-import net.caffeinemc.sodium.config.user.options.OptionImpact;
-import net.caffeinemc.sodium.config.user.options.OptionPage;
+import net.caffeinemc.sodium.config.user.options.*;
 import net.caffeinemc.sodium.gui.config.Control;
 import net.caffeinemc.sodium.gui.config.ControlElement;
 import net.caffeinemc.sodium.gui.frame.components.ScrollBarComponent;
@@ -118,7 +115,11 @@ public class OptionPageScrollFrame extends AbstractFrame {
         OptionImpact impact = option.getImpact();
 
         if (impact != null) {
-            tooltip.add(Language.getInstance().reorder(Text.translatable("sodium.options.performance_impact_string", impact.getLocalizedName()).formatted(Formatting.GRAY)));
+            tooltip.add(Language.getInstance().reorder(Text.translatable("sodium.option_impact.tooltip", impact.getLocalizedName()).formatted(Formatting.GRAY)));
+        }
+
+        if (option.getFlags().contains(OptionFlag.REQUIRES_GAME_RESTART)) {
+            tooltip.add(Language.getInstance().reorder(Text.translatable("sodium.option_flag.requires_game_restart.tooltip").formatted(Formatting.RED)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;

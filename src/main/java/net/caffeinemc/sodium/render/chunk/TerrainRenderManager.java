@@ -16,12 +16,7 @@ import net.caffeinemc.sodium.render.chunk.compile.tasks.AbstractBuilderTask;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.EmptyTerrainBuildTask;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.TerrainBuildResult;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.TerrainBuildTask;
-import net.caffeinemc.sodium.render.chunk.draw.ChunkCameraContext;
-import net.caffeinemc.sodium.render.chunk.draw.ChunkRenderMatrices;
-import net.caffeinemc.sodium.render.chunk.draw.ChunkRenderer;
-import net.caffeinemc.sodium.render.chunk.draw.MdiChunkRenderer;
-import net.caffeinemc.sodium.render.chunk.draw.MdiCountChunkRenderer;
-import net.caffeinemc.sodium.render.chunk.draw.SortedChunkLists;
+import net.caffeinemc.sodium.render.chunk.draw.*;
 import net.caffeinemc.sodium.render.chunk.occlusion.ChunkOcclusion;
 import net.caffeinemc.sodium.render.chunk.occlusion.ChunkTree;
 import net.caffeinemc.sodium.render.chunk.passes.ChunkRenderPass;
@@ -57,7 +52,7 @@ public class TerrainRenderManager {
 
     private final ChunkBuilder builder;
 
-    private final RenderRegionManager regions;
+    private final RenderRegionManager regionManager;
     private final ClonedChunkSectionCache sectionCache;
 
     private final ChunkTree tree;
@@ -84,6 +79,10 @@ public class TerrainRenderManager {
     private final Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
 
     private final boolean alwaysDeferChunkUpdates = SodiumClientMod.options().performance.alwaysDeferChunkUpdates;
+    
+    private double lastComputeUpdateX = 0;
+    private double lastComputeUpdateY = 0;
+    private double lastComputeUpdateZ = 0;
 
     @Deprecated
     private BitArray sectionVisibility = null;
@@ -103,7 +102,7 @@ public class TerrainRenderManager {
         this.needsUpdate = true;
         this.chunkViewDistance = chunkViewDistance;
 
-        this.regions = new RenderRegionManager(device, vertexType);
+        this.regionManager = new RenderRegionManager(device, vertexType);
         this.sectionCache = new ClonedChunkSectionCache(this.world);
 
         for (ChunkUpdateType type : ChunkUpdateType.values()) {
@@ -133,9 +132,9 @@ public class TerrainRenderManager {
 
         this.updateVisibilityLists(visibleSections, camera);
 
-        var chunks = new SortedChunkLists(this.regions, this.visibleMeshedSections);
-
-        this.chunkRenderer.createRenderLists(chunks, this.camera, this.frameIndex);
+        var chunkLists = new SortedChunkLists(this.visibleMeshedSections, this.regionManager);
+        this.chunkRenderer.createRenderLists(chunkLists, camera, this.frameIndex);
+        
         this.needsUpdate = false;
     }
 
@@ -168,7 +167,7 @@ public class TerrainRenderManager {
 
             var data = section.getFlags();
 
-            if (ChunkRenderFlag.has(data, ChunkRenderFlag.HAS_MESHES)) {
+            if (ChunkRenderFlag.has(data, ChunkRenderFlag.HAS_TERRAIN_MODELS)) {
                 this.visibleMeshedSections.add(section);
             }
 
@@ -271,7 +270,7 @@ public class TerrainRenderManager {
 
         if (!blockingFutures.isEmpty()) {
             this.needsUpdate = true;
-            this.regions.uploadChunks(
+            this.regionManager.uploadChunks(
                     new WorkStealingFutureDrain<>(
                             blockingFutures,
                             this.builder::stealTask
@@ -281,7 +280,7 @@ public class TerrainRenderManager {
             );
         }
 
-        this.regions.cleanup();
+        this.regionManager.cleanup();
     }
 
     private LinkedList<CompletableFuture<TerrainBuildResult>> submitRebuildTasks(ChunkUpdateType filterType) {
@@ -330,7 +329,7 @@ public class TerrainRenderManager {
             return false;
         }
 
-        this.regions.uploadChunks(it, this.frameIndex, this::onChunkDataChanged);
+        this.regionManager.uploadChunks(it, this.frameIndex, this::onChunkDataChanged);
 
         return true;
     }
@@ -365,7 +364,7 @@ public class TerrainRenderManager {
     }
 
     public void destroy() {
-        this.regions.delete();
+        this.regionManager.delete();
         this.builder.stopWorkers();
         this.chunkRenderer.delete();
     }
@@ -410,7 +409,7 @@ public class TerrainRenderManager {
         long deviceUsed = 0;
         long deviceAllocated = 0;
 
-        for (var region : this.regions.getLoadedRegions()) {
+        for (var region : this.regionManager.getLoadedRegions()) {
             deviceUsed += region.getDeviceUsedMemory();
             deviceAllocated += region.getDeviceAllocatedMemory();
 
@@ -422,6 +421,7 @@ public class TerrainRenderManager {
         count += this.chunkRenderer.getDeviceBufferObjects();
 
         List<String> strings = new ArrayList<>();
+        strings.add(String.format("Chunk Renderer: %s", this.chunkRenderer.getDebugName()));
         strings.add(String.format("Device buffer objects: %d", count));
         strings.add(String.format("Device memory: %d MiB used/%d MiB alloc", MathUtil.toMib(deviceUsed), MathUtil.toMib(deviceAllocated)));
 
@@ -429,11 +429,17 @@ public class TerrainRenderManager {
     }
 
     private static ChunkRenderer createChunkRenderer(RenderDevice device, ChunkRenderPassManager renderPassManager, TerrainVertexType vertexType) {
-        if (device.properties().driverWorkarounds.forceIndirectCount) {
-            return new MdiCountChunkRenderer(device, renderPassManager, vertexType);
-        } else {
-            return new MdiChunkRenderer(device, renderPassManager, vertexType);
-        }
+        return switch (SodiumClientMod.options().advanced.terrainDrawMode) {
+            case DEFAULT -> device.properties().preferences.directRendering
+                            ? new MdbvChunkRenderer(device, renderPassManager, vertexType)
+                            : new MdiChunkRenderer<>(device, renderPassManager, vertexType);
+            
+            case BASEVERTEX -> new MdbvChunkRenderer(device, renderPassManager, vertexType);
+            
+            case INDIRECT -> new MdiChunkRenderer<>(device, renderPassManager, vertexType);
+            
+            case INDIRECTCOUNT -> new MdiCountChunkRenderer(device, renderPassManager, vertexType);
+        };
     }
 
     private static TerrainVertexType createVertexType() {

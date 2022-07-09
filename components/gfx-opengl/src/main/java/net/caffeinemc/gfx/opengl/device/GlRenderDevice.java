@@ -40,20 +40,24 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.ARBIndirectParameters;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL20C;
-import org.lwjgl.opengl.GL30C;
-import org.lwjgl.opengl.GL43C;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MathUtil;
+import org.lwjgl.system.MemoryUtil;
 
 public class GlRenderDevice implements RenderDevice {
     private final GlPipelineManager pipelineManager;
     private final RenderDeviceProperties properties;
+    private final RenderConfiguration renderConfiguration;
 
-    public GlRenderDevice(Function<RenderDeviceProperties, GlPipelineManager> pipelineManagerFactory) {
+    public GlRenderDevice(Function<RenderDeviceProperties, GlPipelineManager> pipelineManagerFactory, RenderConfiguration renderConfiguration) {
         // TODO: move this into platform code
         this.properties = getDeviceProperties();
+        this.renderConfiguration = renderConfiguration;
         this.pipelineManager = pipelineManagerFactory.apply(this.properties);
+        
+        if (renderConfiguration.apiDebug) {
+            GlDebug.enableDebugMessages();
+        }
     }
 
     private static RenderDeviceProperties getDeviceProperties() {
@@ -80,6 +84,11 @@ public class GlRenderDevice implements RenderDevice {
         boolean isVendorIntel = vendorName != null && vendorName.toLowerCase(Locale.ROOT).contains("intel");
         boolean hasIndirectCountSupport = glCaps.GL_ARB_indirect_parameters;
         boolean forceIndirectCount = isVendorIntel && hasIndirectCountSupport;
+        // My guess is that most devices that support 4.5 but not 4.6 likely have worse indirect performance, because
+        // they're likely more dated and have faster paths for more traditional draw calls.
+        // Because we can't query 4.6 support accurately, lets just check if it has indirect count support. That's
+        // probably a decent indicator.
+        boolean preferDirectRendering = isVendorIntel || !hasIndirectCountSupport;
 
         boolean hasShaderDrawParametersSupport = glCaps.GL_ARB_shader_draw_parameters;
 
@@ -100,6 +109,9 @@ public class GlRenderDevice implements RenderDevice {
                 ),
                 new RenderDeviceProperties.DriverWorkarounds(
                         forceIndirectCount
+                ),
+                new RenderDeviceProperties.Preferences(
+                        preferDirectRendering
                 )
         );
     }
@@ -130,7 +142,7 @@ public class GlRenderDevice implements RenderDevice {
         int handle = buffer.getHandle();
         buffer.invalidateHandle();
 
-        GL20C.glDeleteBuffers(handle);
+        GL45C.glDeleteBuffers(handle);
     }
 
     @Override
@@ -139,7 +151,7 @@ public class GlRenderDevice implements RenderDevice {
     }
 
     private void deleteProgram0(GlProgram<?> program) {
-        GL20C.glDeleteProgram(program.getHandle());
+        GL45C.glDeleteProgram(program.getHandle());
         program.invalidateHandle();
     }
 
@@ -152,7 +164,12 @@ public class GlRenderDevice implements RenderDevice {
     public RenderDeviceProperties properties() {
         return this.properties;
     }
-
+    
+    @Override
+    public RenderConfiguration configuration() {
+        return this.renderConfiguration;
+    }
+    
     @Override
     public <PROGRAM, ARRAY extends Enum<ARRAY>> Pipeline<PROGRAM, ARRAY> createPipeline(PipelineDescription state, Program<PROGRAM> program, VertexArrayDescription<ARRAY> vertexArrayDescription) {
         var vertexArray = new GlVertexArray<>(vertexArrayDescription);
@@ -196,6 +213,7 @@ public class GlRenderDevice implements RenderDevice {
         preUnmapConsumer.accept(mapping);
 
         if (!GL45C.glUnmapNamedBuffer(handle)) {
+            // TODO: retry if this happens
             throw new RuntimeException("Failed to unmap buffer after writing data (contents corrupt?)");
         }
 
@@ -223,7 +241,6 @@ public class GlRenderDevice implements RenderDevice {
         GL45C.glNamedBufferStorage(handle, capacity, storage);
 
         var access = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_UNSYNCHRONIZED_BIT | GL45C.GL_MAP_INVALIDATE_BUFFER_BIT | getMappedBufferAccessBits(flags);
-        // for some reason, this works but glMapNamedBuffer doesn't
         ByteBuffer mapping = GL45C.glMapNamedBufferRange(handle, 0, capacity, access);
 
         if (mapping == null) {
@@ -247,9 +264,15 @@ public class GlRenderDevice implements RenderDevice {
 
         // just make a temporary generic buffer
         preMapConsumer.accept(new GlBuffer(handle, capacity));
+        
+        //// Do the synchronization for the buffer ourselves
+        // TODO: add a memory barrier function to RenderDevice
+        // do we need GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT?
+        GL45C.glMemoryBarrier(GL45C.GL_BUFFER_UPDATE_BARRIER_BIT);
+        this.createFence().sync(true);
 
-        var access = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_UNSYNCHRONIZED_BIT | GL45C.GL_MAP_INVALIDATE_BUFFER_BIT | getMappedBufferAccessBits(flags);
-        // for some reason, this works but glMapNamedBuffer doesn't
+        // If we were to use GL_MAP_INVALIDATE_BIT on this, it would invalidate all the stuff we just wrote to it.
+        var access = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_UNSYNCHRONIZED_BIT | getMappedBufferAccessBits(flags);
         ByteBuffer mapping = GL45C.glMapNamedBufferRange(handle, 0, capacity, access);
 
         if (mapping == null) {
@@ -317,7 +340,7 @@ public class GlRenderDevice implements RenderDevice {
     }
 
     private void deleteVertexArray0(GlVertexArray<?> array) {
-        GL30C.glDeleteVertexArrays(array.getHandle());
+        GL45C.glDeleteVertexArrays(array.getHandle());
         array.invalidateHandle();
     }
 
@@ -393,6 +416,27 @@ public class GlRenderDevice implements RenderDevice {
                 this.parameterBuffer = buffer;
             }
         }
+        
+        @Override
+        public void multiDrawElementsBaseVertex(PrimitiveType primitiveType, ElementFormat elementType, int drawCount, long indexCountsPtr, long indexOffsetsPtr, long baseVerticesPtr) {
+            if (RenderConfiguration.API_CHECKS) {
+                Validate.notNull(this.elementBuffer, "Element buffer target not bound");
+                Validate.noNullElements(this.vertexBuffers, "One or more vertex buffer targets are not bound");
+                Validate.isTrue(drawCount >= 0, "Draw count must be equal to or greater than 0");
+                Validate.isTrue(indexCountsPtr != MemoryUtil.NULL, "Index counts pointer is null");
+                Validate.isTrue(indexOffsetsPtr != MemoryUtil.NULL, "Index offsets pointer is null");
+                Validate.isTrue(baseVerticesPtr != MemoryUtil.NULL, "Base vertices pointer is null");
+            }
+            
+            GL45C.nglMultiDrawElementsBaseVertex(
+                    GlEnum.from(primitiveType),
+                    indexCountsPtr,
+                    GlEnum.from(elementType),
+                    indexOffsetsPtr,
+                    drawCount,
+                    baseVerticesPtr
+            );
+        }
 
         @Override
         public void multiDrawElementsIndirect(PrimitiveType primitiveType, ElementFormat elementType, long indirectOffset, int indirectCount, int stride) {
@@ -408,7 +452,13 @@ public class GlRenderDevice implements RenderDevice {
                 Validate.isTrue(stride >= 0, "Stride must be greater than or equal to 0");
             }
 
-            GL43C.glMultiDrawElementsIndirect(GlEnum.from(primitiveType), GlEnum.from(elementType), indirectOffset, indirectCount, stride);
+            GL45C.glMultiDrawElementsIndirect(
+                    GlEnum.from(primitiveType),
+                    GlEnum.from(elementType),
+                    indirectOffset,
+                    indirectCount,
+                    stride
+            );
         }
 
         @Override
@@ -416,6 +466,7 @@ public class GlRenderDevice implements RenderDevice {
             if (RenderConfiguration.API_CHECKS) {
                 Validate.notNull(this.elementBuffer, "Element buffer target not bound");
                 Validate.notNull(this.commandBuffer, "Command buffer target not bound");
+                Validate.notNull(this.parameterBuffer, "Parameter buffer target not bound");
                 Validate.noNullElements(this.vertexBuffers, "One or more vertex buffer targets are not bound");
 
                 Validate.isTrue(indirectOffset >= 0, "Command offset must be greater than or equal to zero");
