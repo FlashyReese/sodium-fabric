@@ -1,6 +1,7 @@
 apply plugin: "java"
 apply from: "${rootProject.projectDir}/gradle/fabric.gradle"
 apply from: "${rootProject.projectDir}/gradle/java.gradle"
+apply from: "${rootProject.projectDir}/gradle/publish.gradle"
 
 archivesBaseName = 'sodium-gfx-opengl'
 version = rootProject.version

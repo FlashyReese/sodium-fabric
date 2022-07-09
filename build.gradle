@@ -5,6 +5,7 @@ plugins {
 
 apply from: "${rootProject.projectDir}/gradle/fabric.gradle"
 apply from: "${rootProject.projectDir}/gradle/java.gradle"
+apply from: "${rootProject.projectDir}/gradle/publish.gradle"
 
 archivesBaseName = project.archives_base_name
 version = getVersion()

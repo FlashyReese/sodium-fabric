@@ -1,6 +1,6 @@
 name: gradle-ci
 
-on: [ push, pull_request ]
+on: [ push ]
 
 jobs:
   build:
@@ -24,7 +24,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build artifacts
-      run: ./gradlew build
+      run: ./gradlew build publishMavenJavaPublicationToFlashyReeseSnapshotsRepository
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
     - name: Extract current branch name
       shell: bash
       # bash pattern expansion to grab branch name without slashes
