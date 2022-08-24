@@ -1,6 +1,7 @@
 package net.caffeinemc.sodium.render.chunk.draw;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.longs.LongList;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -12,29 +13,25 @@ import net.caffeinemc.gfx.api.buffer.Buffer;
 import net.caffeinemc.gfx.api.buffer.MappedBufferFlags;
 import net.caffeinemc.gfx.api.device.RenderDevice;
 import net.caffeinemc.gfx.api.device.commands.RenderCommandList;
-import net.caffeinemc.gfx.api.pipeline.Pipeline;
 import net.caffeinemc.gfx.api.pipeline.PipelineState;
+import net.caffeinemc.gfx.api.pipeline.RenderPipeline;
 import net.caffeinemc.gfx.api.shader.Program;
 import net.caffeinemc.gfx.api.shader.ShaderDescription;
 import net.caffeinemc.gfx.api.shader.ShaderType;
-import net.caffeinemc.gfx.util.buffer.DualStreamingBuffer;
-import net.caffeinemc.gfx.util.buffer.SequenceBuilder;
-import net.caffeinemc.gfx.util.buffer.SequenceIndexBuffer;
-import net.caffeinemc.gfx.util.buffer.StreamingBuffer;
+import net.caffeinemc.gfx.util.buffer.streaming.DualStreamingBuffer;
+import net.caffeinemc.gfx.util.buffer.streaming.SequenceBuilder;
+import net.caffeinemc.gfx.util.buffer.streaming.SequenceIndexBuffer;
+import net.caffeinemc.gfx.util.buffer.streaming.StreamingBuffer;
 import net.caffeinemc.sodium.SodiumClientMod;
-import net.caffeinemc.sodium.render.chunk.RenderSection;
 import net.caffeinemc.sodium.render.chunk.passes.ChunkRenderPass;
 import net.caffeinemc.sodium.render.chunk.passes.ChunkRenderPassManager;
 import net.caffeinemc.sodium.render.chunk.shader.ChunkShaderBindingPoints;
 import net.caffeinemc.sodium.render.chunk.shader.ChunkShaderInterface;
-import net.caffeinemc.sodium.render.chunk.state.ChunkPassModel;
-import net.caffeinemc.sodium.render.chunk.state.ChunkRenderBounds;
 import net.caffeinemc.sodium.render.shader.ShaderConstants;
 import net.caffeinemc.sodium.render.shader.ShaderLoader;
 import net.caffeinemc.sodium.render.shader.ShaderParser;
 import net.caffeinemc.sodium.render.terrain.format.TerrainMeshAttribute;
 import net.caffeinemc.sodium.render.terrain.format.TerrainVertexType;
-import net.caffeinemc.sodium.render.terrain.quad.properties.ChunkMeshFace;
 import net.caffeinemc.sodium.util.MathUtil;
 import net.caffeinemc.sodium.util.TextureUtil;
 import net.minecraft.util.Identifier;
@@ -49,7 +46,7 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
     public static final int FOG_PARAMETERS_SIZE = 32;
     
     protected final ChunkRenderPassManager renderPassManager;
-    protected final Pipeline<ChunkShaderInterface, BufferTarget>[] pipelines;
+    protected final RenderPipeline<ChunkShaderInterface, BufferTarget>[] renderPipelines;
     
     protected final StreamingBuffer uniformBufferCameraMatrices;
     protected final StreamingBuffer uniformBufferChunkTransforms;
@@ -60,15 +57,16 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
     
     public AbstractMdChunkRenderer(
             RenderDevice device,
+            ChunkCameraContext camera,
             ChunkRenderPassManager renderPassManager,
             TerrainVertexType vertexType
     ) {
-        super(device);
-    
+        super(device, camera);
+        
         this.renderPassManager = renderPassManager;
     
         //noinspection unchecked
-        this.pipelines = new Pipeline[renderPassManager.getRenderPassCount()];
+        this.renderPipelines = new RenderPipeline[renderPassManager.getRenderPassCount()];
     
         // construct all pipelines for current render passes now
         var vertexFormat = vertexType.getCustomVertexFormat();
@@ -121,13 +119,13 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
                                         .build();
         
             Program<ChunkShaderInterface> program = this.device.createProgram(desc, ChunkShaderInterface::new);
-            Pipeline<ChunkShaderInterface, BufferTarget> pipeline = this.device.createPipeline(
+            RenderPipeline<ChunkShaderInterface, BufferTarget> renderPipeline = this.device.createRenderPipeline(
                     renderPass.getPipelineDescription(),
                     program,
                     vertexArray
             );
         
-            this.pipelines[renderPass.getId()] = pipeline;
+            this.renderPipelines[renderPass.getId()] = renderPipeline;
         }
         
         // Set up buffers
@@ -197,15 +195,18 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
         }
         
         // if the render list exists, the pipeline probably exists (unless a new render pass was added without a reload)
-        Pipeline<ChunkShaderInterface, BufferTarget> pipeline = this.pipelines[passId];
+        RenderPipeline<ChunkShaderInterface, BufferTarget> renderPipeline = this.renderPipelines[passId];
         
-        this.device.usePipeline(pipeline, (commandList, programInterface, pipelineState) -> {
-            this.setupPerRenderList(renderPass, matrices, frameIndex, pipeline, commandList, programInterface, pipelineState);
+        this.device.useRenderPipeline(renderPipeline, (commandList, programInterface, pipelineState) -> {
+            this.setupPerRenderList(renderPass, matrices, frameIndex,
+                                    renderPipeline, commandList, programInterface, pipelineState);
             
             for (B batch : renderList) {
-                this.setupPerBatch(renderPass, matrices, frameIndex, pipeline, commandList, programInterface, pipelineState, batch);
+                this.setupPerBatch(renderPass, matrices, frameIndex,
+                                   renderPipeline, commandList, programInterface, pipelineState, batch);
                 
-                this.issueDraw(renderPass, matrices, frameIndex, pipeline, commandList, programInterface, pipelineState, batch);
+                this.issueDraw(renderPass, matrices, frameIndex,
+                               renderPipeline, commandList, programInterface, pipelineState, batch);
             }
         });
     }
@@ -216,7 +217,7 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
             ChunkRenderPass renderPass,
             ChunkRenderMatrices matrices,
             int frameIndex,
-            Pipeline<ChunkShaderInterface, BufferTarget> pipeline,
+            RenderPipeline<ChunkShaderInterface, BufferTarget> renderPipeline,
             RenderCommandList<BufferTarget> commandList,
             ChunkShaderInterface programInterface,
             PipelineState pipelineState
@@ -231,7 +232,7 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
             ChunkRenderPass renderPass,
             ChunkRenderMatrices matrices,
             int frameIndex,
-            Pipeline<ChunkShaderInterface, BufferTarget> pipeline,
+            RenderPipeline<ChunkShaderInterface, BufferTarget> renderPipeline,
             RenderCommandList<BufferTarget> commandList,
             ChunkShaderInterface programInterface,
             PipelineState pipelineState,
@@ -249,7 +250,7 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
             ChunkRenderPass renderPass,
             ChunkRenderMatrices matrices,
             int frameIndex,
-            Pipeline<ChunkShaderInterface, BufferTarget> pipeline,
+            RenderPipeline<ChunkShaderInterface, BufferTarget> renderPipeline,
             RenderCommandList<BufferTarget> commandList,
             ChunkShaderInterface programInterface,
             PipelineState pipelineState,
@@ -319,53 +320,20 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
     
     //// UTILITY METHODS
     
-    protected static int getMaxSectionFaces(SortedChunkLists list) {
+    protected static int getMaxSectionFaces(SortedTerrainLists list) {
         int faces = 0;
     
-        for (SortedChunkLists.RegionBucket regionBucket : list.unsortedRegionBuckets()) {
-            for (RenderSection section : regionBucket.unsortedSections()) {
-                for (ChunkPassModel model : section.getGeometry().models) {
-                    // each bit set represents a model, so we can just count the set bits
-                    faces += Integer.bitCount(model.getVisibilityBits());
-                }
+        for (List<LongList> passModelPartSegments : list.modelPartSegments) {
+            for (LongList regionModelPartSegments : passModelPartSegments) {
+                faces += regionModelPartSegments.size();
             }
         }
         
         return faces;
     }
     
-    protected static float getCameraTranslation(int chunkBlockPos, int cameraBlockPos, float cameraPos) {
-        return (chunkBlockPos - cameraBlockPos) - cameraPos;
-    }
-    
-    protected static int calculateVisibilityFlags(ChunkRenderBounds bounds, ChunkCameraContext camera) {
-        int flags = ChunkMeshFace.UNASSIGNED_BITS;
-        
-        if (camera.posY > bounds.y1) {
-            flags |= ChunkMeshFace.UP_BITS;
-        }
-        
-        if (camera.posY < bounds.y2) {
-            flags |= ChunkMeshFace.DOWN_BITS;
-        }
-        
-        if (camera.posX > bounds.x1) {
-            flags |= ChunkMeshFace.EAST_BITS;
-        }
-        
-        if (camera.posX < bounds.x2) {
-            flags |= ChunkMeshFace.WEST_BITS;
-        }
-        
-        if (camera.posZ > bounds.z1) {
-            flags |= ChunkMeshFace.SOUTH_BITS;
-        }
-        
-        if (camera.posZ < bounds.z2) {
-            flags |= ChunkMeshFace.NORTH_BITS;
-        }
-        
-        return flags;
+    protected static float getCameraTranslation(int chunkBlockPos, int cameraBlockPos, float cameraDeltaPos) {
+        return (chunkBlockPos - cameraBlockPos) - cameraDeltaPos;
     }
     
     //// OVERRIDABLE BATCH
@@ -437,5 +405,9 @@ public abstract class AbstractMdChunkRenderer<B extends AbstractMdChunkRenderer.
         this.uniformBufferChunkTransforms.delete();
         this.uniformBufferFogParameters.delete();
         this.indexBuffer.delete();
+        
+        for (RenderPipeline<?, ?> pipeline : this.renderPipelines) {
+            this.device.deleteRenderPipeline(pipeline);
+        }
     }
 }

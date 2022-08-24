@@ -1,7 +1,6 @@
 package net.caffeinemc.sodium.render.chunk;
 
 import it.unimi.dsi.fastutil.PriorityQueue;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -16,9 +15,14 @@ import net.caffeinemc.sodium.render.chunk.compile.tasks.AbstractBuilderTask;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.EmptyTerrainBuildTask;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.TerrainBuildResult;
 import net.caffeinemc.sodium.render.chunk.compile.tasks.TerrainBuildTask;
-import net.caffeinemc.sodium.render.chunk.draw.*;
-import net.caffeinemc.sodium.render.chunk.occlusion.ChunkOcclusion;
-import net.caffeinemc.sodium.render.chunk.occlusion.ChunkTree;
+import net.caffeinemc.sodium.render.chunk.draw.ChunkCameraContext;
+import net.caffeinemc.sodium.render.chunk.draw.ChunkRenderMatrices;
+import net.caffeinemc.sodium.render.chunk.draw.ChunkRenderer;
+import net.caffeinemc.sodium.render.chunk.draw.MdbvChunkRenderer;
+import net.caffeinemc.sodium.render.chunk.draw.MdiChunkRenderer;
+import net.caffeinemc.sodium.render.chunk.draw.SortedTerrainLists;
+import net.caffeinemc.sodium.render.chunk.occlusion.SectionCuller;
+import net.caffeinemc.sodium.render.chunk.occlusion.SectionTree;
 import net.caffeinemc.sodium.render.chunk.passes.ChunkRenderPass;
 import net.caffeinemc.sodium.render.chunk.passes.ChunkRenderPassManager;
 import net.caffeinemc.sodium.render.chunk.region.RenderRegionManager;
@@ -29,18 +33,20 @@ import net.caffeinemc.sodium.render.terrain.format.TerrainVertexType;
 import net.caffeinemc.sodium.render.texture.SpriteUtil;
 import net.caffeinemc.sodium.util.ListUtil;
 import net.caffeinemc.sodium.util.MathUtil;
-import net.caffeinemc.sodium.util.collections.BitArray;
 import net.caffeinemc.sodium.util.tasks.WorkStealingFutureDrain;
 import net.caffeinemc.sodium.world.ChunkStatus;
 import net.caffeinemc.sodium.world.ChunkTracker;
 import net.caffeinemc.sodium.world.slice.WorldSliceData;
 import net.caffeinemc.sodium.world.slice.cloned.ClonedChunkSectionCache;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 
@@ -48,14 +54,20 @@ public class TerrainRenderManager {
     /**
      * The maximum distance a chunk can be from the player's camera in order to be eligible for blocking updates.
      */
-    private static final float NEARBY_BLOCK_UPDATE_DISTANCE = 32.0f;
+    private static final double NEARBY_BLOCK_UPDATE_DISTANCE = 32.0;
+    private static final int MAX_REBUILDS_PER_RENDERER_UPDATE = 32;
+    
+    private final RenderDevice device;
+    
+    private final SortedTerrainLists sortedTerrainLists;
 
     private final ChunkBuilder builder;
 
     private final RenderRegionManager regionManager;
     private final ClonedChunkSectionCache sectionCache;
 
-    private final ChunkTree tree;
+    private final SectionTree sectionTree;
+    private final SectionCuller sectionCuller;
     private final int chunkViewDistance;
 
     private final Map<ChunkUpdateType, PriorityQueue<RenderSection>> rebuildQueues = new EnumMap<>(ChunkUpdateType.class);
@@ -64,53 +76,68 @@ public class TerrainRenderManager {
 
     private final ClientWorld world;
 
-    private boolean needsUpdate;
+    private boolean needsUpdate = true;
     private int frameIndex = 0;
 
     private final ChunkTracker tracker;
-    private final RenderDevice device;
 
-    private ChunkCameraContext camera;
+    private final ChunkCameraContext camera;
 
-    private final ReferenceArrayList<RenderSection> visibleMeshedSections = new ReferenceArrayList<>();
-    private final ReferenceArrayList<RenderSection> visibleTickingSections = new ReferenceArrayList<>();
-    private final ReferenceArrayList<RenderSection> visibleBlockEntitySections = new ReferenceArrayList<>();
+    private final List<RenderSection> visibleMeshedSections = new ReferenceArrayList<>();
+    private final List<RenderSection> visibleTickingSections = new ReferenceArrayList<>();
+    private final List<RenderSection> visibleBlockEntitySections = new ReferenceArrayList<>();
 
     private final Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
 
     private final boolean alwaysDeferChunkUpdates = SodiumClientMod.options().performance.alwaysDeferChunkUpdates;
     
-    private double lastComputeUpdateX = 0;
-    private double lastComputeUpdateY = 0;
-    private double lastComputeUpdateZ = 0;
+//    private final ChunkGeometrySorter chunkGeometrySorter;
 
-    @Deprecated
-    private BitArray sectionVisibility = null;
-
-    public TerrainRenderManager(RenderDevice device, SodiumWorldRenderer worldRenderer, ChunkRenderPassManager renderPassManager, ClientWorld world, int chunkViewDistance) {
+    public TerrainRenderManager(
+            RenderDevice device,
+            SodiumWorldRenderer worldRenderer,
+            ChunkRenderPassManager renderPassManager,
+            ClientWorld world,
+            ChunkCameraContext camera,
+            int chunkViewDistance
+    ) {
         TerrainVertexType vertexType = createVertexType();
-
+    
         this.device = device;
-
-        this.chunkRenderer = createChunkRenderer(device, renderPassManager, vertexType);
-
         this.world = world;
+        this.camera = camera;
+    
+        this.chunkRenderer = createChunkRenderer(device, camera, renderPassManager, vertexType);
 
         this.builder = new ChunkBuilder(vertexType);
         this.builder.init(world, renderPassManager);
-
-        this.needsUpdate = true;
+        
         this.chunkViewDistance = chunkViewDistance;
 
         this.regionManager = new RenderRegionManager(device, vertexType);
         this.sectionCache = new ClonedChunkSectionCache(this.world);
+    
+        this.sortedTerrainLists = new SortedTerrainLists(this.regionManager, renderPassManager, camera);
 
         for (ChunkUpdateType type : ChunkUpdateType.values()) {
             this.rebuildQueues.put(type, new ObjectArrayFIFOQueue<>());
         }
 
         this.tracker = worldRenderer.getChunkTracker();
-        this.tree = new ChunkTree(4, RenderSection::new);
+        this.sectionTree = new SectionTree(
+                3,
+                chunkViewDistance + 3,
+                world,
+                camera
+        );
+        this.sectionCuller = new SectionCuller(this.sectionTree);
+        
+        // TODO: uncomment when working on translucency sorting
+//        if (SodiumClientMod.options().quality.useTranslucentFaceSorting) {
+//            this.chunkGeometrySorter = new ChunkGeometrySorter(device, renderPassManager, vertexType, (float) Math.toRadians(5.0f));
+//        } else {
+//            this.chunkGeometrySorter = null;
+//        }
     }
 
     public void reloadChunks(ChunkTracker tracker) {
@@ -122,23 +149,34 @@ public class TerrainRenderManager {
         this.frameIndex = frameIndex;
     }
 
-    public void update(ChunkCameraContext camera, Frustum frustum, boolean spectator) {
-        this.camera = camera;
+    public void update(Frustum frustum, boolean spectator) {
+        Profiler profiler = MinecraftClient.getInstance().getProfiler();
+    
+        profiler.swap("chunk_graph_rebuild");
+        BlockPos origin = this.camera.getBlockPos();
+        var useOcclusionCulling = MinecraftClient.getInstance().chunkCullingEnabled &&
+                (!spectator || !this.world.getBlockState(origin).isOpaqueFullCube(this.world, origin));
 
-        BlockPos origin = camera.getBlockPos();
-        var useOcclusionCulling = !spectator || !this.world.getBlockState(origin).isOpaqueFullCube(this.world, origin);
+        this.sectionCuller.calculateVisibleSections(
+                frustum,
+                useOcclusionCulling
+        );
 
-        var visibleSections = ChunkOcclusion.calculateVisibleSections(this.tree, frustum, this.world, origin, this.chunkViewDistance, useOcclusionCulling);
+        this.updateVisibilityLists();
+    
+//        if (this.chunkGeometrySorter != null) {
+//            profiler.swap("translucency_sort");
+//            this.chunkGeometrySorter.sortGeometry(this.visibleMeshedSections, camera);
+//        }
 
-        this.updateVisibilityLists(visibleSections, camera);
-
-        var chunkLists = new SortedChunkLists(this.visibleMeshedSections, this.regionManager);
-        this.chunkRenderer.createRenderLists(chunkLists, camera, this.frameIndex);
+        profiler.swap("create_render_lists");
+        this.sortedTerrainLists.update(this.visibleMeshedSections);
+        this.chunkRenderer.createRenderLists(this.sortedTerrainLists, this.frameIndex);
         
         this.needsUpdate = false;
     }
 
-    private void updateVisibilityLists(IntArrayList visible, ChunkCameraContext camera) {
+    private void updateVisibilityLists() {
         var drawDistance = MathHelper.square((this.chunkViewDistance + 1) * 16.0f);
 
         for (PriorityQueue<RenderSection> queue : this.rebuildQueues.values()) {
@@ -148,52 +186,48 @@ public class TerrainRenderManager {
         this.visibleMeshedSections.clear();
         this.visibleTickingSections.clear();
         this.visibleBlockEntitySections.clear();
-
-        var vis = new BitArray(this.tree.getSectionTableSize());
-
-        for (int i = 0; i < visible.size(); i++) {
-            var sectionId = visible.getInt(i);
-            var section = this.tree.getSectionById(sectionId);
-
-            if (section.getDistance(camera.posX, camera.posZ) > drawDistance) {
+        
+        Iterator<RenderSection> sectionItr = this.sectionCuller.getVisibleSectionIterator();
+    
+        while (sectionItr.hasNext()) {
+            RenderSection section = sectionItr.next();
+            
+            // TODO: build this into SectionCuller?
+            if (section.getDistanceSq(this.camera.getPosX(), this.camera.getPosZ()) > drawDistance) {
                 continue;
             }
-
-            vis.set(sectionId);
 
             if (section.getPendingUpdate() != null) {
                 this.schedulePendingUpdates(section);
             }
 
-            var data = section.getFlags();
+            var flags = section.getFlags();
 
-            if (ChunkRenderFlag.has(data, ChunkRenderFlag.HAS_TERRAIN_MODELS)) {
+            if (ChunkRenderFlag.has(flags, ChunkRenderFlag.HAS_TERRAIN_MODELS)) {
                 this.visibleMeshedSections.add(section);
             }
 
-            if (ChunkRenderFlag.has(data, ChunkRenderFlag.HAS_TICKING_TEXTURES)) {
+            if (ChunkRenderFlag.has(flags, ChunkRenderFlag.HAS_TICKING_TEXTURES)) {
                 this.visibleTickingSections.add(section);
             }
 
-            if (ChunkRenderFlag.has(data, ChunkRenderFlag.HAS_BLOCK_ENTITIES)) {
+            if (ChunkRenderFlag.has(flags, ChunkRenderFlag.HAS_BLOCK_ENTITIES)) {
                 this.visibleBlockEntitySections.add(section);
             }
         }
-
-        this.sectionVisibility = vis;
     }
 
     private void schedulePendingUpdates(RenderSection section) {
         PriorityQueue<RenderSection> queue = this.rebuildQueues.get(section.getPendingUpdate());
 
-        if (queue.size() < 32 && this.tracker.hasMergedFlags(section.getChunkX(), section.getChunkZ(), ChunkStatus.FLAG_ALL)) {
+        if (queue.size() < MAX_REBUILDS_PER_RENDERER_UPDATE && this.tracker.hasMergedFlags(section.getSectionX(), section.getSectionZ(), ChunkStatus.FLAG_ALL)) {
             queue.enqueue(section);
         }
     }
 
     public Iterable<BlockEntity> getVisibleBlockEntities() {
         return () -> this.visibleBlockEntitySections.stream()
-                .flatMap(section -> Arrays.stream(section.data().blockEntities))
+                .flatMap(section -> Arrays.stream(section.getData().blockEntities))
                 .iterator();
     }
 
@@ -203,38 +237,47 @@ public class TerrainRenderManager {
 
     public void onChunkAdded(int x, int z) {
         for (int y = this.world.getBottomSectionCoord(); y < this.world.getTopSectionCoord(); y++) {
+            // TODO: only update if inside radius
             this.needsUpdate |= this.loadSection(x, y, z);
         }
     }
 
     public void onChunkRemoved(int x, int z) {
         for (int y = this.world.getBottomSectionCoord(); y < this.world.getTopSectionCoord(); y++) {
+            // TODO: only update if inside radius
             this.needsUpdate |= this.unloadSection(x, y, z);
         }
     }
 
     private boolean loadSection(int x, int y, int z) {
-        var render = this.tree.add(x, y, z);
+        RenderSection renderSection = this.sectionTree.add(x, y, z);
 
         Chunk chunk = this.world.getChunk(x, z);
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
-
+        
         if (section.isEmpty()) {
-            render.setData(ChunkRenderData.EMPTY);
+            renderSection.setData(ChunkRenderData.EMPTY);
         } else {
-            render.markForUpdate(ChunkUpdateType.INITIAL_BUILD);
+            renderSection.markForUpdate(ChunkUpdateType.INITIAL_BUILD);
         }
-
-        this.onChunkDataChanged(render, ChunkRenderData.ABSENT, render.data());
-
+        
+        this.onChunkDataChanged(x, y, z, ChunkRenderData.ABSENT, renderSection.getData());
+        
         return true;
     }
 
     private boolean unloadSection(int x, int y, int z) {
-        RenderSection chunk = this.tree.remove(x, y, z);
-        chunk.delete();
-
-        return true;
+        RenderSection section = this.sectionTree.remove(x, y, z);
+        
+        if (section != null) {
+//            if (this.chunkGeometrySorter != null) {
+//                this.chunkGeometrySorter.removeSection(section);
+//            }
+            section.delete();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void renderLayer(ChunkRenderMatrices matrices, ChunkRenderPass renderPass) {
@@ -243,23 +286,19 @@ public class TerrainRenderManager {
 
     public void tickVisibleRenders() {
         for (RenderSection render : this.visibleTickingSections) {
-            for (Sprite sprite : render.data().animatedSprites) {
+            for (Sprite sprite : render.getData().animatedSprites) {
                 SpriteUtil.markSpriteActive(sprite);
             }
         }
     }
 
     public boolean isSectionVisible(int x, int y, int z) {
-        var sectionId = this.tree.getSectionId(x, y, z);
-
-        if (sectionId == ChunkTree.ABSENT_VALUE) {
-            return false;
-        }
-
-        return this.sectionVisibility != null && this.sectionVisibility.capacity() > sectionId && this.sectionVisibility.get(sectionId);
+        return this.sectionCuller.isSectionVisible(x, y, z);
     }
 
     public void updateChunks() {
+        Profiler profiler = MinecraftClient.getInstance().getProfiler();
+        
         var blockingFutures = this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD);
 
         this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD);
@@ -279,7 +318,8 @@ public class TerrainRenderManager {
                     this::onChunkDataChanged
             );
         }
-
+    
+        profiler.swap("chunk_cleanup");
         this.regionManager.cleanup();
     }
 
@@ -334,10 +374,10 @@ public class TerrainRenderManager {
         return true;
     }
 
-    private void onChunkDataChanged(RenderSection section, ChunkRenderData prev, ChunkRenderData next) {
+    private void onChunkDataChanged(int x, int y, int z, ChunkRenderData prev, ChunkRenderData next) {
         ListUtil.updateList(this.globalBlockEntities, prev.globalBlockEntities, next.globalBlockEntities);
 
-        this.tree.setVisibilityData(section.id(), next.occlusionData);
+        this.sectionCuller.setVisibilityData(x, y, z, next.occlusionData);
     }
 
     public AbstractBuilderTask createTerrainBuildTask(RenderSection render) {
@@ -367,10 +407,13 @@ public class TerrainRenderManager {
         this.regionManager.delete();
         this.builder.stopWorkers();
         this.chunkRenderer.delete();
+//        if (this.chunkGeometrySorter != null) {
+//            this.chunkGeometrySorter.delete();
+//        }
     }
 
     public int getTotalSections() {
-        return this.tree.getLoadedSections();
+        return this.sectionTree.getLoadedSections();
     }
 
     public int getVisibleSectionCount() {
@@ -380,7 +423,7 @@ public class TerrainRenderManager {
     public void scheduleRebuild(int x, int y, int z, boolean important) {
         this.sectionCache.invalidate(x, y, z);
 
-        RenderSection section = this.tree.getSection(x, y, z);
+        RenderSection section = this.sectionTree.getSection(x, y, z);
 
         if (section != null && section.isBuilt()) {
             if (!this.alwaysDeferChunkUpdates && (important || this.isBlockUpdatePrioritized(section))) {
@@ -394,13 +437,12 @@ public class TerrainRenderManager {
     }
 
     public boolean isBlockUpdatePrioritized(RenderSection render) {
-        var camera = this.camera;
-
-        if (camera == null) {
+        if (!this.camera.isCameraInitialized()) {
             return false;
         }
-
-        return render.getDistance(camera.posX, camera.posY, camera.posZ) <= NEARBY_BLOCK_UPDATE_DISTANCE;
+    
+        Vec3d cameraPos = this.camera.getPos();
+        return render.getDistanceSq(cameraPos.getX(), cameraPos.getY(), cameraPos.getZ()) <= NEARBY_BLOCK_UPDATE_DISTANCE;
     }
 
     public Collection<String> getDebugStrings() {
@@ -408,13 +450,10 @@ public class TerrainRenderManager {
 
         long deviceUsed = 0;
         long deviceAllocated = 0;
-
-        for (var region : this.regionManager.getLoadedRegions()) {
-            deviceUsed += region.getDeviceUsedMemory();
-            deviceAllocated += region.getDeviceAllocatedMemory();
-
-            count++;
-        }
+        
+        deviceAllocated += this.regionManager.getDeviceAllocatedMemory();
+        deviceUsed += this.regionManager.getDeviceUsedMemory();
+        count += this.regionManager.getDeviceBufferObjects();
 
         deviceUsed += this.chunkRenderer.getDeviceUsedMemory();
         deviceAllocated += this.chunkRenderer.getDeviceAllocatedMemory();
@@ -428,17 +467,20 @@ public class TerrainRenderManager {
         return strings;
     }
 
-    private static ChunkRenderer createChunkRenderer(RenderDevice device, ChunkRenderPassManager renderPassManager, TerrainVertexType vertexType) {
-        return switch (SodiumClientMod.options().advanced.terrainDrawMode) {
+    private static ChunkRenderer createChunkRenderer(
+            RenderDevice device,
+            ChunkCameraContext camera,
+            ChunkRenderPassManager renderPassManager,
+            TerrainVertexType vertexType
+    ) {
+        return switch (SodiumClientMod.options().advanced.chunkRendererBackend) {
             case DEFAULT -> device.properties().preferences.directRendering
-                            ? new MdbvChunkRenderer(device, renderPassManager, vertexType)
-                            : new MdiChunkRenderer<>(device, renderPassManager, vertexType);
+                            ? new MdbvChunkRenderer(device, camera, renderPassManager, vertexType)
+                            : new MdiChunkRenderer(device, camera, renderPassManager, vertexType);
             
-            case BASEVERTEX -> new MdbvChunkRenderer(device, renderPassManager, vertexType);
+            case BASEVERTEX -> new MdbvChunkRenderer(device, camera, renderPassManager, vertexType);
             
-            case INDIRECT -> new MdiChunkRenderer<>(device, renderPassManager, vertexType);
-            
-            case INDIRECTCOUNT -> new MdiCountChunkRenderer(device, renderPassManager, vertexType);
+            case INDIRECT -> new MdiChunkRenderer(device, camera, renderPassManager, vertexType);
         };
     }
 

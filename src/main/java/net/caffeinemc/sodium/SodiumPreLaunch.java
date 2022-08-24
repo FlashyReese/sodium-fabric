@@ -1,6 +1,7 @@
 package net.caffeinemc.sodium;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -12,13 +13,13 @@ import org.lwjgl.system.jemalloc.JEmalloc;
 
 public class SodiumPreLaunch implements PreLaunchEntrypoint {
     private static final Logger LOGGER = LogManager.getLogger("Sodium");
-
+    
     @Override
     public void onPreLaunch() {
         tryLoadRenderdoc();
         checkJemalloc();
     }
-
+    
     private static void tryLoadRenderdoc() {
         if (System.getProperty("sodium.load_renderdoc") != null) {
             LOGGER.info("Loading renderdoc...");
