@@ -43,6 +43,7 @@ public class MixinItemRenderer {
         Xoroshiro128PlusPlusRandom random = this.random;
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
+            random.setSeed(42L);
             List<BakedQuad> quads = model.getQuads(null, direction, random);
 
             if (!quads.isEmpty()) {
@@ -50,6 +51,7 @@ public class MixinItemRenderer {
             }
         }
 
+        random.setSeed(42L);
         List<BakedQuad> quads = model.getQuads(null, null, random);
 
         if (!quads.isEmpty()) {
