@@ -3,6 +3,8 @@ import net.fabricmc.loom.task.RemapJarTask
 plugins {
     id 'fabric-loom' version '1.1-SNAPSHOT'
     id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'maven-publish'
+    id 'signing'
 }
 
 apply from: "${rootProject.projectDir}/gradle/fabric.gradle"
@@ -98,4 +100,33 @@ def getVersionMetadata() {
 
     // No tracking information could be found about the build
     return "unknown"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        maven {
+            name = "FlashyReeseReleases"
+            url = "https://maven.flashyreese.me/releases"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
+            name = "FlashyReeseSnapshots"
+            url = "https://maven.flashyreese.me/snapshots"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
