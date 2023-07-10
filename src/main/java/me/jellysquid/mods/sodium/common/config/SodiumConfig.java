@@ -39,6 +39,8 @@ public class SodiumConfig {
         this.addMixinRule("features.entity", true);
         this.addMixinRule("features.entity.fast_render", true);
         this.addMixinRule("features.entity.smooth_lighting", true);
+        this.addMixinRule("features.fast_beacon_beams", true);
+        this.addMixinRule("features.fast_biome_colors", true);
         this.addMixinRule("features.gui", true);
         this.addMixinRule("features.gui.fast_loading_screen", true);
         this.addMixinRule("features.gui.font", true);
@@ -57,7 +59,6 @@ public class SodiumConfig {
         this.addMixinRule("features.texture_tracking", true);
         this.addMixinRule("features.texture_updates", true);
         this.addMixinRule("features.world_ticking", true);
-        this.addMixinRule("features.fast_biome_colors", true);
         this.addMixinRule("features.shaders", true);
         this.addMixinRule("features.clouds", true);
 
