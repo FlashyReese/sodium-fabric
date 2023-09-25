@@ -25,7 +25,7 @@ public class ControlElement<T> extends AbstractWidget {
         String name = this.option.getName().getString();
         String label;
 
-        if ((this.hovered || this.isFocused()) && this.font.getWidth(name) > (this.dim.width() - this.option.getControl().getMaxWidth())) {
+        if ((this.hovered || this.isFocused()) && this.font.getWidth(name) > (this.dim.getWidth() - this.option.getControl().getMaxWidth())) {
             name = name.substring(0, Math.min(name.length(), 10)) + "...";
         }
 
@@ -39,14 +39,19 @@ public class ControlElement<T> extends AbstractWidget {
             label = String.valueOf(Formatting.GRAY) + Formatting.STRIKETHROUGH + name;
         }
 
-        this.hovered = this.dim.containsCursor(mouseX, mouseY);
+        this.hovered = this.isMouseOver(mouseX, mouseY);
 
-        this.drawRect(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.hovered ? 0xE0000000 : 0x90000000);
-        this.drawString(drawContext, label, this.dim.x() + 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);
+        this.drawRect(drawContext, this.dim.getX(), this.dim.getY(), this.dim.getLimitX(), this.dim.getLimitY(), this.hovered ? 0xE0000000 : 0x90000000);
+        this.drawString(drawContext, label, this.dim.getX() + 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);
 
         if (this.isFocused()) {
-            this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
+            this.drawBorder(drawContext, this.dim.getX(), this.dim.getY(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
         }
+    }
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.dim.containsCursor(mouseX, mouseY);
     }
 
     public Option<T> getOption() {
@@ -66,6 +71,6 @@ public class ControlElement<T> extends AbstractWidget {
 
     @Override
     public ScreenRect getNavigationFocus() {
-        return new ScreenRect(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
+        return new ScreenRect(this.dim.getX(), this.dim.getY(), this.dim.getWidth(), this.dim.getHeight());
     }
 }

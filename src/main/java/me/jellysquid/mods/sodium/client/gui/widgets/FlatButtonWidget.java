@@ -18,6 +18,8 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
     private boolean enabled = true;
     private boolean visible = true;
 
+    private boolean centered = true;
+
     private Text label;
 
     public FlatButtonWidget(Dim2i dim, Text label, Runnable action) {
@@ -39,14 +41,14 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
 
         int strWidth = this.font.getWidth(this.label);
 
-        this.drawRect(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), backgroundColor);
-        this.drawString(drawContext, this.label, this.dim.getCenterX() - (strWidth / 2), this.dim.getCenterY() - 4, textColor);
+        this.drawRect(drawContext, this.dim.getX(), this.dim.getY(), this.dim.getLimitX(), this.dim.getLimitY(), backgroundColor);
+        this.drawString(drawContext, this.label, this.centered ?  this.dim.getCenterX() - (strWidth / 2) : this.dim.getX() + 10, this.dim.getCenterY() - 4, textColor);
 
         if (this.enabled && this.selected) {
-            this.drawRect(drawContext, this.dim.x(), this.dim.getLimitY() - 1, this.dim.getLimitX(), this.dim.getLimitY(), 0xFF94E4D3);
+            this.drawRect(drawContext, this.dim.getX(), this.centered ? this.dim.getLimitY() - 1 : this.dim.getY(), this.centered ? this.dim.getLimitX() : this.dim.getX() + 1, this.dim.getLimitY(), 0xFF94E4D3);
         }
         if (this.enabled && this.isFocused()) {
-            this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
+            this.drawBorder(drawContext, this.dim.getX(), this.dim.getY(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
         }
     }
 
@@ -95,6 +97,10 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
         this.visible = visible;
     }
 
+    public void setCentered(boolean centered) {
+        this.centered = centered;
+    }
+
     public void setLabel(Text text) {
         this.label = text;
     }
@@ -112,6 +118,6 @@ public class FlatButtonWidget extends AbstractWidget implements Drawable {
 
     @Override
     public ScreenRect getNavigationFocus() {
-        return new ScreenRect(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
+        return new ScreenRect(this.dim.getX(), this.dim.getY(), this.dim.getWidth(), this.dim.getHeight());
     }
 }

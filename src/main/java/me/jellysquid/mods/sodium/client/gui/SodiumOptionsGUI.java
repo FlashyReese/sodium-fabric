@@ -1,105 +1,145 @@
 package me.jellysquid.mods.sodium.client.gui;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gui.console.Console;
-import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
-import me.jellysquid.mods.sodium.client.gui.options.*;
-import me.jellysquid.mods.sodium.client.gui.options.control.Control;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
+import me.jellysquid.mods.sodium.client.gui.frame.AbstractFrame;
+import me.jellysquid.mods.sodium.client.gui.frame.SimpleFrame;
+import me.jellysquid.mods.sodium.client.gui.frame.tab.Tab;
+import me.jellysquid.mods.sodium.client.gui.frame.tab.TabFrame;
+import me.jellysquid.mods.sodium.client.gui.options.Option;
+import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
+import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
+import me.jellysquid.mods.sodium.client.util.Boxed;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Language;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class SodiumOptionsGUI extends Screen {
-    private final List<OptionPage> pages = new ArrayList<>();
-
-    private final List<ControlElement<?>> controls = new ArrayList<>();
+    private static final Boxed<Text> tabFrameSelectedTab = new Boxed<>(null);
+    private static final Boxed<Integer> tabFrameScrollBarOffset = new Boxed<>(0);
+    private static final Boxed<Integer> optionPageScrollBarOffset = new Boxed<>(0);
 
     private final Screen prevScreen;
-
-    private OptionPage currentPage;
-
+    private final List<OptionPage> pages = new ArrayList<>();
+    private AbstractFrame frame;
     private FlatButtonWidget applyButton, closeButton, undoButton;
     private FlatButtonWidget donateButton, hideDonateButton;
-
     private boolean hasPendingChanges;
-    private ControlElement<?> hoveredElement;
 
-    public SodiumOptionsGUI(Screen prevScreen) {
-        super(Text.translatable("Sodium Options"));
-
-        this.prevScreen = prevScreen;
-
+    public SodiumOptionsGUI(Screen prev) {
+        super(Text.literal("Sodium Options"));
+        this.prevScreen = prev;
         this.pages.add(SodiumGameOptionPages.general());
         this.pages.add(SodiumGameOptionPages.quality());
         this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
     }
 
-    public void setPage(OptionPage page) {
-        this.currentPage = page;
-
-        this.rebuildGUI();
+    // Hackalicious! Rebuild UI
+    public void rebuildUI() {
+        this.clearAndInit();
     }
 
     @Override
     protected void init() {
-        super.init();
-
-        this.rebuildGUI();
+        this.frame = this.parentFrameBuilder().build();
+        this.addDrawableChild(this.frame);
     }
 
-    private void rebuildGUI() {
-        this.controls.clear();
+    protected SimpleFrame.Builder parentFrameBuilder() {
+        SimpleFrame.Builder basicFrameBuilder;
 
-        this.clearChildren();
-
-        if (this.currentPage == null) {
-            if (this.pages.isEmpty()) {
-                throw new IllegalStateException("No pages are available?!");
-            }
-
-            // Just use the first page for now
-            this.currentPage = this.pages.get(0);
+        // Calculates if resolution exceeds 16:9 ratio, force 16:9
+        int newWidth = this.width;
+        if ((float) this.width / (float) this.height > 1.77777777778) {
+            newWidth = (int) (this.height * 1.77777777778);
         }
 
-        this.rebuildGUIPages();
-        this.rebuildGUIOptions();
+        Dim2i basicFrameDim = new Dim2i((this.width - newWidth) / 2, 0, newWidth, this.height);
+        Dim2i tabFrameDim = new Dim2i(basicFrameDim.getX() + basicFrameDim.getWidth() / 20 / 2, basicFrameDim.getY() + basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() - (basicFrameDim.getWidth() / 20), basicFrameDim.getHeight() / 4 * 3);
 
-        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 30, 65, 20), Text.translatable("sodium.options.buttons.undo"), this::undoChanges);
-        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 30, 65, 20), Text.translatable("sodium.options.buttons.apply"), this::applyChanges);
-        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 30, 65, 20), Text.translatable("gui.done"), this::close);
-        this.donateButton = new FlatButtonWidget(new Dim2i(this.width - 128, 6, 100, 20), Text.translatable("sodium.options.buttons.donate"), this::openDonationPage);
-        this.hideDonateButton = new FlatButtonWidget(new Dim2i(this.width - 26, 6, 20, 20), Text.literal("x"), this::hideDonationButton);
+        Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
+        Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
+        Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
+
+        Text donationText = Text.translatable("sodium.options.buttons.donate");
+        int donationTextWidth = this.client.textRenderer.getWidth(donationText);
+
+        Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 32 - donationTextWidth, tabFrameDim.getY() - 26, 10 + donationTextWidth, 20);
+        Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.getY() - 26, 20, 20);
+
+        this.undoButton = new FlatButtonWidget(undoButtonDim, Text.translatable("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(applyButtonDim, Text.translatable("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(closeButtonDim, Text.translatable("gui.done"), this::close);
+
+        this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage);
+        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Text.literal("x"), this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hideDonationButton) {
             this.setDonationButtonVisibility(false);
         }
 
-        this.addDrawableChild(this.undoButton);
-        this.addDrawableChild(this.applyButton);
-        this.addDrawableChild(this.closeButton);
-        this.addDrawableChild(this.donateButton);
-        this.addDrawableChild(this.hideDonateButton);
+        basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
+
+        return basicFrameBuilder;
+    }
+
+    public SimpleFrame.Builder parentBasicFrameBuilder(Dim2i parentBasicFrameDim, Dim2i tabFrameDim) {
+        return SimpleFrame.createBuilder()
+                .setDimension(parentBasicFrameDim)
+                .addChild(dim -> this.donateButton)
+                .addChild(dim -> this.hideDonateButton)
+                .addChild(parentDim -> TabFrame.createBuilder()
+                        .setDimension(tabFrameDim)
+                        .setTabSectionScrollBarOffset(tabFrameScrollBarOffset)
+                        .setTabSectionSelectedTab(tabFrameSelectedTab)
+                        .addTabs(tabs -> this.pages
+                                .stream()
+                                .filter(page -> !page.getGroups().isEmpty())
+                                .forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset)))
+                        )
+                        .onSetTab(() -> optionPageScrollBarOffset.set(0))
+                        .build()
+                )
+                .addChild(dim -> this.undoButton)
+                .addChild(dim -> this.applyButton)
+                .addChild(dim -> this.closeButton);
+    }
+
+    @Override
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        super.renderBackground(drawContext, mouseX, mouseY, delta);
+        this.updateControls();
+        this.frame.render(drawContext, mouseX, mouseY, delta);
+    }
+
+    private void updateControls() {
+        boolean hasChanges = this.getAllOptions()
+                .anyMatch(Option::hasChanged);
+
+        for (OptionPage page : this.pages) {
+            for (Option<?> option : page.getOptions()) {
+                if (option.hasChanged()) {
+                    hasChanges = true;
+                }
+            }
+        }
+
+        this.applyButton.setEnabled(hasChanges);
+        this.undoButton.setVisible(hasChanges);
+        this.closeButton.setEnabled(!hasChanges);
+
+        this.hasPendingChanges = hasChanges;
     }
 
     private void setDonationButtonVisibility(boolean value) {
@@ -118,129 +158,19 @@ public class SodiumOptionsGUI extends Screen {
         }
 
         this.setDonationButtonVisibility(false);
+
+
+        this.rebuildUI();
     }
 
-    private void rebuildGUIPages() {
-        int x = 6;
-        int y = 6;
-
-        for (OptionPage page : this.pages) {
-            int width = 12 + this.textRenderer.getWidth(page.getName());
-
-            FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 18), page.getName(), () -> this.setPage(page));
-            button.setSelected(this.currentPage == page);
-
-            x += width + 6;
-
-            this.addDrawableChild(button);
-        }
-    }
-
-    private void rebuildGUIOptions() {
-        int x = 6;
-        int y = 28;
-
-        for (OptionGroup group : this.currentPage.getGroups()) {
-            // Add each option's control element
-            for (Option<?> option : group.getOptions()) {
-                Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(x, y, 200, 18));
-
-                this.addDrawableChild(element);
-
-                this.controls.add(element);
-
-                // Move down to the next option
-                y += 18;
-            }
-
-            // Add padding beneath each option group
-            y += 4;
-        }
-    }
-
-    @Override
-    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
-        this.updateControls();
-
-        super.render(drawContext, mouseX, mouseY, delta);
-
-        if (this.hoveredElement != null) {
-            this.renderOptionTooltip(drawContext, this.hoveredElement);
-        }
-    }
-
-    private void updateControls() {
-        ControlElement<?> hovered = this.getActiveControls()
-                .filter(ControlElement::isHovered)
-                .findFirst()
-                .orElse(this.getActiveControls() // If there is no hovered element, use the focused element.
-                        .filter(ControlElement::isFocused)
-                        .findFirst()
-                        .orElse(null));
-
-        boolean hasChanges = this.getAllOptions()
-                .anyMatch(Option::hasChanged);
-
-        for (OptionPage page : this.pages) {
-            for (Option<?> option : page.getOptions()) {
-                if (option.hasChanged()) {
-                    hasChanges = true;
-                }
-            }
-        }
-
-        this.applyButton.setEnabled(hasChanges);
-        this.undoButton.setVisible(hasChanges);
-        this.closeButton.setEnabled(!hasChanges);
-
-        this.hasPendingChanges = hasChanges;
-        this.hoveredElement = hovered;
+    private void openDonationPage() {
+        Util.getOperatingSystem()
+                .open("https://caffeinemc.net/donate");
     }
 
     private Stream<Option<?>> getAllOptions() {
         return this.pages.stream()
                 .flatMap(s -> s.getOptions().stream());
-    }
-
-    private Stream<ControlElement<?>> getActiveControls() {
-        return this.controls.stream();
-    }
-
-    private void renderOptionTooltip(DrawContext drawContext, ControlElement<?> element) {
-        Dim2i dim = element.getDimensions();
-
-        int textPadding = 3;
-        int boxPadding = 3;
-
-        int boxWidth = 200;
-
-        int boxY = dim.y();
-        int boxX = dim.getLimitX() + boxPadding;
-
-        Option<?> option = element.getOption();
-        List<OrderedText> tooltip = new ArrayList<>(this.textRenderer.wrapLines(option.getTooltip(), boxWidth - (textPadding * 2)));
-
-        OptionImpact impact = option.getImpact();
-
-        if (impact != null) {
-            tooltip.add(Language.getInstance().reorder(Text.translatable("sodium.options.performance_impact_string", impact.getLocalizedName()).formatted(Formatting.GRAY)));
-        }
-
-        int boxHeight = (tooltip.size() * 12) + boxPadding;
-        int boxYLimit = boxY + boxHeight;
-        int boxYCutoff = this.height - 40;
-
-        // If the box is going to be cutoff on the Y-axis, move it back up the difference
-        if (boxYLimit > boxYCutoff) {
-            boxY -= boxYLimit - boxYCutoff;
-        }
-
-        drawContext.fillGradient(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
-
-        for (int i = 0; i < tooltip.size(); i++) {
-            drawContext.drawTextWithShadow(this.textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
-        }
     }
 
     private void applyChanges() {
@@ -260,22 +190,13 @@ public class SodiumOptionsGUI extends Screen {
 
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (client.world != null) {
-            if (flags.contains(OptionFlag.REQUIRES_RENDERER_RELOAD)) {
-                client.worldRenderer.reload();
-            } else if (flags.contains(OptionFlag.REQUIRES_RENDERER_UPDATE)) {
-                client.worldRenderer.scheduleTerrainUpdate();
-            }
+        if (flags.contains(OptionFlag.REQUIRES_RENDERER_RELOAD)) {
+            client.worldRenderer.reload();
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
             client.setMipmapLevels(client.options.getMipmapLevels().getValue());
             client.reloadResourcesConcurrently();
-        }
-
-        if (flags.contains(OptionFlag.REQUIRES_GAME_RESTART)) {
-            Console.instance().logMessage(MessageLevel.WARN,
-                    Text.translatable("sodium.console.game_restart"), 10.0);
         }
 
         for (OptionStorage<?> storage : dirtyStorages) {
@@ -288,11 +209,6 @@ public class SodiumOptionsGUI extends Screen {
                 .forEach(Option::reset);
     }
 
-    private void openDonationPage() {
-        Util.getOperatingSystem()
-                .open("https://caffeinemc.net/donate");
-    }
-
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
@@ -302,18 +218,6 @@ public class SodiumOptionsGUI extends Screen {
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean clicked = super.mouseClicked(mouseX, mouseY, button);
-
-        if (!clicked) {
-            this.setFocused(null);
-            return true;
-        }
-
-        return clicked;
     }
 
     @Override

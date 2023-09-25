@@ -29,22 +29,22 @@ public class TickBoxControl implements Control<Boolean> {
     }
 
     private static class TickBoxControlElement extends ControlElement<Boolean> {
-        private final Rect2i button;
+        //private final Rect2i button;
 
         public TickBoxControlElement(Option<Boolean> option, Dim2i dim) {
             super(option, dim);
 
-            this.button = new Rect2i(dim.getLimitX() - 16, dim.getCenterY() - 5, 10, 10);
+            //this.button = new Rect2i(dim.getLimitX() - 16, dim.getCenterY() - 5, 10, 10);
         }
 
         @Override
         public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
             super.render(drawContext, mouseX, mouseY, delta);
 
-            final int x = this.button.getX();
-            final int y = this.button.getY();
-            final int w = x + this.button.getWidth();
-            final int h = y + this.button.getHeight();
+            final int x = this.dim.getLimitX() - 16; //this.button.getX();
+            final int y = this.dim.getCenterY() - 5; //this.button.getY()
+            final int w = x + 10; //this.button.getWidth();
+            final int h = y + 10; //this.button.getHeight();
 
             final boolean enabled = this.option.isAvailable();
             final boolean ticked = enabled && this.option.getValue();

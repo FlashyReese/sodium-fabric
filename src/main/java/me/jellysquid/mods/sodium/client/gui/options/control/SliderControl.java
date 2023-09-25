@@ -3,8 +3,8 @@ package me.jellysquid.mods.sodium.client.gui.options.control;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Validate;
@@ -47,7 +47,7 @@ public class SliderControl implements Control<Integer> {
     private static class Button extends ControlElement<Integer> {
         private static final int THUMB_WIDTH = 2, TRACK_HEIGHT = 1;
 
-        private final Rect2i sliderBounds;
+        //private final Rect2i sliderBounds;
         private final ControlValueFormatter formatter;
 
         private final int min;
@@ -59,6 +59,8 @@ public class SliderControl implements Control<Integer> {
 
         private boolean sliderHeld;
 
+        private boolean modifyMode;
+
         public Button(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter) {
             super(option, dim);
 
@@ -69,8 +71,12 @@ public class SliderControl implements Control<Integer> {
             this.thumbPosition = this.getThumbPositionForValue(option.getValue());
             this.formatter = formatter;
 
-            this.sliderBounds = new Rect2i(dim.getLimitX() - 96, dim.getCenterY() - 5, 90, 10);
+            //this.getSliderBounds() = new Rect2i(dim.getLimitX() - 96, dim.getCenterY() - 5, 90, 10);
             this.sliderHeld = false;
+        }
+        
+        private Dim2i getSliderBounds() { // fixme: insanity
+            return new Dim2i(this.dim.getLimitX() - 96, this.dim.getCenterY() - 5, 90, 10);
         }
 
         @Override
@@ -85,10 +91,10 @@ public class SliderControl implements Control<Integer> {
         }
 
         private void renderStandaloneValue(DrawContext drawContext) {
-            int sliderX = this.sliderBounds.getX();
-            int sliderY = this.sliderBounds.getY();
-            int sliderWidth = this.sliderBounds.getWidth();
-            int sliderHeight = this.sliderBounds.getHeight();
+            int sliderX = this.getSliderBounds().getX();
+            int sliderY = this.getSliderBounds().getY();
+            int sliderWidth = this.getSliderBounds().getWidth();
+            int sliderHeight = this.getSliderBounds().getHeight();
 
             Text label = this.formatter.format(this.option.getValue());
             int labelWidth = this.font.getWidth(label);
@@ -97,10 +103,10 @@ public class SliderControl implements Control<Integer> {
         }
 
         private void renderSlider(DrawContext drawContext) {
-            int sliderX = this.sliderBounds.getX();
-            int sliderY = this.sliderBounds.getY();
-            int sliderWidth = this.sliderBounds.getWidth();
-            int sliderHeight = this.sliderBounds.getHeight();
+            int sliderX = this.getSliderBounds().getX();
+            int sliderY = this.getSliderBounds().getY();
+            int sliderWidth = this.getSliderBounds().getWidth();
+            int sliderHeight = this.getSliderBounds().getHeight();
 
             this.thumbPosition = this.getThumbPositionForValue(this.option.getValue());
 
@@ -117,6 +123,10 @@ public class SliderControl implements Control<Integer> {
             int labelWidth = this.font.getWidth(label);
 
             this.drawString(drawContext, label, sliderX - labelWidth - 6, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
+
+            if (this.isFocused() && this.modifyMode) {
+                this.drawRect(drawContext, thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
+            }
         }
 
         public int getIntValue() {
@@ -136,7 +146,7 @@ public class SliderControl implements Control<Integer> {
             this.sliderHeld = false;
 
             if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {
-                if (this.sliderBounds.contains((int) mouseX, (int) mouseY)) {
+                if (this.getSliderBounds().containsCursor(mouseX, mouseY)) {
                     this.setValueFromMouse(mouseX);
                     this.sliderHeld = true;
                 }
@@ -147,8 +157,26 @@ public class SliderControl implements Control<Integer> {
             return false;
         }
 
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+            if (this.option.isAvailable() && this.getSliderBounds().containsCursor(mouseX, mouseY) && Screen.hasShiftDown()) {
+                this.setValueFromMouseScroll(verticalAmount);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private void setValueFromMouseScroll(double amount) {
+            if (this.option.getValue() + this.interval * (int) amount <= this.max && this.option.getValue() + this.interval * (int) amount >= this.min) {
+                this.option.setValue(this.option.getValue() + this.interval * (int) amount);
+                this.thumbPosition = this.getThumbPositionForValue(this.option.getValue());
+            }
+        }
+
         private void setValueFromMouse(double d) {
-            this.setValue((d - (double) this.sliderBounds.getX()) / (double) this.sliderBounds.getWidth());
+            this.setValue((d - (double) this.getSliderBounds().getX()) / (double) this.getSliderBounds().getWidth());
         }
 
         public void setValue(double d) {
@@ -165,12 +193,19 @@ public class SliderControl implements Control<Integer> {
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!isFocused()) return false;
 
-            if (keyCode == InputUtil.GLFW_KEY_LEFT) {
-                this.option.setValue(MathHelper.clamp(this.option.getValue() - this.interval, this.min, this.max));
+            if (keyCode == InputUtil.GLFW_KEY_ENTER) {
+                this.modifyMode = !this.modifyMode;
                 return true;
-            } else if (keyCode == InputUtil.GLFW_KEY_RIGHT) {
-                this.option.setValue(MathHelper.clamp(this.option.getValue() + this.interval, this.min, this.max));
-                return true;
+            }
+
+            if (this.modifyMode) {
+                if (keyCode == InputUtil.GLFW_KEY_LEFT) {
+                    this.option.setValue(MathHelper.clamp(this.option.getValue() - this.interval, this.min, this.max));
+                    return true;
+                } else if (keyCode == InputUtil.GLFW_KEY_RIGHT) {
+                    this.option.setValue(MathHelper.clamp(this.option.getValue() + this.interval, this.min, this.max));
+                    return true;
+                }
             }
 
             return false;

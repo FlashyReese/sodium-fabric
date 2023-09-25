@@ -98,8 +98,8 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {
-                cycleControl(Screen.hasShiftDown());
+            if (this.option.isAvailable() && (button == 0 || button == 1) && this.dim.containsCursor(mouseX, mouseY)) {
+                cycleControl(Screen.hasShiftDown() || button == 1);
                 this.playClickSound();
 
                 return true;
