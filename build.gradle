@@ -10,6 +10,9 @@ plugins {
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
     // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
     id 'org.ajoberstar.grgit' version '5.2.0'
+
+    // For publishing
+    id 'maven-publish'
 }
 
 apply from: "${rootProject.projectDir}/gradle/fabric.gradle"
@@ -68,6 +71,10 @@ jar {
     from sourceSets.api.output.resourcesDir
 }
 
+java {
+    withSourcesJar()
+}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -104,4 +111,33 @@ def getVersionMetadata() {
 
     // No tracking information could be found about the build
     return "+unknown"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        maven {
+            name = "FlashyReeseReleases"
+            url = "https://maven.flashyreese.me/releases"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
+            name = "FlashyReeseSnapshots"
+            url = "https://maven.flashyreese.me/snapshots"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
