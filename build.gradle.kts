@@ -15,6 +15,7 @@ plugins {
     // is not reachable for some reason, and it makes builds much more reproducible. Observation also shows that it
     // really helps to improve startup times on slow connections.
     id("fabric-loom") version "1.6.5"
+    id("maven-publish")
 }
 
 base {
@@ -36,6 +37,7 @@ loom {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
 }
 
 sourceSets {
@@ -143,4 +145,31 @@ fun createVersionString(): String {
     }
 
     return builder.toString()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "FlashyReeseReleases"
+            setUrl(uri("https://maven.flashyreese.me/releases"))
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
+            name = "FlashyReeseSnapshots"
+            setUrl(uri("https://maven.flashyreese.me/snapshots"))
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
