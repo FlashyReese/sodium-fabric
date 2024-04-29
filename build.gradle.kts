@@ -2,6 +2,7 @@
 plugins {
     id("java")
     id("fabric-loom") version("1.6.6") apply(false)
+    id("maven-publish")
 }
 
 val MINECRAFT_VERSION by extra { "1.20.4" }
@@ -72,5 +73,32 @@ subprojects {
     // other mod developers.
     tasks.withType<GenerateModuleMetadata>().configureEach {
         enabled = false
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "FlashyReeseReleases"
+            url = uri("https://maven.flashyreese.me/releases")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
+            name = "FlashyReeseSnapshots"
+            url = uri("https://maven.flashyreese.me/snapshots")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
     }
 }
