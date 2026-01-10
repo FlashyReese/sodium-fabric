@@ -37,6 +37,8 @@ public class BigramSearchIndex extends SourceStoringIndex {
 
             text = conditionText(text).trim();
 
+            if (text.isEmpty()) continue;
+
             for (var entry : countBigrams(text).object2IntEntrySet()) {
                 var bigram = entry.getKey();
                 var count = entry.getIntValue();
@@ -63,6 +65,8 @@ public class BigramSearchIndex extends SourceStoringIndex {
     private static @NonNull Object2IntMap<String> countBigrams(String text) {
         int length = text.length();
         var bigramCounts = new Object2IntLinkedOpenHashMap<String>(length + 1);
+
+        if (length == 0) return bigramCounts;
 
         addLeadingBigram(text, bigramCounts);
 
